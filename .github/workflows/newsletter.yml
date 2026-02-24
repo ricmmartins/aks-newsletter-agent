@@ -1,0 +1,115 @@
+name: AKS Newsletter – Monthly Collection
+
+on:
+  schedule:
+    # Run at 18:00 UTC on the last day of each month
+    # Cron doesn't support "last day", so we run on the 28th-31st and check
+    - cron: '0 18 28-31 * *'
+  workflow_dispatch:
+    inputs:
+      year:
+        description: 'Target year (e.g., 2026)'
+        required: false
+      month:
+        description: 'Target month (1-12)'
+        required: false
+
+jobs:
+  collect-and-generate:
+    runs-on: ubuntu-latest
+
+    # Only run on the actual last day of the month (for scheduled runs)
+    # workflow_dispatch always runs
+    steps:
+      - name: Check if last day of month
+        id: check-date
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "is_last_day=true" >> $GITHUB_OUTPUT
+          else
+            today=$(date +%d)
+            tomorrow=$(date -d "+1 day" +%d)
+            # If tomorrow's day (01) < today's day, today is the last day
+            if [ "$tomorrow" -lt "$today" ]; then
+              echo "is_last_day=true" >> $GITHUB_OUTPUT
+            else
+              echo "is_last_day=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Checkout repository
+        if: steps.check-date.outputs.is_last_day == 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: steps.check-date.outputs.is_last_day == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        if: steps.check-date.outputs.is_last_day == 'true'
+        run: npm ci
+
+      - name: Install Puppeteer with browser
+        if: steps.check-date.outputs.is_last_day == 'true'
+        run: npx puppeteer browsers install chrome
+
+      - name: Determine target month
+        if: steps.check-date.outputs.is_last_day == 'true'
+        id: target
+        run: |
+          if [ -n "${{ inputs.year }}" ] && [ -n "${{ inputs.month }}" ]; then
+            echo "year=${{ inputs.year }}" >> $GITHUB_OUTPUT
+            echo "month=${{ inputs.month }}" >> $GITHUB_OUTPUT
+          else
+            echo "year=$(date +%Y)" >> $GITHUB_OUTPUT
+            echo "month=$(date +%-m)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run AKS Newsletter Agent (collect)
+        if: steps.check-date.outputs.is_last_day == 'true'
+        run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --collect-only
+        env:
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'false'
+
+      - name: Run AKS Newsletter Agent (generate draft)
+        if: steps.check-date.outputs.is_last_day == 'true'
+        run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --generate-only
+
+      - name: Upload collected data
+        if: steps.check-date.outputs.is_last_day == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: newsletter-${{ steps.target.outputs.year }}-${{ steps.target.outputs.month }}
+          path: |
+            collected/*.json
+            newsletters/**/*.md
+          retention-days: 90
+
+      - name: Create Pull Request with draft
+        if: steps.check-date.outputs.is_last_day == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Add AKS Newsletter draft for ${{ steps.target.outputs.year }}-${{ steps.target.outputs.month }}"
+          title: "📰 AKS Newsletter Draft – ${{ steps.target.outputs.year }}-${{ steps.target.outputs.month }}"
+          body: |
+            ## Automated Newsletter Draft
+
+            This PR contains the collected data and generated draft for the monthly AKS Newsletter.
+
+            **Target month:** ${{ steps.target.outputs.year }}-${{ steps.target.outputs.month }}
+
+            ### Files
+            - `collected/${{ steps.target.outputs.year }}-${{ steps.target.outputs.month }}.json` – Raw collected data
+            - `newsletters/${{ steps.target.outputs.year }}/${{ steps.target.outputs.year }}-${{ steps.target.outputs.month }}.md` – Draft newsletter
+
+            ### Next steps
+            1. Review the collected data JSON for completeness
+            2. Use `agent_prompt.md` with an AI assistant to polish the draft
+            3. Replace the draft with the polished version
+            4. Merge when ready to publish
+          branch: newsletter/${{ steps.target.outputs.year }}-${{ steps.target.outputs.month }}
+          delete-branch: true

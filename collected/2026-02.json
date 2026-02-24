@@ -1,0 +1,656 @@
+{
+  "metadata": {
+    "year": 2026,
+    "month": 2,
+    "monthName": "February",
+    "collectedAt": "2026-02-24T20:31:59.848Z",
+    "windowStart": "2026-01-29T23:59:59.000Z",
+    "windowEnd": "2026-02-28T23:59:59.000Z"
+  },
+  "aks_blog": [
+    {
+      "title": "Scaling Anyscale Ray Workloads on AKS",
+      "url": "https://blog.aks.azure.com/2026/02/13/scaling-ray-aks",
+      "date": "2026-02-13T00:00:00.000Z",
+      "summary": "This post focuses on running Anyscale's managed Ray service on AKS, using the Anyscale Runtime (formerly RayTurbo) for an optimized Ray experience. For open-source Ray on AKS, see our Ray on AKS overview.",
+      "source": "AKS Engineering Blog"
+    },
+    {
+      "title": "Deploying KubeVirt on AKS",
+      "url": "https://blog.aks.azure.com/2026/02/06/kubevirt-on-aks",
+      "date": "2026-02-06T00:00:00.000Z",
+      "summary": "Many organizations still depend on virtual machines (VMs) to run applications to meet technical, regulatory, or operational requirements. While Kubernetes adoption continues to grow, not every workload can or should be redesigned for containers.",
+      "source": "AKS Engineering Blog"
+    },
+    {
+      "title": "Autoscale KAITO inference workloads on AKS using KEDA",
+      "url": "https://blog.aks.azure.com/2026/02/03/autoscale-inference-workloads-with-kaito",
+      "date": "2026-02-03T00:00:00.000Z",
+      "summary": "Kubernetes AI Toolchain Operator (KAITO) is an operator that simplifies and automates AI/ML model inference, tuning, and RAG in a Kubernetes cluster. With the recent v0.8.0 release, KAITO has introduced intelligent autoscaling for inference workloads as an alpha feature! In this blog, we'll guide you through setting up event-driven autoscaling for vLLM inference workloads.",
+      "source": "AKS Engineering Blog"
+    },
+    {
+      "title": "Navigating Capacity Challenges on AKS with Node Auto Provisioning or Virtual Machine Node Pools",
+      "url": "https://blog.aks.azure.com/2025/12/06/node-auto-provisioning-capacity-management",
+      "date": "2026-01-30T00:00:00.000Z",
+      "summary": "Imagine this: your application is thriving, traffic spikes, and Kubernetes promises elasticity. You hit “scale,” expecting seamless provisioning - only to be greeted by errors like:",
+      "source": "AKS Engineering Blog"
+    }
+  ],
+  "azure_updates": [],
+  "aks_releases": [
+    {
+      "title": "Release 2026-02-08",
+      "url": "https://github.com/Azure/AKS/releases/tag/2026-02-08",
+      "date": "2026-02-17T21:29:46Z",
+      "body": "## Release Notes 2026-02-08\r\n\r\nMonitor the release status by regions at [AKS-Release-Tracker](https://releases.aks.azure.com/).\r\n\r\n### Announcements\r\n* [Windows Server 2019 is scheduled for retirement on March 1, 2026](https://aka.ms/aks/ws2019-retirement-github). Please [transition to Windows Server 2022+](https://aka.ms/aks/upgrade-windows-os-version) by that date. After that date, AKS will no longer produce new node images or provide security patches for Windows Server 2019. After that date, you will not be able to create new node pools with Windows Server 2019 on any Kubernetes version. All existing node pools with Windows Server 2019 will be unsupported. Windows Server 2019 is not supported in Kubernetes versions >= 1.33. Starting on April 1, 2027, AKS will remove all existing node images for Windows Server 2019 which will result in failure of scaling and remediation (reimage and redeploy) operations.\r\n* [Windows Server Annual Channel (Preview)](https://aka.ms/aks/windows-annual-channel-retirement) on AKS will be retired on May 15, 2026, please transition to the [Long Term Servicing Channel (LTSC)](https://aka.ms/aks/upgrade-windows-os-version) by that date. From now to May 15, 2026 you can continue to use Windows Server Annual Channel (Preview) without disruption. On May 15, 2026, AKS will no longer produce new Windows Server Annual Channel node images or provide security patches. You will not be able to create new node pools with Windows Server Annual Channel. On May 15, 2027, AKS will remove all existing Windows Server Annual Channel node images, which will cause scaling and remediation (reimage and redeploy) operations to fail.\r\n\r\n### Kubernetes Version\r\n* AKS Kubernetes patch versions `1.34.2`, `1.33.6`, and `1.32.10` are now available. Refer to [version support policy](https://learn.microsoft.com/azure/aks/supported-kubernetes-versions?tabs=azure-cli#kubernetes-version-support-policy) and [upgrading a cluster](https://learn.microsoft.com/azure/aks/upgrade-aks-cluster?tabs=azure-cli) for more information.\r\n\r\n### Preview Features\r\n* [Managed GPU profiles](https://learn.microsoft.com/azure/aks/gpu-cluster) are now available in public preview via API version `2026-01-02-preview`.\r\n\r\n### Features\r\n* [API Server VNET Integration](https://learn.microsoft.com/azure/aks/api-server-vnet-integration#availability) is now available in eastus2, eastus3, and belgiumcentral. \r\n* HTTP Proxy and Custom Certificate Authority (CA) are now supported in Node Auto-provisioning (NAP) enabled clusters. Visit [HTTP Proxy documentation](https://learn.microsoft.com/azure/aks/http-proxy) and [Custom CA documentation](https://learn.microsoft.com/azure/aks/custom-certificate-authority) to enable these features.\r\n\r\n### Behavioral Changes\r\n* [LocalDNS](https://learn.microsoft.com/azure/aks/localdns-custom) is now enabled by default for clusters running Kubernetes 1.35+.\r\n* Nodes are now annotated with a `kubernetes.azure.com/security-patch-timestamp` annotation during",
+      "source": "AKS GitHub Releases"
+    }
+  ],
+  "aks_docs_commits": [
+    {
+      "title": "Remove configuration file section from documentation",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f2f757c33ec31163ec2d5e254d77caff7cb04c9f",
+      "date": "2026-02-23T18:44:17Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Change title",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/1dddc99da8c4216aa9748af6fe839f2537c718ef",
+      "date": "2026-02-23T02:48:28Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix plugin in doc",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/bac335762c81b467a78e4350b9e1715e58610de9",
+      "date": "2026-02-23T02:42:55Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Resolve comments and fix plug-in docs",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/382d407b5731ae870aa2dbf5ed2921858a995fd0",
+      "date": "2026-02-23T02:36:52Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update link",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/8a937b55560be3235b7d697c49c804a473b8fe73",
+      "date": "2026-02-21T01:51:36Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Add s to gateway",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/1857fc78ef6bb41a56ba9982214d170660cfe181",
+      "date": "2026-02-21T01:45:40Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix istio typo outbound docs",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2b4a7a49e4c72566018345b4e887fffe705c59e9",
+      "date": "2026-02-21T01:26:04Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2541 from schaffererin/feature545042",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/be0ee345122e8bedcee99a0355ea0bf1edc0fc56",
+      "date": "2026-02-20T23:47:44Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "removed instances of zero-downtime wording",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/47e9bfb683117b28a08b9f2f6d26e3b0efc369b0",
+      "date": "2026-02-20T22:37:21Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge branch 'main' into scottaddie/identity-bindings-dotnet",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/e32525c1fa901fc9862678d8dfc61053e897ddb6",
+      "date": "2026-02-20T21:35:18Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update .NET identity bindings package version and property name",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/5ce5d516baeb801631417224556593706a724646",
+      "date": "2026-02-20T21:32:18Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2662 from dyu1208/main",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/e7c85689c51d46e8bc179c59c717179ba6a551b6",
+      "date": "2026-02-20T05:00:08Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2578 from jaiveerk/jkatariya/gw-bundle-135-update",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/e06f44563761e6a5f283ef60c79901b6786f6f43",
+      "date": "2026-02-20T00:49:13Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "verified and updated ephemeral os disk section",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/a44c1723ba8cedfd3128297713b94fd0f0ea32a1",
+      "date": "2026-02-19T20:11:03Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2665 from cdpark/refresh-dapr-batch7",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/51b3d3831cdf26aec2f2fca0ddd95d1158c6564e",
+      "date": "2026-02-19T17:37:26Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2652 from cdpark/refresh-dapr-batch6",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/3f7b0cbb9e09a5aba087a0e07100259186a3a95d",
+      "date": "2026-02-19T17:36:40Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2709 from varora24/updated_localdnsauthoralias",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/a78dcc7f2ea1ccbef02db2827f52d1757fcb8115",
+      "date": "2026-02-19T17:03:44Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2713 from eh8/0001-toc",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/0bff9c4d2a34cd54ef6e5641ae91b999a41343ba",
+      "date": "2026-02-19T04:28:05Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Recreate streamlined stateful workload TOC",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/cad3912c419a01fafd9109c9680625c611232170",
+      "date": "2026-02-19T04:08:03Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2706 from MicrosoftDocs/repo_sync_working_branch",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/637cab3dc1da06b96c565277c0de6845ceb94b7b",
+      "date": "2026-02-18T23:02:12Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "fixed broken link",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/ac1a85bb9d4c6d083a032f25b2830eeaac384f69",
+      "date": "2026-02-18T20:27:48Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Added container comparison article to AKS docs",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/28046fccda060a09639ad845945d1840a688b138",
+      "date": "2026-02-18T20:06:39Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix ms.author to vaibhavarora in dns-concepts and localdns-custom",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f6262a07e9ea3107c6a39f913e4b2105d9fe6aa1",
+      "date": "2026-02-18T19:59:54Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #379 from mhedhbisaber/patch-1",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/b814cd098014505e0e3a490ee6552f134515e471",
+      "date": "2026-02-18T18:52:30Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update author alias from vaibhavarora to varora24",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/69f804995c1c958fb21e375217f1564502d154e2",
+      "date": "2026-02-18T18:38:42Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2673 from khdownie/kendownie021226",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/3a359a129aa6cb1ec8915182ea351f05fa2d809a",
+      "date": "2026-02-18T17:10:52Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "delete volume",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/4a0895e0acccf54cf72b8e23076717b6f32697e1",
+      "date": "2026-02-18T16:54:42Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Eric edits",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/af9b3e5ee34931f61643e2413be9044d62608a8a",
+      "date": "2026-02-18T16:28:07Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2600 from julia-yin/aks-mcp",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/a4e27f768ae9fd106eaee5bed07c85c57fcacf0b",
+      "date": "2026-02-18T00:26:13Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix redirection + note",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/fc1657aaa55505c46b662164f1e26c953634141e",
+      "date": "2026-02-18T00:12:15Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2694 from MicrosoftDocs/copilot/update-documentation-for-azure-snapshots",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/5f37db611b3af2744f7faf536ac23f82b37d655d",
+      "date": "2026-02-17T20:59:44Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2686 from MicrosoftDocs/copilot/update-azure-npm-documentation",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/d700fb14b978bfe65ce276a7477f0d6504763126",
+      "date": "2026-02-17T20:58:59Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2685 from MicrosoftDocs/copilot/update-documentation-ubuntu-24-04",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/81f72ea6217f61e10099a643219dcd2f0fed23a8",
+      "date": "2026-02-17T19:55:47Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Address code review feedback: improve table structure and wording",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f0b1b9e84bc9e89c78c8d0bfdb5969971463dd12",
+      "date": "2026-02-17T19:16:55Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Add instant access snapshot support documentation for Premium SSD v2 and Ultra Disk",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/dc864850dc7dcde43b869690b00a305753199633",
+      "date": "2026-02-17T19:16:13Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Revert Ubuntu 24.04 default range change in table (restore 1.35 to 1.37)",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/db3a3f170c8e95d843acc43647d61383e31f31ac",
+      "date": "2026-02-17T19:05:46Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Clarify Preferred mode behavior and node reimage impact for LocalDNS.md",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/5aa033ea07630b7e7bb6623fddb4f52dd82fcdfa",
+      "date": "2026-02-16T09:48:11Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update emptyDir volumes section for NVMe usage",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/c834449da7957b9caf9ec66944ecc06669b0d3cc",
+      "date": "2026-02-14T00:05:57Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix naming changes to agentic-cli",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/96faf13046d8fdea837fdd477fa03e226c2760c4",
+      "date": "2026-02-13T23:41:19Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix TOC",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/d5b649ef6b93b4d62bfb5b6047fb1857c03ff310",
+      "date": "2026-02-13T23:34:28Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge branch 'aks-mcp' of https://github.com/julia-yin/azure-aks-docs-pr into aks-mcp",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/df23e34410783f67097b78f3ffbf898ffd8208ec",
+      "date": "2026-02-13T23:33:32Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Align doc names with official marketing name for Agentic CLI",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/9a66a91a23299e5a80167f0ac2179b9038dead02",
+      "date": "2026-02-13T23:33:15Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge branch 'main' into aks-mcp",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/b96fb2a552387249e4adf43c63c928ed4090b213",
+      "date": "2026-02-13T23:24:34Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Test",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/b74e467f292ef4f7eb1301ae7fb1e7a773aa5aaf",
+      "date": "2026-02-13T23:22:36Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Add MCP doc to TOC + fix acrolinx issues",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/47c2d0c184dbb14786d45d33f1b85c70454452e0",
+      "date": "2026-02-13T23:13:20Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2681 from wdarko1/nap-disk-encryption-support",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/cf1683102a8683201fbc3ad85cf66049735fda14",
+      "date": "2026-02-13T23:12:31Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update date for node auto-provisioning documentation",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/c5f1ddbebf3de33bbff86cb8e0c8a9e74a7b358e",
+      "date": "2026-02-13T23:10:15Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2687 from schaffererin/managed-gateway-api-content-dev-review",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/9d5b22b096a82febe097991fd4a8f3e2f67a1702",
+      "date": "2026-02-13T22:45:09Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Refine NVMe storage best practices in AKS documentation",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/3b7477a5e2936600f335c9a94ff29b71c75b6bd9",
+      "date": "2026-02-13T22:06:27Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Editorial review from content dev",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/989da230a9e536c59b58e186c8bb96e2c0bb502f",
+      "date": "2026-02-13T21:50:50Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix iptables capitalization to follow standard Linux naming convention",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/6e050c1ec8bc7698318f719a15d60dd2d8d2dba8",
+      "date": "2026-02-13T21:15:00Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Address code review feedback - improve link text and paragraph structure",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/bb43c01798a51f206ab988ee7ae4f2fa75902993",
+      "date": "2026-02-13T21:14:06Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Add NPM retirement documentation updates for both articles",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2c90747770965fb96759af62ddd82b2d9ce2dee7",
+      "date": "2026-02-13T21:13:10Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Add ai-usage metadata to document AI assistance",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/8f6f4e420c7c1a445b319385c3eb1ce373d5793c",
+      "date": "2026-02-13T21:10:31Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update Ubuntu 24.04 documentation with containerd 2.0 info and fix version inconsistencies",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/477a5b4e1790703e5982d7dd6cbd8e9a9b5a8e0d",
+      "date": "2026-02-13T21:09:37Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2670 from schaffererin/supported-k8s-versions-duplicate",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/d95911a01a99c96e530d8e7a0043cd82320928c7",
+      "date": "2026-02-13T20:41:48Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2649 from schaffererin/feature551161",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/551afe8b1604786ae875468fbdbb61c6c0e20ec7",
+      "date": "2026-02-13T19:12:37Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "updated retirement notice",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/769df1f508fa451f1f46f678d37af5dc70539b95",
+      "date": "2026-02-13T19:00:21Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2656 from eh8/main",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/136388a9c4b306b86d76782f716808381d2c314e",
+      "date": "2026-02-13T18:33:45Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update unsupported features for node auto-provisioning",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2bc25db9b61e59e4d075516f554aaf99d0134bdd",
+      "date": "2026-02-13T17:30:59Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2671 from cdpark/refresh-dapr-batch8",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f0e40178b8877999713d00f72b24821c6e2a3726",
+      "date": "2026-02-12T21:53:13Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update Identity Bindings details for Go and JS",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2166ea63fd671070731e029b09f33da371dcf914",
+      "date": "2026-02-12T21:19:26Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update Azure Identity for Python Identity Bindings details",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/b9a7fc0b599525fd3cd10227b9b76182d0be11ae",
+      "date": "2026-02-12T20:56:42Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Minor edits",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/ffeb4dd36034884156777255cd5d74fba9906f0c",
+      "date": "2026-02-12T17:57:36Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "update to ACStor v2",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/21f6e58060b2cd664ee816f70a066daa1b810db0",
+      "date": "2026-02-12T16:41:51Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix typo",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/3c703d88a495e86756e3afbf0eb45b9bdc217212",
+      "date": "2026-02-12T05:55:48Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Refresh article",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/37a6155672314d4d9dfcb11fe2e42db790a7055a",
+      "date": "2026-02-12T05:45:14Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "typo fixes",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/0c38282236c52b3530507692903756f971c42b20",
+      "date": "2026-02-11T20:54:40Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "removed duplicate faq and did a large editorial review",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/ee16d9e10ed485dfb58ef5a53e3f97b7e6d9aba2",
+      "date": "2026-02-11T20:48:14Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update articles/aks/release-tracker.md",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/b0ff32d3d7c399640d7a98260533cc7fdc4a2f62",
+      "date": "2026-02-11T19:56:57Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "fix image name",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2ec45b521923796225a71f360a1d4067bc034cd0",
+      "date": "2026-02-11T19:45:01Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "fix wording",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/068074bbb2164bbed19633a4e4685705bb087c33",
+      "date": "2026-02-11T19:15:28Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "fix image naming issue",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/04bebd04bb9987cddc4653d4171d163bf34b4a32",
+      "date": "2026-02-11T19:05:27Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "zone term updates",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/c2c1b08ac67cdc239c2a90c8db71ce9b9876724c",
+      "date": "2026-02-11T18:55:07Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Edit meta titles",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/c693c3025487f4059402b479cd9dcbd88d05eef4",
+      "date": "2026-02-11T17:21:27Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Add edits",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2a9ada10cf7c69f8e93c214dca0041a43fdfa65b",
+      "date": "2026-02-10T19:24:16Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Refresh articles",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/05a836b3346471769fb164d89ff3536e79d9fb7b",
+      "date": "2026-02-10T18:42:26Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "update release tracker new ui",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/e2f1e45c8f5a9719d58ca4837d80bab04fa24d91",
+      "date": "2026-02-09T19:51:07Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2268 from wdarko1/nap-metrics-update",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f6f600798fecc62aeed7ffbd412daa6acfc2ccc4",
+      "date": "2026-02-09T17:27:24Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2654 from mainred/update-aks-agent",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/6a4b244fcb4f9422e414fab77d31518d4315313b",
+      "date": "2026-02-09T17:26:12Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix formatting and capitalization in auto-provisioning doc",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f0dd9555b3e9dea6bb85798ff23e464e57c4fcb3",
+      "date": "2026-02-09T17:22:29Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge branch 'MicrosoftDocs:main' into nap-metrics-update",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/a4886a5c111e9a31c1c886487dfe436cdf2072f8",
+      "date": "2026-02-09T17:05:06Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "fix incorrect bookmark",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/46fa8596e2a3b75a596821f870ac68587ac7dc8c",
+      "date": "2026-02-09T01:21:10Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "fix comments",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/614cccbcb993fe4ab3e37fb82bf93eeea226ff46",
+      "date": "2026-02-09T01:17:00Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Add Application Gateway for Containers section to TOC",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/618814fc04b5d963ecdea891e177aa5132c77af9",
+      "date": "2026-02-07T20:19:42Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix missing ADLS link",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/e432097c9110d0123c16250d406849f880603299",
+      "date": "2026-02-06T21:44:07Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "update service account role and msi role",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/c559a6ae547abe42b225067c682da0432daef565",
+      "date": "2026-02-06T10:19:40Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "added link definitions to file to resolve broken command link formatting",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/78d3b3a67c471bb4b8bde04c1e37aba5d106251a",
+      "date": "2026-02-05T20:58:24Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Adding retirement notice for Windows Annual Channel (Preview)",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f96ee104d2dd0f5612bf62b59b3f632ba25138e0",
+      "date": "2026-02-05T19:42:57Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "updated line 148 in rollback doc",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/e2b9cccbdd360c55e35080470c87fa77416f7bef",
+      "date": "2026-02-05T17:58:14Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2621 from chasewilson/chase/byocni/ip-address-planning",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/74e8c2eb1b99f1827821b8faa7d95befc276d9ac",
+      "date": "2026-02-04T22:33:41Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Updates for PR comments and acrolinx",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/e8a8fae1ac95b5237ff137757c77cde973245c4a",
+      "date": "2026-02-04T22:31:04Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2645 from schaffererin/feature548144-v1",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2bc651b93af60e0e14693a8254667665b8a65960",
+      "date": "2026-02-04T20:35:04Z",
+      "source": "AKS Docs"
+    }
+  ],
+  "techcommunity": [
+    {
+      "title": "azure container apps",
+      "url": "https://techcommunity.microsoft.com/tag/azure%20container%20apps?nodeId=board%3AAppsonAzureBlog",
+      "date": "",
+      "source": "Apps on Azure Blog"
+    },
+    {
+      "title": "containers",
+      "url": "https://techcommunity.microsoft.com/tag/containers?nodeId=board%3AAppsonAzureBlog",
+      "date": "",
+      "source": "Apps on Azure Blog"
+    },
+    {
+      "title": "azure kubernetes service",
+      "url": "https://techcommunity.microsoft.com/tag/azure%20kubernetes%20service?nodeId=board%3AAppsonAzureBlog",
+      "date": "",
+      "source": "Apps on Azure Blog"
+    },
+    {
+      "title": "azure kubernetes service",
+      "url": "https://techcommunity.microsoft.com/tag/azure%20kubernetes%20service?nodeId=board%3AAzureObservabilityBlog",
+      "date": "",
+      "source": "Azure Observability Blog"
+    }
+  ],
+  "techcommunity_search": [],
+  "youtube": [
+    {
+      "title": "Troubleshooting OOM failures with Claudio Godoy: AKS Troubleshooting Series:Azure Kubernetes Service",
+      "url": "https://www.youtube.com/watch?v=whnksEP0yUI",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "Scaling Smarter: Simplifying Multicluster AI with KAITO \\u0026 KubeFleet: Jorge Palma, KubeCon NA 2025",
+      "url": "https://www.youtube.com/watch?v=10IQeDOtVqo",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "Breaking into Big Tech and pro-tips for your 1st KubeCon: with Morgan Brown: Upstream@AKS",
+      "url": "https://www.youtube.com/watch?v=IM4bxDl5nV4",
+      "source": "AKS Community YouTube"
+    }
+  ],
+  "roadmap_url": "https://github.com/orgs/Azure/projects/685/views/1",
+  "releases_url": "https://github.com/Azure/AKS/releases/"
+}

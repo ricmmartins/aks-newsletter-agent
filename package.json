@@ -1,0 +1,18 @@
+{
+  "name": "aks-newsletter-agent",
+  "version": "1.0.0",
+  "description": "Automated agent for generating Ricardo Martins' monthly AKS Newsletter",
+  "main": "run.js",
+  "scripts": {
+    "start": "node run.js",
+    "collect": "node run.js --collect-only",
+    "generate": "node run.js --generate-only"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "node-fetch": "^2.7.0"
+  },
+  "optionalDependencies": {
+    "puppeteer": "^24.0.0"
+  }
+}
