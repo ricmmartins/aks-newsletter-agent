@@ -50,11 +50,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.check-date.outputs.is_last_day == 'true'
-        run: npm ci
-
-      - name: Install Puppeteer with browser
-        if: steps.check-date.outputs.is_last_day == 'true'
-        run: npx puppeteer browsers install chrome
+        run: npm install
 
       - name: Determine target month
         if: steps.check-date.outputs.is_last_day == 'true'
@@ -71,8 +67,6 @@ jobs:
       - name: Run AKS Newsletter Agent (collect)
         if: steps.check-date.outputs.is_last_day == 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --collect-only
-        env:
-          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'false'
 
       - name: Run AKS Newsletter Agent (generate draft)
         if: steps.check-date.outputs.is_last_day == 'true'
