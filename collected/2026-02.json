@@ -3,7 +3,7 @@
     "year": 2026,
     "month": 2,
     "monthName": "February",
-    "collectedAt": "2026-02-24T20:31:59.848Z",
+    "collectedAt": "2026-02-28T18:20:34.673Z",
     "windowStart": "2026-01-29T23:59:59.000Z",
     "windowEnd": "2026-02-28T23:59:59.000Z"
   },
@@ -48,6 +48,198 @@
     }
   ],
   "aks_docs_commits": [
+    {
+      "title": "Merge pull request #2756 from msftjonw/ACPCwithCNP",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f8dd42751d9df89f3c60846ff8811954d42089e6",
+      "date": "2026-02-27T17:22:45Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "updated content.",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/48633fbff9ef6f390e0515759d52b45796f39fd3",
+      "date": "2026-02-27T17:00:54Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2735 from lzhecheng/patch-2",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/60b4161d7549083a3bc9998ce6b10245f7e35e20",
+      "date": "2026-02-27T00:26:32Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update articles/aks/localdns-custom.md",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/1802738fa25f4a81f858a846573ed572a627a8cf",
+      "date": "2026-02-26T23:58:04Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Apply suggestion from @varora24",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/4b0577608c5615bcaac93df73ea3de6ab9b4743a",
+      "date": "2026-02-26T23:55:54Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2755 from schaffererin/upgrade-tutorial-portal-ui",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/ba003a5ab134e226b1a812a0a36b8f8638ffc89a",
+      "date": "2026-02-26T23:30:28Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "reshuffled the content.",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/af7a1134fe940fe3b01ae44596d87a397e5f56c2",
+      "date": "2026-02-26T22:47:24Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "updated content",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/91e7aad43679aa190116d8782696f601d6c5137c",
+      "date": "2026-02-26T22:43:17Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "updated the CIDR-based policy",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/146685b5b6f8e430a720985e96a1765d87a2ca4c",
+      "date": "2026-02-26T22:19:22Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "small adjustment on the lines to read better.",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/57f6657bad783aa4fcba7c08b9641c34c1045d2c",
+      "date": "2026-02-26T22:18:21Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "added how ACPC AKS clusters work with LocalDNS when CNP is enabled.",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/0f22d71f92c48c9d077ca7985edd6569ea2a523c",
+      "date": "2026-02-26T22:15:32Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Updated portal content with new UI",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/c83b6054fe05182f2bb5322130ac3db006df72b7",
+      "date": "2026-02-26T22:11:58Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Standardize Azure storage branding in documentation",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/53f2e632d5191104944aaf1dc80019f2723a8f7b",
+      "date": "2026-02-26T20:48:45Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "portal UI updates",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/9e89f9438fffa9363eeaec7316a182f0d64bb0e1",
+      "date": "2026-02-26T19:50:23Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "resolved merge conflict",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/70ddf6b01dbfd1069d0e4bdecfeff1b7bcbe97bc",
+      "date": "2026-02-26T19:45:44Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "fixed issues",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/644d1202288669e2288f7304f1fef5599045e713",
+      "date": "2026-02-26T19:43:08Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update Java and .NET details for identity bindings",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/441b35105e36d6b1b048fbc3ccef575f1b68bb19",
+      "date": "2026-02-26T13:51:44Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Ensure consistent Azure Managed Disks branding",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/620e1193c46aac418bce99f2137bd906e50935ef",
+      "date": "2026-02-26T07:43:55Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "fixed typo",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/3bd3337f0894d77d41c2e3bd7b3536ac518050dd",
+      "date": "2026-02-25T22:22:08Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2731 from msftjonw/RemoveK8sVer",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/26cfb46180c30dc82e9998401dac66b7ccc8550c",
+      "date": "2026-02-25T22:00:21Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2741 from chasewilson/chase/calico/blogLink",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/908658dddc133e407dd95f91e112ec65f563712d",
+      "date": "2026-02-25T21:54:42Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2739 from AllenWen-at-Azure/main",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/13b1f85e68771f91dc03ad719f1686c2b138e03d",
+      "date": "2026-02-25T21:24:14Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "[Calico Networkk Policy] - Point to guidance for customers wanting to use Calico features",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/3fe5c510a996f1c229871fa8838daf4109031f3d",
+      "date": "2026-02-25T20:04:23Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Merge pull request #2722 from msftjonw/OverlaySupportedOS",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/c47166bf19d360966885f878e54b134fef91aa7e",
+      "date": "2026-02-25T18:20:43Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "renamed files",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/6ebe03971f24473fd68eaf354c0edcba501fbab0",
+      "date": "2026-02-25T18:18:10Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "updated toc",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/eed817f312a54977dcaca960085d9adda77ab255",
+      "date": "2026-02-25T01:09:24Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update the CSI Secret Store doc during the docathon testing",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/e3fc07731dfa6252ec2b52baaf346170ef6362da",
+      "date": "2026-02-25T00:09:22Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "added links i forgot to add earlier",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/78bbe5df90554d5316f9404f5f2871eb3bfabb9d",
+      "date": "2026-02-25T00:08:11Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update docs during the docathon testing",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/0ef4dacc0ea483846b660ae8af88c31557d864b2",
+      "date": "2026-02-25T00:07:36Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Complete restructure of Azure CSI drivers content",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/3df00464ff4a941fd1c020fd1cc0d2a8b494696e",
+      "date": "2026-02-25T00:02:38Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update migration instructions for KMS",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/5d9c8eb93a9953152a37e10acf5649b885ebbaff",
+      "date": "2026-02-24T01:38:43Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "removed the restriction of only supporting K8s version 1.33+.",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/16b34d27bb4c5228c69d5f52fcf5617d4d3139b8",
+      "date": "2026-02-23T19:12:55Z",
+      "source": "AKS Docs"
+    },
     {
       "title": "Remove configuration file section from documentation",
       "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f2f757c33ec31163ec2d5e254d77caff7cb04c9f",
@@ -94,6 +286,12 @@
       "title": "Merge pull request #2541 from schaffererin/feature545042",
       "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/be0ee345122e8bedcee99a0355ea0bf1edc0fc56",
       "date": "2026-02-20T23:47:44Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "added the support for WS2025 in preview",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/1ed0eb3c8d1abac8295080106b88f6ad43a93e47",
+      "date": "2026-02-20T23:09:48Z",
       "source": "AKS Docs"
     },
     {
@@ -419,192 +617,6 @@
       "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2166ea63fd671070731e029b09f33da371dcf914",
       "date": "2026-02-12T21:19:26Z",
       "source": "AKS Docs"
-    },
-    {
-      "title": "Update Azure Identity for Python Identity Bindings details",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/b9a7fc0b599525fd3cd10227b9b76182d0be11ae",
-      "date": "2026-02-12T20:56:42Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Minor edits",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/ffeb4dd36034884156777255cd5d74fba9906f0c",
-      "date": "2026-02-12T17:57:36Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "update to ACStor v2",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/21f6e58060b2cd664ee816f70a066daa1b810db0",
-      "date": "2026-02-12T16:41:51Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Fix typo",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/3c703d88a495e86756e3afbf0eb45b9bdc217212",
-      "date": "2026-02-12T05:55:48Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Refresh article",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/37a6155672314d4d9dfcb11fe2e42db790a7055a",
-      "date": "2026-02-12T05:45:14Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "typo fixes",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/0c38282236c52b3530507692903756f971c42b20",
-      "date": "2026-02-11T20:54:40Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "removed duplicate faq and did a large editorial review",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/ee16d9e10ed485dfb58ef5a53e3f97b7e6d9aba2",
-      "date": "2026-02-11T20:48:14Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Update articles/aks/release-tracker.md",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/b0ff32d3d7c399640d7a98260533cc7fdc4a2f62",
-      "date": "2026-02-11T19:56:57Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "fix image name",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2ec45b521923796225a71f360a1d4067bc034cd0",
-      "date": "2026-02-11T19:45:01Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "fix wording",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/068074bbb2164bbed19633a4e4685705bb087c33",
-      "date": "2026-02-11T19:15:28Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "fix image naming issue",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/04bebd04bb9987cddc4653d4171d163bf34b4a32",
-      "date": "2026-02-11T19:05:27Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "zone term updates",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/c2c1b08ac67cdc239c2a90c8db71ce9b9876724c",
-      "date": "2026-02-11T18:55:07Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Edit meta titles",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/c693c3025487f4059402b479cd9dcbd88d05eef4",
-      "date": "2026-02-11T17:21:27Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Add edits",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2a9ada10cf7c69f8e93c214dca0041a43fdfa65b",
-      "date": "2026-02-10T19:24:16Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Refresh articles",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/05a836b3346471769fb164d89ff3536e79d9fb7b",
-      "date": "2026-02-10T18:42:26Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "update release tracker new ui",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/e2f1e45c8f5a9719d58ca4837d80bab04fa24d91",
-      "date": "2026-02-09T19:51:07Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Merge pull request #2268 from wdarko1/nap-metrics-update",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f6f600798fecc62aeed7ffbd412daa6acfc2ccc4",
-      "date": "2026-02-09T17:27:24Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Merge pull request #2654 from mainred/update-aks-agent",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/6a4b244fcb4f9422e414fab77d31518d4315313b",
-      "date": "2026-02-09T17:26:12Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Fix formatting and capitalization in auto-provisioning doc",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f0dd9555b3e9dea6bb85798ff23e464e57c4fcb3",
-      "date": "2026-02-09T17:22:29Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Merge branch 'MicrosoftDocs:main' into nap-metrics-update",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/a4886a5c111e9a31c1c886487dfe436cdf2072f8",
-      "date": "2026-02-09T17:05:06Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "fix incorrect bookmark",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/46fa8596e2a3b75a596821f870ac68587ac7dc8c",
-      "date": "2026-02-09T01:21:10Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "fix comments",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/614cccbcb993fe4ab3e37fb82bf93eeea226ff46",
-      "date": "2026-02-09T01:17:00Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Add Application Gateway for Containers section to TOC",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/618814fc04b5d963ecdea891e177aa5132c77af9",
-      "date": "2026-02-07T20:19:42Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Fix missing ADLS link",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/e432097c9110d0123c16250d406849f880603299",
-      "date": "2026-02-06T21:44:07Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "update service account role and msi role",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/c559a6ae547abe42b225067c682da0432daef565",
-      "date": "2026-02-06T10:19:40Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "added link definitions to file to resolve broken command link formatting",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/78d3b3a67c471bb4b8bde04c1e37aba5d106251a",
-      "date": "2026-02-05T20:58:24Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Adding retirement notice for Windows Annual Channel (Preview)",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f96ee104d2dd0f5612bf62b59b3f632ba25138e0",
-      "date": "2026-02-05T19:42:57Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "updated line 148 in rollback doc",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/e2b9cccbdd360c55e35080470c87fa77416f7bef",
-      "date": "2026-02-05T17:58:14Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Merge pull request #2621 from chasewilson/chase/byocni/ip-address-planning",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/74e8c2eb1b99f1827821b8faa7d95befc276d9ac",
-      "date": "2026-02-04T22:33:41Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Updates for PR comments and acrolinx",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/e8a8fae1ac95b5237ff137757c77cde973245c4a",
-      "date": "2026-02-04T22:31:04Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Merge pull request #2645 from schaffererin/feature548144-v1",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2bc651b93af60e0e14693a8254667665b8a65960",
-      "date": "2026-02-04T20:35:04Z",
-      "source": "AKS Docs"
     }
   ],
   "techcommunity": [
@@ -633,21 +645,107 @@
       "source": "Azure Observability Blog"
     }
   ],
-  "techcommunity_search": [],
+  "techcommunity_search": [
+    {
+      "title": "Microsoft at NVIDIA GTC 2026",
+      "url": "https://techcommunity.microsoft.com/blog/azurehighperformancecomputingblog/microsoft-at-nvidia-gtc-2026/4497670",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Place Azure High Performance Computing (HPC) BlogAzure High Performance Computing (HPC) Blog",
+      "url": "https://techcommunity.microsoft.com/category/azure/blog/azurehighperformancecomputingblog",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Become a Microsoft Defender for Cloud Ninja",
+      "url": "https://techcommunity.microsoft.com/blog/microsoftdefendercloudblog/become-a-microsoft-defender-for-cloud-ninja/1608761",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Place Microsoft Defender for Cloud BlogMicrosoft Defender for Cloud Blog",
+      "url": "https://techcommunity.microsoft.com/category/microsoft-defender-for-cloud/blog/microsoftdefendercloudblog",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Accelerating AKS Upgrades with Fleet Manager: Finding the Right Balance",
+      "url": "https://techcommunity.microsoft.com/blog/microsoftmissioncriticalblog/accelerating-aks-upgrades-with-fleet-manager-finding-the-right-balance/4497133",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Place Microsoft Mission Critical BlogMicrosoft Mission Critical Blog",
+      "url": "https://techcommunity.microsoft.com/category/microsoftmissioncriticalcommunityhub/blog/microsoftmissioncriticalblog",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Azure SRE Agent Architecture and Creation: Practical Benefits for SAP on Azure Customers",
+      "url": "https://techcommunity.microsoft.com/blog/microsoftmissioncriticalblog/azure-sre-agent-architecture-and-creation-practical-benefits-for-sap-on-azure-cu/4497625",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Nasdaq builds thoughtfully designed AI for board governance with PostgreSQL on Azure",
+      "url": "https://techcommunity.microsoft.com/blog/adforpostgresql/nasdaq-builds-thoughtfully-designed-ai-for-board-governance-with-postgresql-on-a/4493078",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Place Microsoft Blog for PostgreSQLMicrosoft Blog for PostgreSQL",
+      "url": "https://techcommunity.microsoft.com/category/azuredatabases/blog/adforpostgresql",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Regional Endpoints for Geo-Replicated Azure Container Registries (Private Preview)",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/regional-endpoints-for-geo-replicated-azure-container-registries-private-preview/4496186",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Place Apps on Azure BlogApps on Azure Blog",
+      "url": "https://techcommunity.microsoft.com/category/azure/blog/appsonazureblog",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Seamless Migrations From Self Hosted Nginx Ingress To The AKS App Routing Add-On",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/seamless-migrations-from-self-hosted-nginx-ingress-to-the-aks-app-routing-add-on/4495630",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Implementing Azure Lighthouse: A Technical Guide for Service Providers and Enterprises",
+      "url": "https://techcommunity.microsoft.com/blog/coreinfrastructureandsecurityblog/implementing-azure-lighthouse-a-technical-guide-for-service-providers-and-enterp/4490592",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Place Core Infrastructure and Security BlogCore Infrastructure and Security Blog",
+      "url": "https://techcommunity.microsoft.com/category/cis/blog/coreinfrastructureandsecurityblog",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Reactive Incident Response with Azure SRE Agent: From Alert to Resolution in Minutes",
+      "url": "https://techcommunity.microsoft.com/blog/azurearchitectureblog/reactive-incident-response-with-azure-sre-agent-from-alert-to-resolution-in-minu/4492938",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Place Azure Architecture BlogAzure Architecture Blog",
+      "url": "https://techcommunity.microsoft.com/category/azure/blog/azurearchitectureblog",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Private Preview: Azure Managed Prometheus on VM / VMSS",
+      "url": "https://techcommunity.microsoft.com/blog/azurehighperformancecomputingblog/private-preview-azure-managed-prometheus-on-vm--vmss/4473472",
+      "source": "TechCommunity Search"
+    }
+  ],
   "youtube": [
     {
-      "title": "Troubleshooting OOM failures with Claudio Godoy: AKS Troubleshooting Series:Azure Kubernetes Service",
+      "title": "Troubleshooting Disk Latency with Burak Ok: AKS Troubleshooting Series: Azure Kubernetes Service",
+      "url": "https://www.youtube.com/watch?v=YeO5zTDFtHA",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "AKS Community Call - US \\u0026 Europe (Jan 2026) - Azure Kubernetes Service",
+      "url": "https://www.youtube.com/watch?v=yGc7STl48GE",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "Getting started with the Container Secure Supply Chain",
       "url": "https://www.youtube.com/watch?v=whnksEP0yUI",
-      "source": "AKS Community YouTube"
-    },
-    {
-      "title": "Scaling Smarter: Simplifying Multicluster AI with KAITO \\u0026 KubeFleet: Jorge Palma, KubeCon NA 2025",
-      "url": "https://www.youtube.com/watch?v=10IQeDOtVqo",
-      "source": "AKS Community YouTube"
-    },
-    {
-      "title": "Breaking into Big Tech and pro-tips for your 1st KubeCon: with Morgan Brown: Upstream@AKS",
-      "url": "https://www.youtube.com/watch?v=IM4bxDl5nV4",
       "source": "AKS Community YouTube"
     }
   ],
