@@ -3,7 +3,7 @@
     "year": 2026,
     "month": 2,
     "monthName": "February",
-    "collectedAt": "2026-02-28T18:20:34.673Z",
+    "collectedAt": "2026-03-01T21:11:51.031Z",
     "windowStart": "2026-01-29T23:59:59.000Z",
     "windowEnd": "2026-02-28T23:59:59.000Z"
   },
@@ -48,6 +48,12 @@
     }
   ],
   "aks_docs_commits": [
+    {
+      "title": "Merge pull request #2751 from wdarko1/node-image-update",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/c26406d857c88653db1e7671723c3ede33bbdde0",
+      "date": "2026-02-28T16:19:43Z",
+      "source": "AKS Docs"
+    },
     {
       "title": "Merge pull request #2756 from msftjonw/ACPCwithCNP",
       "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f8dd42751d9df89f3c60846ff8811954d42089e6",
@@ -142,6 +148,12 @@
       "title": "fixed issues",
       "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/644d1202288669e2288f7304f1fef5599045e713",
       "date": "2026-02-26T19:43:08Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update AKS node image upgrade documentation",
+      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/d758a1c37cd92a76e6108ab9589899d773e10c1e",
+      "date": "2026-02-26T18:59:34Z",
       "source": "AKS Docs"
     },
     {
@@ -604,18 +616,6 @@
       "title": "Update unsupported features for node auto-provisioning",
       "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2bc25db9b61e59e4d075516f554aaf99d0134bdd",
       "date": "2026-02-13T17:30:59Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Merge pull request #2671 from cdpark/refresh-dapr-batch8",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/f0e40178b8877999713d00f72b24821c6e2a3726",
-      "date": "2026-02-12T21:53:13Z",
-      "source": "AKS Docs"
-    },
-    {
-      "title": "Update Identity Bindings details for Go and JS",
-      "url": "https://github.com/MicrosoftDocs/azure-aks-docs/commit/2166ea63fd671070731e029b09f33da371dcf914",
-      "date": "2026-02-12T21:19:26Z",
       "source": "AKS Docs"
     }
   ],
