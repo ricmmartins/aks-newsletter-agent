@@ -45,6 +45,19 @@ const CSS = `
   --purple: #6366f1;
   --radius: 8px;
 }
+[data-theme="dark"] {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface-hover: #22263a;
+  --border: #2a2e3e;
+  --border-hover: #3b82f6;
+  --text: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-dim: #64748b;
+  --accent: #3b82f6;
+  --accent-light: rgba(59,130,246,0.12);
+  --accent-dark: #93bbfd;
+}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
@@ -65,9 +78,10 @@ a:hover{color:var(--accent-dark)}
 .header-inner{
   max-width:760px;margin:0 auto;
   padding:1.25rem 0;
-  display:flex;align-items:center;justify-content:space-between;
+  display:flex;align-items:center;justify-content:space-between;gap:0.75rem;
 }
 .header-left{display:flex;align-items:center;gap:0.6rem}
+.header-actions{display:flex;align-items:center;gap:0.6rem}
 .header-logo{
   width:32px;height:32px;border-radius:8px;
   background:var(--accent);
@@ -77,7 +91,7 @@ a:hover{color:var(--accent-dark)}
   background-size:cover;
 }
 .header-brand{font-size:0.95rem;font-weight:700;color:var(--text);letter-spacing:-0.01em}
-.header-right .badge{
+.badge{
   font-size:0.7rem;font-weight:600;
   padding:0.25rem 0.7rem;border-radius:100px;
   background:var(--accent-light);color:var(--accent);
@@ -235,6 +249,22 @@ mark{background:rgba(0,120,212,0.12);color:var(--accent-dark);border-radius:2px;
   .hero h1{font-size:1.5rem}
   .container{padding:0 1rem 3rem}
 }
+
+/* ── Theme toggle ── */
+.theme-toggle{
+  background:none;border:1px solid var(--border);
+  width:36px;height:36px;border-radius:var(--radius);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:1rem;transition:all 0.15s;flex-shrink:0;
+}
+.theme-toggle:hover{background:var(--surface);border-color:var(--text-dim)}
+[data-theme="dark"] .theme-icon-dark,
+:root:not([data-theme="dark"]) .theme-icon-light{display:none}
+[data-theme="dark"] .theme-icon-light,
+:root:not([data-theme="dark"]) .theme-icon-dark{display:none}
+[data-theme="dark"] .theme-icon-light{display:inline}
+:root:not([data-theme="dark"]) .theme-icon-dark{display:inline}
+[data-theme="dark"] mark{background:rgba(59,130,246,0.2);color:var(--accent-dark)}
 `.trim();
 
 function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = "", badge = "") {
@@ -245,7 +275,13 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
         <div class="header-logo"></div>
         <span class="header-brand">AKS Newsletter</span>
       </div>
-      ${badge ? `<div class="header-right"><span class="badge">${badge}</span></div>` : ""}
+      <div class="header-actions">
+        ${badge ? `<span class="badge">${badge}</span>` : ""}
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <span class="theme-icon-light">☀️</span>
+          <span class="theme-icon-dark">🌙</span>
+        </button>
+      </div>
     </div>
   </div>`;
 
@@ -263,6 +299,9 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
   <title>${title}</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230078d4'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-weight='700' font-size='15' fill='white'%3EK%3C/text%3E%3C/svg%3E">
   <style>${CSS}</style>
+  <script>
+  (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
+  </script>
 </head>
 <body>
   ${headerHtml}
@@ -274,6 +313,20 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
       Built with <a href="https://github.com/ricmmartins/aks-newsletter-agent">aks-newsletter-agent</a> · Curated monthly updates on Azure Kubernetes Service
     </div>
   </div>
+  <script>
+  (function(){
+    const t=document.getElementById('themeToggle');
+    const saved=localStorage.getItem('theme');
+    if(saved==='dark'||(! saved&&window.matchMedia('(prefers-color-scheme:dark)').matches)){
+      document.documentElement.setAttribute('data-theme','dark');
+    }
+    t.addEventListener('click',()=>{
+      const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+      if(isDark){document.documentElement.removeAttribute('data-theme');localStorage.setItem('theme','light')}
+      else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('theme','dark')}
+    });
+  })();
+  </script>
 </body>
 </html>`;
 }
