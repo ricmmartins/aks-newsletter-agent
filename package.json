@@ -6,10 +6,12 @@
   "scripts": {
     "start": "node run.js",
     "collect": "node run.js --collect-only",
-    "generate": "node run.js --generate-only"
+    "generate": "node run.js --generate-only",
+    "build:site": "node build-site.js"
   },
   "dependencies": {
     "cheerio": "^1.0.0",
+    "marked": "^17.0.3",
     "node-fetch": "^2.7.0",
     "puppeteer": "^24.0.0"
   }
