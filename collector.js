@@ -256,6 +256,10 @@ class ContentCollector {
           link = new URL(link, "https://techcommunity.microsoft.com").href;
         }
 
+        // Skip category/tag pages and navigation elements
+        if (link.includes("/category/") || link.includes("/tag/") || title.startsWith("Place ")) return;
+        if (!link.includes("/blog/") && !link.includes("/ba-p/")) return;
+
         const timeEl = $el.find("time");
         const dateStr = timeEl.attr("datetime") || "";
 
@@ -379,7 +383,9 @@ class ContentCollector {
               href &&
               text.length > 10 &&
               !links.has(href) &&
-              (href.includes("/blog/") || href.includes("/ba-p/"))
+              (href.includes("/blog/") || href.includes("/ba-p/")) &&
+              !href.includes("/category/") &&
+              !text.startsWith("Place ")
             ) {
               links.add(href);
               items.push({ title: text, url: href });
@@ -390,10 +396,12 @@ class ContentCollector {
       });
 
       for (const item of results) {
-        this.collected.techcommunity_search.push({
-          ...item,
-          source: "TechCommunity Search",
-        });
+        if (this._matchesAKS(item.title)) {
+          this.collected.techcommunity_search.push({
+            ...item,
+            source: "TechCommunity Search",
+          });
+        }
       }
 
       console.log(
