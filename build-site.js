@@ -353,12 +353,57 @@ mark{background:rgba(0,120,212,0.12);color:var(--accent-dark);border-radius:2px;
 /* ── Print ── */
 @media print{
   .header,.hero,.toc,.share-bar,.back-top,.search-wrap,.search-stats,.no-results,
-  #results,.theme-toggle,.s-kbd,.s-clear,.nav,.footer{display:none!important}
+  #results,.theme-toggle,.s-kbd,.s-clear,.nav,.footer,.edition-nav,.filter-bar{display:none!important}
   body{color:#000;background:#fff;font-size:11pt;line-height:1.5}
   .container{max-width:100%;padding:0}
   a{color:#000;text-decoration:underline}
   li:has(> strong > a){border:1px solid #ccc;break-inside:avoid}
   h2{color:#333;border-color:#ccc}
+}
+
+/* ── Edition prev/next nav ── */
+.edition-nav{
+  display:grid;grid-template-columns:1fr 1fr;gap:1rem;
+  margin:2.5rem 0 0;padding:1.5rem 0 0;
+  border-top:1px solid var(--border);
+}
+.edition-nav-link{
+  display:flex;flex-direction:column;gap:0.15rem;
+  padding:1rem;border:1px solid var(--border);border-radius:var(--radius);
+  text-decoration:none;color:inherit;transition:all 0.15s;
+}
+.edition-nav-link:hover{border-color:var(--accent);background:var(--surface)}
+.edition-nav-link.next{text-align:right}
+.edition-nav-dir{font-size:0.75rem;color:var(--text-dim);font-weight:500}
+.edition-nav-title{font-size:0.95rem;font-weight:600;color:var(--text)}
+
+/* ── Category filter ── */
+.filter-bar{display:flex;flex-wrap:wrap;gap:0.4rem;margin:0 0 1.5rem}
+.filter-pill{
+  font-size:0.75rem;font-weight:500;padding:0.3rem 0.7rem;
+  border-radius:100px;border:1px solid var(--border);
+  background:none;color:var(--text-secondary);cursor:pointer;
+  transition:all 0.15s;font-family:inherit;
+}
+.filter-pill:hover{border-color:var(--accent);color:var(--accent)}
+.filter-pill.active{background:var(--accent);color:white;border-color:var(--accent)}
+
+/* ── LinkedIn copy box ── */
+.linkedin-box{
+  margin:1rem 0;padding:1rem 1.25rem;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  display:none;
+}
+.linkedin-box.visible{display:block}
+.linkedin-box pre{
+  white-space:pre-wrap;font-size:0.82rem;line-height:1.6;
+  color:var(--text-secondary);background:none;border:none;padding:0;margin:0.5rem 0;
+}
+.linkedin-box-header{display:flex;align-items:center;justify-content:space-between}
+.linkedin-box-title{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim)}
+
+@media(max-width:640px){
+  .edition-nav{grid-template-columns:1fr}
 }
 `.trim();
 
@@ -479,7 +524,7 @@ function countItems(md) {
   return links.length;
 }
 
-function buildEditionPage(edition) {
+function buildEditionPage(edition, prevEdition, nextEdition) {
   const md = fs.readFileSync(edition.file, "utf8");
   const rt = readingTime(md);
   const stats = sectionStats(md);
@@ -504,19 +549,51 @@ function buildEditionPage(edition) {
       </ul>
     </div>` : "";
 
+  const linkedinText = buildLinkedInDraft(edition).replace(/'/g, "\\'").replace(/\n/g, "\\n");
   const shareHtml = `
     <div class="share-bar">
       <span class="share-label">Share</span>
       <a class="share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(edUrl)}" target="_blank" rel="noopener">LinkedIn</a>
       <a class="share-btn" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(`AKS Newsletter – ${edition.monthName} ${edition.year}`)}&url=${encodeURIComponent(edUrl)}" target="_blank" rel="noopener">X / Twitter</a>
       <button class="share-btn" onclick="navigator.clipboard.writeText('${edUrl}');this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy link';this.classList.remove('copied')},2000)">Copy link</button>
+      <button class="share-btn" onclick="document.getElementById('liBox').classList.toggle('visible')">📝 LinkedIn draft</button>
+    </div>
+    <div class="linkedin-box" id="liBox">
+      <div class="linkedin-box-header">
+        <span class="linkedin-box-title">Ready-to-share LinkedIn post</span>
+        <button class="share-btn" onclick="navigator.clipboard.writeText('${linkedinText}');this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy text';this.classList.remove('copied')},2000)">Copy text</button>
+      </div>
+      <pre>${buildLinkedInDraft(edition).replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
     </div>`;
+
+  // Prev / Next navigation
+  let prevNextHtml = "";
+  if (prevEdition || nextEdition) {
+    prevNextHtml = `<div class="edition-nav">`;
+    if (nextEdition) {
+      prevNextHtml += `<a class="edition-nav-link prev" href="${nextEdition.year === edition.year ? '' : '../' + nextEdition.year + '/'}${nextEdition.slug}.html">
+        <span class="edition-nav-dir">← Previous</span>
+        <span class="edition-nav-title">${nextEdition.monthName} ${nextEdition.year}</span>
+      </a>`;
+    } else {
+      prevNextHtml += `<div></div>`;
+    }
+    if (prevEdition) {
+      prevNextHtml += `<a class="edition-nav-link next" href="${prevEdition.year === edition.year ? '' : '../' + prevEdition.year + '/'}${prevEdition.slug}.html">
+        <span class="edition-nav-dir">Next →</span>
+        <span class="edition-nav-title">${prevEdition.monthName} ${prevEdition.year}</span>
+      </a>`;
+    } else {
+      prevNextHtml += `<div></div>`;
+    }
+    prevNextHtml += `</div>`;
+  }
 
   const nav = `<a href="../index.html">← All Editions</a>`;
 
   return htmlTemplate(
     `AKS Newsletter – ${edition.monthName} ${edition.year}`,
-    tocHtml + contentHtml + shareHtml,
+    tocHtml + contentHtml + shareHtml + prevNextHtml,
     nav,
     "AKS Newsletter",
     `${edition.monthName} ${edition.year} Edition`,
@@ -543,8 +620,13 @@ function buildIndexPage(editions) {
         return `<span class="stat-pill">${icon ? icon[1] + " " : ""}${n}</span>`;
       }).join("");
 
+    const categories = Object.keys(stats).map(s => {
+      const icon = Object.entries(SECTION_ICONS).find(([k]) => s.includes(k));
+      return icon ? icon[0] : s;
+    });
+
     editionCards += `
-      <a class="edition-card" href="${ed.year}/${ed.slug}.html">
+      <a class="edition-card" href="${ed.year}/${ed.slug}.html" data-cats="${categories.join(",")}">
         <div class="ed-info">
           <span class="ed-title">${ed.monthName} ${ed.year}</span>
           <span class="ed-meta"><span class="ed-tag">Edition</span>${count} items · ${rt} min read</span>
@@ -579,6 +661,21 @@ function buildIndexPage(editions) {
     }
   }
 
+  // Collect all categories across editions
+  const allCategories = new Set();
+  for (const ed of editions) {
+    const md = fs.readFileSync(ed.file, "utf8");
+    const st = sectionStats(md);
+    for (const name of Object.keys(st)) {
+      const icon = Object.entries(SECTION_ICONS).find(([k]) => name.includes(k));
+      allCategories.add(icon ? icon[0] : name);
+    }
+  }
+  const filterPills = [...allCategories].map(cat => {
+    const icon = Object.entries(SECTION_ICONS).find(([k]) => cat.includes(k));
+    return `<button class="filter-pill" data-cat="${cat}">${icon ? icon[1] + " " : ""}${cat}</button>`;
+  }).join("");
+
   const body = `
     <div class="search-wrap">
       <input type="text" id="q" placeholder="Search all editions…" autocomplete="off" spellcheck="false">
@@ -591,6 +688,10 @@ function buildIndexPage(editions) {
     <div id="results"></div>
     <div id="list">
       <h2>Editions</h2>
+      <div class="filter-bar">
+        <button class="filter-pill active" data-cat="all">All</button>
+        ${filterPills}
+      </div>
       <div class="edition-grid">${editionCards}</div>
     </div>
     <script>
@@ -628,6 +729,22 @@ function buildIndexPage(editions) {
     }
     q.addEventListener('input',go);
     document.addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus()}if(e.key==='Escape'){clr()}});
+
+    // Category filter
+    document.querySelectorAll('.filter-pill').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat=btn.dataset.cat;
+        document.querySelectorAll('.edition-card').forEach(card=>{
+          if(cat==='all'){card.style.display=''}
+          else{
+            const cats=(card.dataset.cats||'').split(',');
+            card.style.display=cats.includes(cat)?'':'none';
+          }
+        });
+      });
+    });
     </script>
   `;
 
@@ -699,6 +816,34 @@ function buildOgImage() {
 </svg>`;
 }
 
+function buildLinkedInDraft(edition) {
+  const md = fs.readFileSync(edition.file, "utf8");
+  const stats = sectionStats(md);
+  const totalItems = Object.values(stats).reduce((a, b) => a + b, 0);
+  const url = `${SITE_URL}/${edition.year}/${edition.slug}.html`;
+
+  const highlights = [];
+  if (stats["Documentation Updates"]) highlights.push(`📄 ${stats["Documentation Updates"]} documentation updates`);
+  if (stats["Preview Feature Announcements"]) highlights.push(`🧪 ${stats["Preview Feature Announcements"]} preview feature announcements`);
+  if (stats["General Availability Announcements"]) highlights.push(`✅ ${stats["General Availability Announcements"]} GA announcements`);
+  if (stats["Community Blogs"]) highlights.push(`📚 ${stats["Community Blogs"]} community blog posts`);
+  const watchLearn = stats["Watch & Learn"] || stats["Watch  Learn"];
+  if (watchLearn) highlights.push(`🎥 ${watchLearn} videos`);
+
+  return `🚀 AKS Newsletter – ${edition.monthName} ${edition.year} Edition is out!
+
+The ${edition.monthName} edition of the AKS Newsletter is here, with ${totalItems} curated items covering the latest in Azure Kubernetes Service.
+
+${highlights.length > 0 ? "Highlights:\n" + highlights.join("\n") : ""}
+
+📖 Read the full edition: ${url}
+
+📬 Subscribe via RSS to never miss an update: ${SITE_URL}/feed.xml
+
+#Azure #AKS #Kubernetes #CloudNative #AzureKubernetesService #DevOps #CloudComputing
+`;
+}
+
 function build() {
   console.log("🔨 Building AKS Newsletter site...\n");
 
@@ -711,14 +856,22 @@ function build() {
   fs.rmSync(OUTPUT_DIR, { recursive: true, force: true });
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  for (const ed of editions) {
+  for (let i = 0; i < editions.length; i++) {
+    const ed = editions[i];
+    const prev = i > 0 ? editions[i - 1] : null;       // newer edition
+    const next = i < editions.length - 1 ? editions[i + 1] : null; // older edition
     const yearDir = path.join(OUTPUT_DIR, String(ed.year));
     fs.mkdirSync(yearDir, { recursive: true });
 
-    const html = buildEditionPage(ed);
+    const html = buildEditionPage(ed, prev, next);
     const outFile = path.join(yearDir, `${ed.slug}.html`);
     fs.writeFileSync(outFile, html, "utf8");
     console.log(`  ✓ ${ed.monthName} ${ed.year} → ${ed.slug}.html`);
+
+    // Generate LinkedIn post draft
+    const linkedinDraft = buildLinkedInDraft(ed);
+    fs.writeFileSync(path.join(yearDir, `${ed.slug}-linkedin.txt`), linkedinDraft, "utf8");
+    console.log(`  ✓ ${ed.monthName} ${ed.year} → ${ed.slug}-linkedin.txt`);
   }
 
   const indexHtml = buildIndexPage(editions);

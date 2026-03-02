@@ -147,3 +147,31 @@ jobs:
             4. Merge when ready to publish
           branch: newsletter/${{ steps.target.outputs.year }}-${{ steps.target.outputs.month }}
           delete-branch: true
+
+      - name: Send webhook notification
+        if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
+        continue-on-error: true
+        run: |
+          MONTH_PAD=$(printf '%02d' ${{ steps.target.outputs.month }})
+          MONTH_NAMES=("" "January" "February" "March" "April" "May" "June" "July" "August" "September" "October" "November" "December")
+          MONTH_NAME=${MONTH_NAMES[${{ steps.target.outputs.month }}]}
+          PR_URL="${{ github.server_url }}/${{ github.repository }}/pulls"
+
+          # Slack webhook (if configured)
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -s -X POST "$SLACK_WEBHOOK_URL" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"📰 AKS Newsletter draft for ${MONTH_NAME} ${{ steps.target.outputs.year }} is ready for review!\nPR: ${PR_URL}\"}"
+          fi
+
+          # Teams webhook (if configured)
+          if [ -n "$TEAMS_WEBHOOK_URL" ]; then
+            curl -s -X POST "$TEAMS_WEBHOOK_URL" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"📰 AKS Newsletter draft for ${MONTH_NAME} ${{ steps.target.outputs.year }} is ready for review! PR: ${PR_URL}\"}"
+          fi
+
+          echo "✅ Webhook notifications sent (if configured)"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
