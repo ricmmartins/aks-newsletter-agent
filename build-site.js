@@ -72,7 +72,9 @@ a:hover{color:var(--accent-dark)}
   width:32px;height:32px;border-radius:8px;
   background:var(--accent);
   display:flex;align-items:center;justify-content:center;
-  font-size:1.1rem;color:white;flex-shrink:0;
+  flex-shrink:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230078d4'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-weight='700' font-size='15' fill='white'%3EK%3C/text%3E%3C/svg%3E");
+  background-size:cover;
 }
 .header-brand{font-size:0.95rem;font-weight:700;color:var(--text);letter-spacing:-0.01em}
 .header-right .badge{
@@ -240,7 +242,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
   <div class="header">
     <div class="header-inner">
       <div class="header-left">
-        <div class="header-logo">⎈</div>
+        <div class="header-logo"></div>
         <span class="header-brand">AKS Newsletter</span>
       </div>
       ${badge ? `<div class="header-right"><span class="badge">${badge}</span></div>` : ""}
@@ -259,7 +261,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⎈</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230078d4'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-weight='700' font-size='15' fill='white'%3EK%3C/text%3E%3C/svg%3E">
   <style>${CSS}</style>
 </head>
 <body>
