@@ -19,10 +19,9 @@ class ContentCollector {
       month: "long",
     });
 
-    // Date window: last 30 days from end of target month (UTC)
+    // Date window: full calendar month (1st through last day, UTC)
+    this.windowStart = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0)); // 1st of month
     this.windowEnd = new Date(Date.UTC(year, month, 0, 23, 59, 59)); // last day of month
-    this.windowStart = new Date(this.windowEnd);
-    this.windowStart.setUTCDate(this.windowStart.getUTCDate() - 30);
 
     this.collected = {
       metadata: {
@@ -58,6 +57,26 @@ class ContentCollector {
   // Keep backward compat – alias for collectors that still use month check
   _isTargetMonth(dateStr) {
     return this._isWithinWindow(dateStr);
+  }
+
+  // Check if YouTube relative time text (e.g. "2 weeks ago") falls within target month
+  _isRecentVideo(timeText) {
+    if (!timeText) return true; // include if no time info
+    const lower = timeText.toLowerCase();
+    const match = lower.match(/(\d+)\s+(hour|day|week|month|year)/);
+    if (!match) return true;
+    const num = parseInt(match[1], 10);
+    const unit = match[2];
+    const daysAgo =
+      unit === "hour" ? 0 :
+      unit === "day" ? num :
+      unit === "week" ? num * 7 :
+      unit === "month" ? num * 30 :
+      unit === "year" ? num * 365 : 0;
+    // Calculate approximate publish date and check against window
+    const approxDate = new Date();
+    approxDate.setDate(approxDate.getDate() - daysAgo);
+    return approxDate >= this.windowStart && approxDate <= this.windowEnd;
   }
 
   _githubHeaders() {
@@ -272,10 +291,14 @@ class ContentCollector {
           link = new URL(link, "https://azure.microsoft.com").href;
         }
 
-        if (this._matchesAKS(title)) {
+        const timeEl = $el.find("time");
+        const dateStr = timeEl.attr("datetime") || timeEl.text().trim() || "";
+
+        if (this._matchesAKS(title) && (this._isWithinWindow(dateStr) || !dateStr)) {
           this.collected.azure_updates.push({
             title,
             url: link,
+            date: dateStr,
             source: "Azure Updates",
           });
         }
@@ -328,12 +351,14 @@ class ContentCollector {
         const timeEl = $el.find("time");
         const dateStr = timeEl.attr("datetime") || "";
 
-        this.collected.techcommunity.push({
-          title,
-          url: link,
-          date: dateStr,
-          source: name,
-        });
+        if (this._isWithinWindow(dateStr) || !dateStr) {
+          this.collected.techcommunity.push({
+            title,
+            url: link,
+            date: dateStr,
+            source: name,
+          });
+        }
       });
     }
 
@@ -373,10 +398,13 @@ class ContentCollector {
             if (!vr) continue;
             const videoId = vr.videoId;
             const title = vr.title?.runs?.[0]?.text || "";
-            if (videoId && title && this._matchesAKS(title)) {
+            // publishedTimeText contains relative date like "2 weeks ago"
+            const timeText = vr.publishedTimeText?.simpleText || "";
+            if (videoId && title && this._matchesAKS(title) && this._isRecentVideo(timeText)) {
               this.collected.youtube.push({
                 title,
                 url: `https://www.youtube.com/watch?v=${videoId}`,
+                publishedText: timeText,
                 source: name,
               });
             }
@@ -467,9 +495,10 @@ class ContentCollector {
         }
       } else {
         // Use GraphQL API to fetch ALL results (avoids pagination limits)
-        const dateGte = new Date(this.year, this.month - 1, 1).toISOString();
+        const dateGte = this.windowStart.toISOString();
+        const dateLte = this.windowEnd.toISOString();
         const allResults = await page.evaluate(
-          async (token, dateFilter) => {
+          async (token, dateFrom, dateTo) => {
             const body = {
               operationName: "MessageSearch",
               variables: {
@@ -477,7 +506,7 @@ class ContentCollector {
                 truncateBodyLength: 200, useUnreadCount: false, first: 50,
                 constraints: {
                   conversationStyle: { eq: "BLOG" },
-                  conversationLastPostingActivityTime: { gte: dateFilter },
+                  conversationLastPostingActivityTime: { gte: dateFrom, lte: dateTo },
                 },
                 sorts: { topicPublishDate: { direction: "DESC" } },
                 searchTerm: "aks",
@@ -517,7 +546,7 @@ class ContentCollector {
               };
             });
           },
-          bearerToken, dateGte
+          bearerToken, dateGte, dateLte
         );
 
         for (const item of allResults) {
