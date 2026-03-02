@@ -88,6 +88,30 @@ jobs:
         if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --generate-only
 
+      - name: Quality gate – check content completeness
+        if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
+        run: |
+          MONTH_PAD=$(printf '%02d' ${{ steps.target.outputs.month }})
+          FILE="newsletters/${{ steps.target.outputs.year }}/${{ steps.target.outputs.year }}-${MONTH_PAD}.md"
+          if [ ! -f "$FILE" ]; then
+            echo "::error::Newsletter file not generated: $FILE"
+            exit 1
+          fi
+          # Check each expected section has at least one linked item
+          WARNINGS=0
+          for SECTION in "Documentation Updates" "Preview Feature" "General Availability" "Behavioral Changes" "Community Blogs"; do
+            CONTENT=$(sed -n "/## .*${SECTION}/,/## /p" "$FILE" | grep -c '\*\*\[' || true)
+            if [ "$CONTENT" -eq 0 ]; then
+              echo "::warning::Section '$SECTION' has no linked items — may need manual review."
+              WARNINGS=$((WARNINGS + 1))
+            fi
+          done
+          TOTAL=$(grep -c '\*\*\[' "$FILE" || true)
+          echo "📊 Quality gate: $TOTAL total items, $WARNINGS empty sections"
+          if [ "$TOTAL" -lt 3 ]; then
+            echo "::warning::Newsletter has very few items ($TOTAL). Consider investigating data collection."
+          fi
+
       - name: Upload collected data
         if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
         uses: actions/upload-artifact@v4

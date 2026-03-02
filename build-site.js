@@ -3,6 +3,7 @@
  * Static site builder for AKS Newsletter.
  * Converts newsletter markdown files into styled HTML pages
  * with an index page listing all editions.
+ * Generates RSS feed, sitemap.xml, and robots.txt.
  */
 
 const fs = require("fs");
@@ -11,6 +12,7 @@ const { marked } = require("marked");
 
 const NEWSLETTERS_DIR = path.join(__dirname, "newsletters");
 const OUTPUT_DIR = path.join(__dirname, "docs");
+const SITE_URL = "https://ricmmartins.github.io/aks-newsletter-agent";
 
 const MONTH_NAMES = [
   "", "January", "February", "March", "April", "May", "June",
@@ -27,6 +29,35 @@ const SECTION_ICONS = {
   "Watch & Learn": "🎥",
   "Closing Thoughts": "🧠",
 };
+
+function readingTime(md) {
+  const words = md.replace(/[#*\[\]()>`_\-|]/g, " ").split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
+
+function sectionStats(md) {
+  const stats = {};
+  const sections = md.split(/^## /m).slice(1);
+  for (const section of sections) {
+    const name = section.split("\n")[0].replace(/^[^\w]*/, "").trim();
+    const items = (section.match(/\*\*\[([^\]]+)\]\(/g) || []).length;
+    if (items > 0) stats[name] = items;
+  }
+  return stats;
+}
+
+function extractToc(md) {
+  const toc = [];
+  const sections = md.split(/^## /m).slice(1);
+  for (const section of sections) {
+    const raw = section.split("\n")[0].trim();
+    const name = raw.replace(/^[^\w]*/, "").trim();
+    const icon = Object.entries(SECTION_ICONS).find(([k]) => name.includes(k));
+    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
+    toc.push({ name, id, icon: icon ? icon[1] : "" });
+  }
+  return toc;
+}
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -265,15 +296,85 @@ mark{background:rgba(0,120,212,0.12);color:var(--accent-dark);border-radius:2px;
 [data-theme="dark"] .theme-icon-light{display:inline}
 :root:not([data-theme="dark"]) .theme-icon-dark{display:inline}
 [data-theme="dark"] mark{background:rgba(59,130,246,0.2);color:var(--accent-dark)}
+
+/* ── Table of Contents ── */
+.toc{
+  margin:0 0 2rem;padding:1rem 1.25rem;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+}
+.toc-title{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:0.5rem}
+.toc-list{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:0.4rem}
+.toc-list li{margin:0}
+.toc-list a{
+  display:inline-flex;align-items:center;gap:0.3rem;
+  font-size:0.82rem;color:var(--text-secondary);padding:0.3rem 0.6rem;
+  border-radius:6px;transition:all 0.15s;border:1px solid transparent;
+}
+.toc-list a:hover{background:var(--bg);border-color:var(--border);color:var(--accent)}
+
+/* ── Share buttons ── */
+.share-bar{
+  display:flex;align-items:center;gap:0.5rem;
+  margin:1.5rem 0;padding:1rem 0;border-top:1px solid var(--border);
+}
+.share-label{font-size:0.75rem;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em}
+.share-btn{
+  display:inline-flex;align-items:center;gap:0.3rem;
+  font-size:0.78rem;font-weight:500;color:var(--text-secondary);
+  padding:0.35rem 0.7rem;border-radius:6px;border:1px solid var(--border);
+  text-decoration:none;transition:all 0.15s;font-family:inherit;
+  background:none;cursor:pointer;
+}
+.share-btn:hover{background:var(--surface);border-color:var(--accent);color:var(--accent)}
+.share-btn.copied{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+
+/* ── Back to top ── */
+.back-top{
+  position:fixed;bottom:2rem;right:2rem;
+  width:40px;height:40px;border-radius:50%;
+  background:var(--accent);color:white;border:none;
+  cursor:pointer;font-size:1.1rem;
+  display:none;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  transition:all 0.2s;z-index:100;
+}
+.back-top:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+.back-top.visible{display:flex}
+
+/* ── Reading time & stats ── */
+.reading-time{font-size:0.8rem;color:var(--text-dim);margin-top:0.25rem}
+.section-stats{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem}
+.stat-pill{
+  font-size:0.68rem;font-weight:500;padding:0.2rem 0.5rem;
+  border-radius:100px;background:var(--surface);color:var(--text-dim);
+  border:1px solid var(--border);display:inline-flex;align-items:center;gap:0.2rem;
+}
+
+/* ── Print ── */
+@media print{
+  .header,.hero,.toc,.share-bar,.back-top,.search-wrap,.search-stats,.no-results,
+  #results,.theme-toggle,.s-kbd,.s-clear,.nav,.footer{display:none!important}
+  body{color:#000;background:#fff;font-size:11pt;line-height:1.5}
+  .container{max-width:100%;padding:0}
+  a{color:#000;text-decoration:underline}
+  li:has(> strong > a){border:1px solid #ccc;break-inside:avoid}
+  h2{color:#333;border-color:#ccc}
+}
 `.trim();
 
-function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = "", badge = "") {
+function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = "", badge = "", meta = {}) {
+  const ogUrl = meta.url || SITE_URL;
+  const ogDesc = meta.description || "Monthly curated updates on Azure Kubernetes Service — docs, features, blogs, releases, and more.";
+  const ogImage = meta.image || `${SITE_URL}/og-image.svg`;
+
   const headerHtml = `
   <div class="header">
     <div class="header-inner">
       <div class="header-left">
-        <div class="header-logo"></div>
-        <span class="header-brand">AKS Newsletter</span>
+        <a href="${meta.isEdition ? '../index.html' : 'index.html'}" style="display:flex;align-items:center;gap:0.6rem;text-decoration:none;color:inherit">
+          <div class="header-logo"></div>
+          <span class="header-brand">AKS Newsletter</span>
+        </a>
       </div>
       <div class="header-actions">
         ${badge ? `<span class="badge">${badge}</span>` : ""}
@@ -289,6 +390,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
   <div class="hero">
     <h1>${headerSubtitle || headerTitle}</h1>
     ${headerSubtitle ? `<p>Curated documentation updates, feature announcements, community blogs, release highlights, and more.</p>` : ""}
+    ${meta.readingTime ? `<div class="reading-time">📖 ${meta.readingTime} min read</div>` : ""}
   </div>` : "";
 
   return `<!DOCTYPE html>
@@ -297,6 +399,18 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
+  <meta name="description" content="${ogDesc}">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${ogDesc}">
+  <meta property="og:url" content="${ogUrl}">
+  <meta property="og:image" content="${ogImage}">
+  <meta property="og:site_name" content="AKS Newsletter">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${ogDesc}">
+  <meta name="twitter:image" content="${ogImage}">
+  <link rel="alternate" type="application/rss+xml" title="AKS Newsletter RSS" href="${SITE_URL}/feed.xml">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230078d4'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-weight='700' font-size='15' fill='white'%3EK%3C/text%3E%3C/svg%3E">
   <style>${CSS}</style>
   <script>
@@ -311,20 +425,21 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
     ${body}
     <div class="footer">
       Built with <a href="https://github.com/ricmmartins/aks-newsletter-agent">aks-newsletter-agent</a> · Curated monthly updates on Azure Kubernetes Service
+      · <a href="${SITE_URL}/feed.xml">RSS Feed</a>
     </div>
   </div>
+  <button class="back-top" id="backTop" aria-label="Back to top" title="Back to top">↑</button>
   <script>
   (function(){
     const t=document.getElementById('themeToggle');
-    const saved=localStorage.getItem('theme');
-    if(saved==='dark'||(! saved&&window.matchMedia('(prefers-color-scheme:dark)').matches)){
-      document.documentElement.setAttribute('data-theme','dark');
-    }
     t.addEventListener('click',()=>{
       const isDark=document.documentElement.getAttribute('data-theme')==='dark';
       if(isDark){document.documentElement.removeAttribute('data-theme');localStorage.setItem('theme','light')}
       else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('theme','dark')}
     });
+    const b=document.getElementById('backTop');
+    window.addEventListener('scroll',()=>{b.classList.toggle('visible',window.scrollY>400)});
+    b.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
   })();
   </script>
 </body>
@@ -366,16 +481,52 @@ function countItems(md) {
 
 function buildEditionPage(edition) {
   const md = fs.readFileSync(edition.file, "utf8");
-  const html = marked.parse(md);
-  const nav = `<a href="../index.html">← All Editions</a>`;
+  const rt = readingTime(md);
+  const stats = sectionStats(md);
+  const toc = extractToc(md);
+  const edUrl = `${SITE_URL}/${edition.year}/${edition.slug}.html`;
+
+  // Add IDs to h2 headings for TOC anchoring
+  let html = marked.parse(md);
+  for (const entry of toc) {
+    html = html.replace(
+      new RegExp(`(<h2[^>]*>)(.*?${entry.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}.*?)(</h2>)`, "i"),
+      `$1<a id="${entry.id}"></a>$2$3`
+    );
+  }
   const contentHtml = html.replace(/<h1[^>]*>.*?<\/h1>/i, "");
+
+  const tocHtml = toc.length > 0 ? `
+    <div class="toc">
+      <div class="toc-title">In this edition</div>
+      <ul class="toc-list">
+        ${toc.map(t => `<li><a href="#${t.id}">${t.icon ? t.icon + " " : ""}${t.name}</a></li>`).join("")}
+      </ul>
+    </div>` : "";
+
+  const shareHtml = `
+    <div class="share-bar">
+      <span class="share-label">Share</span>
+      <a class="share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(edUrl)}" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="share-btn" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(`AKS Newsletter – ${edition.monthName} ${edition.year}`)}&url=${encodeURIComponent(edUrl)}" target="_blank" rel="noopener">X / Twitter</a>
+      <button class="share-btn" onclick="navigator.clipboard.writeText('${edUrl}');this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy link';this.classList.remove('copied')},2000)">Copy link</button>
+    </div>`;
+
+  const nav = `<a href="../index.html">← All Editions</a>`;
+
   return htmlTemplate(
     `AKS Newsletter – ${edition.monthName} ${edition.year}`,
-    contentHtml,
+    tocHtml + contentHtml + shareHtml,
     nav,
     "AKS Newsletter",
     `${edition.monthName} ${edition.year} Edition`,
-    `${edition.monthName} ${edition.year}`
+    `${edition.monthName} ${edition.year}`,
+    {
+      url: edUrl,
+      description: `${edition.monthName} ${edition.year} edition of the AKS Newsletter — ${Object.values(stats).reduce((a, b) => a + b, 0)} curated items covering docs, features, blogs, and more.`,
+      readingTime: rt,
+      isEdition: true,
+    }
   );
 }
 
@@ -384,11 +535,20 @@ function buildIndexPage(editions) {
   for (const ed of editions) {
     const md = fs.readFileSync(ed.file, "utf8");
     const count = countItems(md);
+    const rt = readingTime(md);
+    const stats = sectionStats(md);
+    const statPills = Object.entries(stats)
+      .map(([name, n]) => {
+        const icon = Object.entries(SECTION_ICONS).find(([k]) => name.includes(k));
+        return `<span class="stat-pill">${icon ? icon[1] + " " : ""}${n}</span>`;
+      }).join("");
+
     editionCards += `
       <a class="edition-card" href="${ed.year}/${ed.slug}.html">
         <div class="ed-info">
           <span class="ed-title">${ed.monthName} ${ed.year}</span>
-          <span class="ed-meta"><span class="ed-tag">Edition</span>${count} items</span>
+          <span class="ed-meta"><span class="ed-tag">Edition</span>${count} items · ${rt} min read</span>
+          ${statPills ? `<div class="section-stats">${statPills}</div>` : ""}
         </div>
         <span class="ed-arrow">→</span>
       </a>\n`;
@@ -476,8 +636,67 @@ function buildIndexPage(editions) {
     body,
     "",
     "AKS Newsletter",
-    "Monthly curated updates on Azure Kubernetes Service"
+    "Monthly curated updates on Azure Kubernetes Service",
+    "",
+    { url: SITE_URL }
   );
+}
+
+function buildRssFeed(editions) {
+  const items = editions.slice(0, 20).map(ed => {
+    const md = fs.readFileSync(ed.file, "utf8");
+    const count = countItems(md);
+    const pubDate = new Date(ed.year, ed.month - 1, 28).toUTCString();
+    const url = `${SITE_URL}/${ed.year}/${ed.slug}.html`;
+    return `    <item>
+      <title>AKS Newsletter – ${ed.monthName} ${ed.year}</title>
+      <link>${url}</link>
+      <guid isPermaLink="true">${url}</guid>
+      <pubDate>${pubDate}</pubDate>
+      <description>${count} curated items covering documentation updates, feature announcements, community blogs, and more.</description>
+    </item>`;
+  }).join("\n");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>AKS Newsletter</title>
+    <link>${SITE_URL}</link>
+    <description>Monthly curated updates on Azure Kubernetes Service — docs, features, blogs, releases, and more.</description>
+    <language>en-us</language>
+    <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml" />
+${items}
+  </channel>
+</rss>`;
+}
+
+function buildSitemap(editions) {
+  const urls = [
+    `  <url><loc>${SITE_URL}/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>`,
+  ];
+  for (const ed of editions) {
+    const lastmod = `${ed.year}-${String(ed.month).padStart(2, "0")}-28`;
+    urls.push(`  <url><loc>${SITE_URL}/${ed.year}/${ed.slug}.html</loc><lastmod>${lastmod}</lastmod><changefreq>yearly</changefreq><priority>0.8</priority></url>`);
+  }
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join("\n")}
+</urlset>`;
+}
+
+function buildOgImage() {
+  // SVG-based OG image for social sharing
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <rect x="60" y="60" width="64" height="64" rx="16" fill="#0078d4"/>
+  <text x="92" y="102" font-family="system-ui,sans-serif" font-weight="700" font-size="32" fill="white" text-anchor="middle" dominant-baseline="middle">K</text>
+  <text x="60" y="280" font-family="system-ui,sans-serif" font-weight="700" font-size="72" fill="white">AKS Newsletter</text>
+  <text x="60" y="360" font-family="system-ui,sans-serif" font-weight="400" font-size="32" fill="#94a3b8">Monthly curated updates on</text>
+  <text x="60" y="410" font-family="system-ui,sans-serif" font-weight="400" font-size="32" fill="#94a3b8">Azure Kubernetes Service</text>
+  <rect x="60" y="500" width="120" height="6" rx="3" fill="#0078d4"/>
+  <rect x="200" y="500" width="80" height="6" rx="3" fill="#3b82f6"/>
+  <rect x="300" y="500" width="60" height="6" rx="3" fill="#6366f1"/>
+</svg>`;
 }
 
 function build() {
@@ -505,6 +724,25 @@ function build() {
   const indexHtml = buildIndexPage(editions);
   fs.writeFileSync(path.join(OUTPUT_DIR, "index.html"), indexHtml, "utf8");
   console.log(`  ✓ index.html`);
+
+  // RSS feed
+  const rss = buildRssFeed(editions);
+  fs.writeFileSync(path.join(OUTPUT_DIR, "feed.xml"), rss, "utf8");
+  console.log(`  ✓ feed.xml`);
+
+  // Sitemap
+  const sitemap = buildSitemap(editions);
+  fs.writeFileSync(path.join(OUTPUT_DIR, "sitemap.xml"), sitemap, "utf8");
+  console.log(`  ✓ sitemap.xml`);
+
+  // robots.txt
+  fs.writeFileSync(path.join(OUTPUT_DIR, "robots.txt"),
+    `User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`, "utf8");
+  console.log(`  ✓ robots.txt`);
+
+  // OG image
+  fs.writeFileSync(path.join(OUTPUT_DIR, "og-image.svg"), buildOgImage(), "utf8");
+  console.log(`  ✓ og-image.svg`);
 
   console.log(`\n✅ Site built: ${editions.length} edition(s) → docs/`);
 }

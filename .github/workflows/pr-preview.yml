@@ -1,0 +1,51 @@
+name: PR Preview – Build Check
+
+on:
+  pull_request:
+    paths:
+      - 'newsletters/**'
+      - 'build-site.js'
+
+jobs:
+  preview-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site
+        run: node build-site.js
+
+      - name: Validate links in changed newsletters
+        run: |
+          CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} -- 'newsletters/**/*.md' || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No newsletter files changed, skipping link validation."
+            exit 0
+          fi
+          for FILE in $CHANGED; do
+            if [ -f "$FILE" ]; then
+              YEAR=$(echo "$FILE" | grep -oP '\d{4}' | head -1)
+              MONTH=$(echo "$FILE" | grep -oP '(?<=-)\d{2}(?=\.md)' | head -1)
+              echo "Validating $FILE..."
+              node validate-links.js "$YEAR" "$((10#$MONTH))" || true
+            fi
+          done
+
+      - name: Post build summary
+        run: |
+          echo "### 🏗️ Site Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          for f in docs/*.html docs/**/*.html; do
+            [ -f "$f" ] && echo "| \`$f\` | ✅ Built |" >> $GITHUB_STEP_SUMMARY
+          done
+          [ -f "docs/feed.xml" ] && echo "| \`docs/feed.xml\` | ✅ Generated |" >> $GITHUB_STEP_SUMMARY
+          [ -f "docs/sitemap.xml" ] && echo "| \`docs/sitemap.xml\` | ✅ Generated |" >> $GITHUB_STEP_SUMMARY

@@ -7,7 +7,8 @@
     "start": "node run.js",
     "collect": "node run.js --collect-only",
     "generate": "node run.js --generate-only",
-    "build:site": "node build-site.js"
+    "build:site": "node build-site.js",
+    "validate": "node validate-links.js"
   },
   "dependencies": {
     "cheerio": "^1.0.0",
