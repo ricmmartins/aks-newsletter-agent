@@ -402,8 +402,6 @@ class ContentCollector {
 
   async collectTechCommunitySearch() {
     console.log("📡 Collecting TechCommunity Search (AKS, past month)...");
-    const searchUrl =
-      "https://techcommunity.microsoft.com/search?q=aks&contentType=BLOG&lastUpdate=pastMonth&sortBy=newest";
 
     let puppeteer;
     try {
@@ -425,57 +423,110 @@ class ContentCollector {
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
       });
       const page = await browser.newPage();
-      await page.setUserAgent("AKS-Newsletter-Agent/1.0");
-      await page.goto(searchUrl, { waitUntil: "networkidle2", timeout: 60000 });
 
-      // Wait for search results to render
-      await page.waitForSelector('[class*="search-result"], [class*="SearchResult"], article, [data-testid*="search"]', {
-        timeout: 15000,
-      }).catch(() => {
-        console.log("  ⚠ Search results selector not found, trying fallback...");
+      // Capture Bearer token from the initial GraphQL request
+      let bearerToken = "";
+      page.on("request", (req) => {
+        if (req.url().includes("opname=MessageSearch")) {
+          bearerToken = req.headers()["authorization"] || "";
+        }
       });
 
-      // Extra wait for SPA hydration
-      await new Promise((r) => setTimeout(r, 3000));
+      // Load search page to trigger auth and obtain token
+      const searchUrl =
+        "https://techcommunity.microsoft.com/search?q=aks&contentType=BLOG&lastUpdate=pastMonth&sortBy=newest";
+      await page.goto(searchUrl, { waitUntil: "networkidle2", timeout: 60000 });
+      await new Promise((r) => setTimeout(r, 5000));
 
-      const results = await page.evaluate(() => {
-        const items = [];
-        // Try multiple selectors for TechCommunity search results
-        const selectors = [
-          '[class*="SearchResult"] a',
-          '[class*="search-result"] a',
-          'article a[href*="/blog/"]',
-          'a[href*="techcommunity.microsoft.com/blog/"]',
-          'a[href*="/t5/"][href*="/ba-p/"]',
-        ];
-
-        const links = new Set();
-        for (const sel of selectors) {
-          document.querySelectorAll(sel).forEach((a) => {
+      if (!bearerToken) {
+        // Fallback: scrape visible DOM links if token capture fails
+        console.log("  ⚠ Auth token not captured, falling back to DOM scraping");
+        const results = await page.evaluate(() => {
+          const items = [];
+          const links = new Set();
+          document.querySelectorAll("a").forEach((a) => {
             const href = a.href || "";
             const text = (a.textContent || "").trim();
             if (
-              href &&
-              text.length > 10 &&
-              !links.has(href) &&
+              href && text.length > 10 && !links.has(href) &&
               (href.includes("/blog/") || href.includes("/ba-p/")) &&
-              !href.includes("/category/") &&
-              !text.startsWith("Place ")
+              !href.includes("/category/") && !text.startsWith("Place ")
             ) {
               links.add(href);
               items.push({ title: text, url: href });
             }
           });
+          return items;
+        });
+        for (const item of results) {
+          if (this._matchesAKS(item.title) || this._matchesAKS(item.url)) {
+            this.collected.techcommunity_search.push({
+              ...item, source: "TechCommunity Search",
+            });
+          }
         }
-        return items;
-      });
+      } else {
+        // Use GraphQL API to fetch ALL results (avoids pagination limits)
+        const dateGte = new Date(this.year, this.month - 1, 1).toISOString();
+        const allResults = await page.evaluate(
+          async (token, dateFilter) => {
+            const body = {
+              operationName: "MessageSearch",
+              variables: {
+                forAutoSuggest: false, useFullPageInfo: true,
+                truncateBodyLength: 200, useUnreadCount: false, first: 50,
+                constraints: {
+                  conversationStyle: { eq: "BLOG" },
+                  conversationLastPostingActivityTime: { gte: dateFilter },
+                },
+                sorts: { topicPublishDate: { direction: "DESC" } },
+                searchTerm: "aks",
+              },
+              extensions: {
+                persistedQuery: {
+                  version: 1,
+                  sha256Hash: "d6f4a952ca4e2ccea2b104ec949092601be072e638c72b0313bc089bb977ce9d",
+                },
+              },
+            };
+            const resp = await fetch(
+              "/t5/s/api/2.1/graphql?opname=MessageSearch",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: token },
+                body: JSON.stringify(body),
+              }
+            );
+            const data = await resp.json();
+            const results = data.data?.messageSearch?.results;
+            if (!results) return [];
+            return (results.edges || []).map((e) => {
+              const msg = e.node.message;
+              const boardId = (msg.board?.displayId || "").toLowerCase();
+              const slug = (msg.subject || "")
+                .toLowerCase().replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-|-$/g, "").substring(0, 80);
+              // Include snippet text for keyword matching against body
+              const snippetText = (e.node.snippet || [])
+                .map((s) => (s.content || []).join(" ")).join(" ");
+              return {
+                title: msg.subject || "",
+                url: `https://techcommunity.microsoft.com/blog/${boardId}/${slug}/${msg.uid}`,
+                posted: msg.postTime || "",
+                snippet: snippetText,
+              };
+            });
+          },
+          bearerToken, dateGte
+        );
 
-      for (const item of results) {
-        if (this._matchesAKS(item.title)) {
-          this.collected.techcommunity_search.push({
-            ...item,
-            source: "TechCommunity Search",
-          });
+        for (const item of allResults) {
+          if (this._matchesAKS(item.title) || this._matchesAKS(item.url) || this._matchesAKS(item.snippet)) {
+            this.collected.techcommunity_search.push({
+              title: item.title, url: item.url, posted: item.posted,
+              source: "TechCommunity Search",
+            });
+          }
         }
       }
 
