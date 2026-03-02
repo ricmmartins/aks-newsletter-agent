@@ -81,6 +81,8 @@ jobs:
       - name: Run AKS Newsletter Agent (collect)
         if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --collect-only
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run AKS Newsletter Agent (generate draft)
         if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'

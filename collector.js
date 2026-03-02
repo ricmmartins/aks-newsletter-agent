@@ -14,6 +14,7 @@ class ContentCollector {
     this.year = year;
     this.month = month;
     this.outputDir = outputDir;
+    this.githubToken = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
     this.monthName = new Date(year, month - 1).toLocaleString("en-US", {
       month: "long",
     });
@@ -57,6 +58,14 @@ class ContentCollector {
   // Keep backward compat – alias for collectors that still use month check
   _isTargetMonth(dateStr) {
     return this._isWithinWindow(dateStr);
+  }
+
+  _githubHeaders() {
+    const headers = { Accept: "application/vnd.github.v3+json" };
+    if (this.githubToken) {
+      headers.Authorization = `token ${this.githubToken}`;
+    }
+    return headers;
   }
 
   async _safeFetch(url, options = {}) {
@@ -128,7 +137,7 @@ class ContentCollector {
   async collectGitHubReleases() {
     console.log("📡 Collecting AKS GitHub Releases...");
     const resp = await this._safeFetch(SOURCES.aks_releases.apiUrl, {
-      headers: { Accept: "application/vnd.github.v3+json" },
+      headers: this._githubHeaders(),
     });
     if (!resp) return;
 
@@ -157,29 +166,85 @@ class ContentCollector {
     const url = `${SOURCES.aks_docs.apiUrl}&since=${startDate}&until=${endDate}`;
 
     const resp = await this._safeFetch(url, {
-      headers: { Accept: "application/vnd.github.v3+json" },
+      headers: this._githubHeaders(),
     });
     if (!resp) return;
-
     const commits = await resp.json();
-    const seenFiles = new Set();
+
+    // Noise patterns: merge commits, trivial messages, metadata-only changes
+    const noisePatterns = [
+      /^merge /i,
+      /^merge pull request/i,
+      /^merge branch/i,
+      /^fixed typo/i,
+      /^fixed issues/i,
+      /^updated content\.?$/i,
+      /^reshuffled/i,
+      /^resolved merge conflict/i,
+      /^small adjustment/i,
+      /^update articles\/aks\//i,
+      /^apply suggestion/i,
+      /^fix ms\.author/i,
+      /^renamed files/i,
+      /^delete volume/i,
+      /^change title/i,
+      /^update link$/i,
+      /^update date /i,
+      /^fixed broken link/i,
+      /^added links/i,
+      /^portal ui updates/i,
+      /^fix redirection/i,
+    ];
+
+    // Group commits by article file to deduplicate
+    const articleMap = new Map(); // filePath -> { title, url, date, learnUrl }
 
     for (const commit of Array.isArray(commits) ? commits : []) {
       const msg = commit.commit?.message || "";
       const date = commit.commit?.committer?.date || "";
       const commitUrl = commit.html_url || "";
+      const sha = commit.sha || "";
       const firstLine = msg.split("\n")[0].trim();
 
-      if (firstLine && !seenFiles.has(firstLine)) {
-        seenFiles.add(firstLine);
-        this.collected.aks_docs_commits.push({
+      // Skip noise commits (patterns + short/cryptic messages)
+      if (!firstLine || firstLine.length < 20) continue;
+      if (!firstLine || noisePatterns.some((p) => p.test(firstLine))) continue;
+
+      // Fetch commit details to get changed files
+      let files = [];
+      if (sha) {
+        const detailResp = await this._safeFetch(
+          `https://api.github.com/repos/MicrosoftDocs/azure-aks-docs/commits/${sha}`,
+          { headers: this._githubHeaders() }
+        );
+        if (detailResp) {
+          const detail = await detailResp.json();
+          files = (detail.files || [])
+            .map((f) => f.filename)
+            .filter((f) => f.startsWith("articles/aks/") && f.endsWith(".md") && !f.includes("includes/"));
+        }
+      }
+
+      // Pick the primary article file (skip TOC.yml-only commits)
+      const articleFile = files.find((f) => !f.endsWith("TOC.yml")) || null;
+      if (!articleFile) continue;
+
+      // Build Learn URL: articles/aks/some-article.md -> https://learn.microsoft.com/azure/aks/some-article
+      const slug = articleFile.replace("articles/aks/", "").replace(/\.md$/, "");
+      const learnUrl = `https://learn.microsoft.com/azure/aks/${slug}`;
+
+      // Deduplicate by article – keep the most recent commit per file
+      if (!articleMap.has(articleFile)) {
+        articleMap.set(articleFile, {
           title: firstLine,
-          url: commitUrl,
+          url: learnUrl,
           date,
           source: "AKS Docs",
         });
       }
     }
+
+    this.collected.aks_docs_commits = Array.from(articleMap.values());
 
     console.log(
       `  ✓ Found ${this.collected.aks_docs_commits.length} doc commits`
@@ -290,25 +355,35 @@ class ContentCollector {
       if (!resp) continue;
 
       const html = await resp.text();
-      // Extract video data from ytInitialData in script tags
-      const videoIdMatches = html.match(/"videoId":"([^"]+)"/g) || [];
-      const titleMatches =
-        html.match(/"title":\{"runs":\[\{"text":"([^"]+)"\}/g) || [];
+      // Extract ytInitialData JSON and parse video renderers properly
+      // to ensure videoId and title are paired from the same object
+      const jsonMatch = html.match(/var ytInitialData = (.+?);\s*<\/script>/s);
+      if (!jsonMatch) {
+        console.log(`  ⚠ Could not extract ytInitialData from ${name}`);
+        continue;
+      }
 
-      const ids = videoIdMatches.map((m) => m.match(/"videoId":"([^"]+)"/)[1]);
-      const titles = titleMatches.map(
-        (m) => m.match(/"text":"([^"]+)"/)[1]
-      );
-
-      const limit = Math.min(ids.length, titles.length, 15);
-      for (let i = 0; i < limit; i++) {
-        if (this._matchesAKS(titles[i])) {
-          this.collected.youtube.push({
-            title: titles[i],
-            url: `https://www.youtube.com/watch?v=${ids[i]}`,
-            source: name,
-          });
+      try {
+        const data = JSON.parse(jsonMatch[1]);
+        const tabs = data?.contents?.twoColumnBrowseResultsRenderer?.tabs || [];
+        for (const tab of tabs) {
+          const items = tab?.tabRenderer?.content?.richGridRenderer?.contents || [];
+          for (const item of items) {
+            const vr = item?.richItemRenderer?.content?.videoRenderer;
+            if (!vr) continue;
+            const videoId = vr.videoId;
+            const title = vr.title?.runs?.[0]?.text || "";
+            if (videoId && title && this._matchesAKS(title)) {
+              this.collected.youtube.push({
+                title,
+                url: `https://www.youtube.com/watch?v=${videoId}`,
+                source: name,
+              });
+            }
+          }
         }
+      } catch (e) {
+        console.log(`  ⚠ Failed to parse ytInitialData from ${name}: ${e.message}`);
       }
     }
 
