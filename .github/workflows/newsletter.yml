@@ -64,16 +64,30 @@ jobs:
             echo "month=$(date +%-m)" >> $GITHUB_OUTPUT
           fi
 
-      - name: Run AKS Newsletter Agent (collect)
+      - name: Check if newsletter already exists
         if: steps.check-date.outputs.is_last_day == 'true'
+        id: check-existing
+        run: |
+          MONTH_PAD=$(printf '%02d' ${{ steps.target.outputs.month }})
+          NEWSLETTER_FILE="newsletters/${{ steps.target.outputs.year }}/${{ steps.target.outputs.year }}-${MONTH_PAD}.md"
+          if [ -f "$NEWSLETTER_FILE" ]; then
+            echo "::notice::Newsletter already exists at $NEWSLETTER_FILE — skipping generation to avoid overwriting a polished edition."
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "No existing newsletter found, proceeding with generation."
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run AKS Newsletter Agent (collect)
+        if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --collect-only
 
       - name: Run AKS Newsletter Agent (generate draft)
-        if: steps.check-date.outputs.is_last_day == 'true'
+        if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --generate-only
 
       - name: Upload collected data
-        if: steps.check-date.outputs.is_last_day == 'true'
+        if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: newsletter-${{ steps.target.outputs.year }}-${{ steps.target.outputs.month }}
@@ -83,7 +97,7 @@ jobs:
           retention-days: 90
 
       - name: Create Pull Request with draft
-        if: steps.check-date.outputs.is_last_day == 'true'
+        if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
