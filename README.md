@@ -1,6 +1,12 @@
 # AKS Newsletter Agent
 
-Automated agent for generating Ricardo Martins' monthly **AKS Newsletter** — a technical, engineering-focused newsletter covering Azure Kubernetes Service updates.
+[![Deploy Newsletter Site](https://github.com/ricmmartins/aks-newsletter-agent/actions/workflows/deploy-site.yml/badge.svg)](https://github.com/ricmmartins/aks-newsletter-agent/actions/workflows/deploy-site.yml)
+[![AKS Newsletter – Monthly Collection](https://github.com/ricmmartins/aks-newsletter-agent/actions/workflows/newsletter.yml/badge.svg)](https://github.com/ricmmartins/aks-newsletter-agent/actions/workflows/newsletter.yml)
+
+Automated agent for generating the monthly **AKS Newsletter** — a technical, engineering-focused newsletter covering Azure Kubernetes Service updates. Collects data from 14+ sources, generates a structured draft, and publishes to a GitHub Pages website.
+
+🌐 **Live site:** [ricmmartins.github.io/aks-newsletter-agent](https://ricmmartins.github.io/aks-newsletter-agent/)
+📡 **RSS feed:** [feed.xml](https://ricmmartins.github.io/aks-newsletter-agent/feed.xml)
 
 ## Quick Start
 
@@ -8,7 +14,7 @@ Automated agent for generating Ricardo Martins' monthly **AKS Newsletter** — a
 # Install dependencies
 npm install
 
-# Full run: collect data + generate newsletter
+# Full run: collect data + generate newsletter for a specific month
 node run.js 2026 2
 
 # Collect data only
@@ -16,54 +22,76 @@ node run.js 2026 2 --collect-only
 
 # Generate from previously collected data
 node run.js 2026 2 --generate-only
+
+# Build the static website
+npm run build:site
+
+# Validate links in all newsletters
+npm run validate
 ```
 
-## Automated Monthly Scheduling
+## Features
 
-The agent includes a GitHub Actions workflow (`.github/workflows/newsletter.yml`) that:
+### 📰 Newsletter Generation
+- Collects content from 14+ AKS-related sources for the **full calendar month**
+- Generates structured Markdown draft with canonical section ordering
+- GitHub Actions workflow runs automatically on the last day of each month
+- Guard to prevent overwriting manually polished editions
+- Quality gate warns on empty sections or low item counts
 
-1. **Runs automatically on the last day of each month** at 18:00 UTC
-2. Collects content from the **last 30 days** across all sources
-3. Scrapes TechCommunity search using headless Chrome (Puppeteer) for AKS blog posts from the past month
-4. Generates a draft newsletter
-5. Creates a **Pull Request** with the collected data and draft for review
+### 🌐 Website ([live site](https://ricmmartins.github.io/aks-newsletter-agent/))
+- Clean, professional design with **light and dark mode** (auto-detects system preference)
+- **Full-text search** across all editions with keyboard shortcuts (`/` to focus, `Esc` to clear)
+- **Table of contents** with anchor links on each edition page
+- **Category filter pills** on index page (Docs, Blogs, Videos, etc.)
+- **Previous/Next navigation** between editions
+- **Reading time estimates** and section-level item counts
+- **Social sharing** — LinkedIn, X/Twitter, copy link buttons
+- **LinkedIn draft box** — toggle to reveal a ready-to-copy LinkedIn post
+- **RSS feed**, **sitemap.xml**, **robots.txt**, and **Open Graph meta tags**
+- **Back-to-top button** and **print-friendly styles**
+- Auto-deployed to GitHub Pages on push to `main`
 
-You can also trigger it manually via `workflow_dispatch` with custom year/month inputs.
+### 📬 Distribution
+- Auto-generated **LinkedIn post draft** (`.txt` file) for each edition
+- **Slack/Teams webhook notifications** when a new draft PR is created
+- RSS feed for subscribers
 
-### TechCommunity Search
-
-The agent uses Puppeteer (headless browser) to scrape the client-side rendered TechCommunity search at:
-```
-https://techcommunity.microsoft.com/search?q=aks&contentType=BLOG&lastUpdate=pastMonth&sortBy=newest
-```
-
-Puppeteer is listed as an optional dependency. Install it for full collection:
-```bash
-npm install puppeteer
-```
-If Puppeteer is not installed, the agent skips TechCommunity search and collects from the other 13 sources.
+### ⚙️ Pipeline & Automation
+- **Link validation** script (`validate-links.js`) checks all URLs for broken links
+- **PR preview workflow** — builds site and validates links on PRs
+- **Quality gate** — warns if sections are empty or item count is suspiciously low
+- **Webhook notifications** — configurable Slack/Teams alerts
 
 ## How It Works
 
 The agent operates in two phases:
 
-### Phase 1: Collection (`collector.py`)
-Fetches and filters content from all mandatory sources for the target month:
+### Phase 1: Collection (`collector.js`)
+Fetches and filters content from all sources for the **full calendar month** (1st to last day):
 
-| Source | URL |
-|--------|-----|
-| AKS Engineering Blog | https://blog.aks.azure.com/ |
-| Azure Updates (AKS) | https://azure.microsoft.com/en-us/updates/?query=AKS |
-| AKS GitHub Releases | https://github.com/Azure/AKS/releases/ |
-| AKS Docs Commits | https://github.com/MicrosoftDocs/azure-aks-docs |
-| AKS Public Roadmap | https://github.com/orgs/Azure/projects/685/views/1 |
-| TechCommunity (AKS) | Multiple blogs (Architecture, Infrastructure, Linux, Apps, Observability) |
-| YouTube | @theakscommunity, @MicrosoftAzure |
+| Source | Method |
+|--------|--------|
+| AKS Engineering Blog | RSS/HTML scraping |
+| Azure Updates (AKS) | HTML scraping with date filtering |
+| AKS GitHub Releases | GitHub API |
+| AKS Docs Changes | GitHub API → mapped to [learn.microsoft.com](https://learn.microsoft.com) URLs |
+| AKS Public Roadmap | GitHub Projects API |
+| TechCommunity Blogs | Direct blog pages (6 blogs) + GraphQL search API |
+| TechCommunity Search | GraphQL API with Bearer token capture (Puppeteer) |
+| YouTube | JSON parsing of `ytInitialData` with date filtering |
+
+**Key details:**
+- Docs collector maps GitHub commits to `learn.microsoft.com` article URLs, filters noise (TOC-only changes, merge commits)
+- TechCommunity search uses the internal GraphQL API (`MessageSearch` operation) to capture all results (not just the first 10)
+- YouTube scraper parses the `ytInitialData` JSON embedded in page HTML, pairing video IDs with titles reliably
+- All sources are filtered to the target calendar month window
+- `GITHUB_TOKEN` is supported to avoid API rate limits
 
 Output: `collected/<YYYY-MM>.json`
 
-### Phase 2: Generation (`generator.py`)
-Assembles collected data into a structured Markdown newsletter following the canonical section order:
+### Phase 2: Generation (`generator.js`)
+Assembles collected data into a structured Markdown newsletter:
 
 1. Title & Intro
 2. 🔎 Documentation Updates
@@ -77,12 +105,40 @@ Assembles collected data into a structured Markdown newsletter following the can
 
 Output: `newsletters/<YYYY>/<YYYY-MM>.md`
 
+### Phase 3: Website (`build-site.js`)
+Converts newsletter Markdown files into a styled static HTML site:
+
+- Generates edition pages, index page, RSS feed, sitemap, robots.txt, and OG image
+- LinkedIn post drafts (`.txt`) generated alongside each edition
+- Deployed automatically to GitHub Pages via `deploy-site.yml`
+
 ### AI-Assisted Final Editing
 The generated draft is a structured starting point. For the best results:
 
 1. Run the collector to gather raw data
 2. Review `collected/<YYYY-MM>.json` for completeness
-3. Use `agent_prompt.md` with an AI assistant (Copilot, etc.) along with the collected data to produce the final polished newsletter matching Ricardo's editorial voice
+3. Use `agent_prompt.md` with an AI assistant (Copilot, etc.) along with the collected data to produce the final polished newsletter
+
+## Automated Monthly Scheduling
+
+The GitHub Actions workflow (`.github/workflows/newsletter.yml`):
+
+1. **Runs on the last day of each month** at 18:00 UTC (cron runs 28-31, checks if it's the actual last day)
+2. **Skips if newsletter already exists** — prevents overwriting polished editions
+3. Collects content for the **full calendar month** (1st to last day)
+4. Runs a **quality gate** checking for empty sections and minimum item counts
+5. Creates a **Pull Request** with the draft for review
+6. Sends **webhook notifications** to Slack/Teams (if configured)
+
+Manual trigger via `workflow_dispatch` with optional `year` and `month` inputs.
+
+### Webhook Notifications
+
+To receive notifications when a draft is ready, add these repository secrets:
+- `SLACK_WEBHOOK_URL` — Slack incoming webhook URL
+- `TEAMS_WEBHOOK_URL` — Microsoft Teams incoming webhook URL
+
+Both are optional; notifications are sent only if the corresponding secret is configured.
 
 ## Project Structure
 
@@ -90,27 +146,50 @@ The generated draft is a structured starting point. For the best results:
 aks-newsletter-agent/
 ├── .github/
 │   └── workflows/
-│       └── newsletter.yml     # Monthly GitHub Actions schedule
-├── README.md                  # This file
-├── package.json               # Node.js dependencies
-├── config.js                  # Source URLs and configuration
-├── collector.js               # Data collection & filtering (last 30 days)
-├── generator.js               # Markdown newsletter assembly
-├── run.js                     # CLI entry point
-├── agent_prompt.md            # Full AI editorial prompt (reusable)
-├── reference/                 # Reference editions for tone/style
-│   └── 2026-01.md             # January 2026 canonical reference
-├── collected/                 # Intermediate collected data (JSON)
-└── newsletters/               # Final output (Markdown)
-    └── 2026/
+│       ├── newsletter.yml       # Monthly collection + draft PR
+│       ├── deploy-site.yml      # GitHub Pages deployment
+│       └── pr-preview.yml       # PR build check + link validation
+├── README.md                    # This file
+├── package.json                 # Dependencies and scripts
+├── config.js                    # Source URLs, section headers, AKS keywords
+├── collector.js                 # Data collection from 14+ sources
+├── generator.js                 # Markdown newsletter assembly
+├── build-site.js                # Static site generator (HTML, RSS, sitemap)
+├── validate-links.js            # Link checker for newsletter URLs
+├── run.js                       # CLI entry point
+├── agent_prompt.md              # AI editorial prompt (reusable)
+├── reference/                   # Reference editions for tone/style
+│   └── 2026-01.md
+├── collected/                   # Intermediate collected data (JSON)
+├── newsletters/                 # Final newsletters (Markdown)
+│   └── 2026/
+└── docs/                        # Generated website (git-ignored)
 ```
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm start` | Full run (collect + generate) |
+| `npm run collect` | Collect data only |
+| `npm run generate` | Generate draft from collected data |
+| `npm run build:site` | Build the static website to `docs/` |
+| `npm run validate` | Validate all links in newsletters |
 
 ## Configuration
 
-Edit `config.py` to:
-- Add/remove content sources
-- Change section headers or order
-- Adjust filtering keywords
+Edit `config.js` to:
+- Add/remove content sources (`SOURCES` array)
+- Change section headers or order (`SECTION_HEADERS`)
+- Adjust AKS-related filtering keywords (`AKS_KEYWORDS`)
+
+### Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `GITHUB_TOKEN` | Avoid GitHub API rate limits during collection |
+| `SLACK_WEBHOOK_URL` | Slack notification webhook (Actions secret) |
+| `TEAMS_WEBHOOK_URL` | Teams notification webhook (Actions secret) |
 
 ## Reference Edition
 
