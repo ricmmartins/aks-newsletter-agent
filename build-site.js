@@ -59,6 +59,17 @@ function extractToc(md) {
   return toc;
 }
 
+function addUtmTracking(html, edition, medium = "website") {
+  const params = `utm_source=aksnewsletter&utm_medium=${medium}&utm_campaign=${edition.slug}`;
+  return html.replace(
+    /href="(https:\/\/learn\.microsoft\.com\/[^"]*?)"/g,
+    (match, url) => {
+      const separator = url.includes("?") ? "&" : "?";
+      return `href="${url}${separator}${params}"`;
+    }
+  );
+}
+
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 :root {
@@ -650,9 +661,12 @@ function buildEditionPage(edition, prevEdition, nextEdition) {
       `$1<a id="${entry.id}"></a>$2$3`
     );
   }
-  const contentHtml = html
-    .replace(/<h1[^>]*>.*?<\/h1>/i, "")
-    .replace(/<p>None this month\.?<\/p>/gi, '<div class="empty-section">None this month.</div>');
+  const contentHtml = addUtmTracking(
+    html
+      .replace(/<h1[^>]*>.*?<\/h1>/i, "")
+      .replace(/<p>None this month\.?<\/p>/gi, '<div class="empty-section">None this month.</div>'),
+    edition
+  );
 
   const tocHtml = toc.length > 0 ? `
     <div class="toc">
@@ -881,8 +895,8 @@ function buildRssFeed(editions) {
     const md = fs.readFileSync(ed.file, "utf8");
     const count = countItems(md);
     const contentHtml = marked.parse(md)
-      .replace(/<h1[^>]*>.*?<\/h1>/i, "")
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      .replace(/<h1[^>]*>.*?<\/h1>/i, "");
+    const emailHtml = addUtmTracking(contentHtml, ed, "email");
     const pubDate = new Date(ed.year, ed.month - 1, 28).toUTCString();
     const url = `${SITE_URL}/${ed.year}/${ed.slug}.html`;
     return `    <item>
@@ -891,7 +905,7 @@ function buildRssFeed(editions) {
       <guid isPermaLink="true">${url}</guid>
       <pubDate>${pubDate}</pubDate>
       <description>${count} curated items covering documentation updates, feature announcements, community blogs, and more.</description>
-      <content:encoded><![CDATA[${marked.parse(md).replace(/<h1[^>]*>.*?<\/h1>/i, "")}]]></content:encoded>
+      <content:encoded><![CDATA[${emailHtml}]]></content:encoded>
     </item>`;
   }).join("\n");
 
