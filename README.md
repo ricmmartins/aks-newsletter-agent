@@ -5,8 +5,8 @@
 
 Automated agent for generating the monthly **AKS Newsletter** — a technical, engineering-focused newsletter covering Azure Kubernetes Service updates. Collects data from 14+ sources, generates a structured draft, and publishes to a GitHub Pages website.
 
-🌐 **Live site:** [ricmmartins.github.io/aks-newsletter-agent](https://ricmmartins.github.io/aks-newsletter-agent/)
-📡 **RSS feed:** [feed.xml](https://ricmmartins.github.io/aks-newsletter-agent/feed.xml)
+🌐 **Live site:** [aksnewsletter.com](https://aksnewsletter.com/)
+📡 **RSS feed:** [feed.xml](https://aksnewsletter.com/feed.xml)
 
 ## Quick Start
 
@@ -39,7 +39,7 @@ npm run validate
 - Guard to prevent overwriting manually polished editions
 - Quality gate warns on empty sections or low item counts
 
-### 🌐 Website ([live site](https://ricmmartins.github.io/aks-newsletter-agent/))
+### 🌐 Website ([live site](https://aksnewsletter.com/))
 - Clean, professional design with **light and dark mode** (auto-detects system preference)
 - **Full-text search** across all editions with keyboard shortcuts (`/` to focus, `Esc` to clear)
 - **Table of contents** with anchor links on each edition page

@@ -12,7 +12,7 @@ const { marked } = require("marked");
 
 const NEWSLETTERS_DIR = path.join(__dirname, "newsletters");
 const OUTPUT_DIR = path.join(__dirname, "docs");
-const SITE_URL = "https://ricmmartins.github.io/aks-newsletter-agent";
+const SITE_URL = "https://aksnewsletter.com";
 
 const MONTH_NAMES = [
   "", "January", "February", "March", "April", "May", "June",
@@ -877,6 +877,11 @@ function build() {
   // OG image
   fs.writeFileSync(path.join(OUTPUT_DIR, "og-image.svg"), buildOgImage(), "utf8");
   console.log(`  ✓ og-image.svg`);
+
+  // CNAME for custom domain
+  const domain = SITE_URL.replace(/^https?:\/\//, "");
+  fs.writeFileSync(path.join(OUTPUT_DIR, "CNAME"), domain, "utf8");
+  console.log(`  ✓ CNAME (${domain})`);
 
   console.log(`\n✅ Site built: ${editions.length} edition(s) → docs/`);
 }
