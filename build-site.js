@@ -96,7 +96,16 @@ body{
   line-height:1.75;color:var(--text);background:var(--bg);
   -webkit-font-smoothing:antialiased;
 }
-.container{max-width:760px;margin:0 auto;padding:0 1.5rem 4rem}
+
+/* ── Reading progress bar ── */
+.progress-bar{
+  position:fixed;top:0;left:0;height:3px;
+  background:var(--accent);z-index:200;
+  width:0;transition:width 0.1s linear;
+}
+
+/* ── Page fade-in ── */
+.container{max-width:760px;margin:0 auto;padding:0 1.5rem 4rem;animation:fadeIn 0.3s ease}
 a{color:var(--accent);text-decoration:none;transition:color 0.15s}
 a:hover{color:var(--accent-dark)}
 
@@ -194,8 +203,16 @@ li:has(> strong > a){
 li:has(> strong > a):hover{
   border-color:var(--border-hover);
   box-shadow:0 1px 3px rgba(0,120,212,0.08);
+  transform:translateY(-1px);
 }
 li:has(> strong > a) strong a{font-size:0.95rem}
+
+/* ── Empty section ── */
+.empty-section{
+  padding:0.75rem 1rem;margin:0.5rem 0;
+  background:var(--surface);border-radius:var(--radius);
+  color:var(--text-dim);font-size:0.85rem;font-style:italic;
+}
 
 /* ── Footer ── */
 .footer{
@@ -316,7 +333,13 @@ mark{background:rgba(0,120,212,0.12);color:var(--accent-dark);border-radius:2px;
   .hero{padding:2rem 1rem 1.5rem}
   .hero h1{font-size:1.5rem}
   .container{padding:0 1rem 3rem}
+  .toc-list{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:0.3rem}
+  .toc-list::-webkit-scrollbar{height:3px}
+  .toc-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+  .share-bar{flex-wrap:wrap}
+  .subscribe-form{flex-direction:column}
 }
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 /* ── Theme toggle ── */
 .theme-toggle{
@@ -345,9 +368,16 @@ mark{background:rgba(0,120,212,0.12);color:var(--accent-dark);border-radius:2px;
 .toc-list a{
   display:inline-flex;align-items:center;gap:0.3rem;
   font-size:0.82rem;color:var(--text-secondary);padding:0.3rem 0.6rem;
-  border-radius:6px;transition:all 0.15s;border:1px solid transparent;
+  border-radius:6px;transition:all 0.2s;border:1px solid transparent;
 }
 .toc-list a:hover{background:var(--bg);border-color:var(--border);color:var(--accent)}
+.toc-list a.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent);font-weight:600}
+.toc-count{
+  font-size:0.65rem;font-weight:600;color:var(--text-dim);
+  background:var(--bg);border-radius:100px;padding:0.05rem 0.35rem;
+  min-width:1.1rem;text-align:center;line-height:1.4;
+}
+.toc-list a.active .toc-count{background:var(--accent);color:white}
 
 /* ── Share buttons ── */
 .share-bar{
@@ -492,6 +522,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
   </script>
 </head>
 <body>
+  <div class="progress-bar" id="progressBar"></div>
   ${headerHtml}
   ${heroHtml}
   <div class="container">
@@ -516,8 +547,29 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
       else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('theme','dark')}
     });
     const b=document.getElementById('backTop');
-    window.addEventListener('scroll',()=>{b.classList.toggle('visible',window.scrollY>400)});
+    const p=document.getElementById('progressBar');
+    window.addEventListener('scroll',()=>{
+      b.classList.toggle('visible',window.scrollY>400);
+      const h=document.documentElement.scrollHeight-window.innerHeight;
+      p.style.width=h>0?((window.scrollY/h)*100)+'%':'0';
+    });
     b.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
+    // Active TOC highlighting
+    const tocLinks=document.querySelectorAll('.toc-list a[data-section]');
+    if(tocLinks.length){
+      const sections=[...tocLinks].map(a=>{const el=document.getElementById(a.dataset.section);return{a,el}}).filter(s=>s.el);
+      const obs=new IntersectionObserver(entries=>{
+        entries.forEach(e=>{
+          if(e.isIntersecting){
+            tocLinks.forEach(a=>a.classList.remove('active'));
+            const match=sections.find(s=>s.el===e.target);
+            if(match)match.a.classList.add('active');
+          }
+        });
+      },{rootMargin:'-10% 0px -80% 0px'});
+      sections.forEach(s=>obs.observe(s.el));
+    }
   })();
   </script>
 </body>
@@ -576,13 +628,18 @@ function buildEditionPage(edition, prevEdition, nextEdition) {
       `$1<a id="${entry.id}"></a>$2$3`
     );
   }
-  const contentHtml = html.replace(/<h1[^>]*>.*?<\/h1>/i, "");
+  const contentHtml = html
+    .replace(/<h1[^>]*>.*?<\/h1>/i, "")
+    .replace(/<p>None this month\.?<\/p>/gi, '<div class="empty-section">None this month.</div>');
 
   const tocHtml = toc.length > 0 ? `
     <div class="toc">
       <div class="toc-title">In this edition</div>
       <ul class="toc-list">
-        ${toc.map(t => `<li><a href="#${t.id}">${t.icon ? t.icon + " " : ""}${t.name}</a></li>`).join("")}
+        ${toc.map(t => {
+          const count = stats[Object.keys(stats).find(k => k.includes(t.name) || t.name.includes(k))] || 0;
+          return `<li><a href="#${t.id}" data-section="${t.id}">${t.icon ? t.icon + " " : ""}${t.name}${count > 0 ? `<span class="toc-count">${count}</span>` : ""}</a></li>`;
+        }).join("")}
       </ul>
     </div>` : "";
 
