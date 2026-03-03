@@ -257,6 +257,24 @@ li:has(> strong > a) strong a{font-size:0.95rem}
 }
 .subscribe-compact a{font-size:0.8rem}
 
+/* ── Header subscribe ── */
+.header-subscribe{
+  font-size:0.78rem;font-weight:600;color:var(--accent);
+  padding:0.35rem 0.75rem;border-radius:6px;border:1px solid var(--accent);
+  text-decoration:none;transition:all 0.15s;white-space:nowrap;
+}
+.header-subscribe:hover{background:var(--accent);color:white}
+
+/* ── Bottom subscribe CTA ── */
+.subscribe-cta{
+  margin:2.5rem 0 0;padding:2rem 1.5rem;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  text-align:center;
+}
+.subscribe-cta-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:0.3rem}
+.subscribe-cta-desc{font-size:0.88rem;color:var(--text-secondary);margin-bottom:1rem}
+.subscribe-cta .subscribe-form{max-width:380px;margin:0 auto;justify-content:center}
+
 /* ── Edition cards ── */
 .edition-grid{display:grid;gap:0}
 .edition-card{
@@ -420,7 +438,8 @@ mark{background:rgba(0,120,212,0.12);color:var(--accent-dark);border-radius:2px;
 /* ── Print ── */
 @media print{
   .header,.hero,.toc,.share-bar,.back-top,.search-wrap,.search-stats,.no-results,
-  #results,.theme-toggle,.s-kbd,.s-clear,.nav,.footer,.edition-nav,.filter-bar{display:none!important}
+  #results,.theme-toggle,.s-kbd,.s-clear,.nav,.footer,.edition-nav,.filter-bar,
+  .header-subscribe,.subscribe-cta,.progress-bar{display:none!important}
   body{color:#000;background:#fff;font-size:11pt;line-height:1.5}
   .container{max-width:100%;padding:0}
   a{color:#000;text-decoration:underline}
@@ -476,6 +495,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
       </div>
       <div class="header-actions">
         ${badge ? `<span class="badge">${badge}</span>` : ""}
+        <a class="header-subscribe" href="https://buttondown.com/aksnewsletter" target="_blank">Subscribe</a>
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
           <span class="theme-icon-light">☀️</span>
           <span class="theme-icon-dark">🌙</span>
@@ -674,11 +694,21 @@ function buildEditionPage(edition, prevEdition, nextEdition) {
     prevNextHtml += `</div>`;
   }
 
+  const subscribeCta = `
+    <div class="subscribe-cta">
+      <div class="subscribe-cta-title">Enjoyed this edition?</div>
+      <div class="subscribe-cta-desc">Get the AKS Newsletter delivered to your inbox every month.</div>
+      <form class="subscribe-form" action="https://buttondown.com/api/emails/embed-subscribe/aksnewsletter" method="post" target="_blank">
+        <input type="email" name="email" placeholder="you@example.com" required aria-label="Email address">
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>`;
+
   const nav = `<a href="../index.html">← All Editions</a>`;
 
   return htmlTemplate(
     `AKS Newsletter – ${edition.monthName} ${edition.year}`,
-    tocHtml + contentHtml + shareHtml + prevNextHtml,
+    tocHtml + contentHtml + shareHtml + subscribeCta + prevNextHtml,
     nav,
     "AKS Newsletter",
     `${edition.monthName} ${edition.year} Edition`,
