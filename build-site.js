@@ -203,6 +203,35 @@ li:has(> strong > a) strong a{font-size:0.95rem}
   font-size:0.8rem;color:var(--text-dim);text-align:center;
 }
 
+/* ── Subscribe form ── */
+.subscribe-form{
+  display:flex;gap:0.5rem;margin-top:1rem;max-width:420px;
+}
+.subscribe-form input[type="email"]{
+  flex:1;padding:0.6rem 0.85rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-size:0.88rem;
+  font-family:inherit;outline:none;transition:all 0.15s;min-width:0;
+}
+.subscribe-form input[type="email"]::placeholder{color:var(--text-dim)}
+.subscribe-form input[type="email"]:focus{
+  border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,120,212,0.1);background:var(--bg);
+}
+.subscribe-form button{
+  padding:0.6rem 1.1rem;background:var(--accent);color:white;
+  border:none;border-radius:var(--radius);font-size:0.85rem;
+  font-weight:600;font-family:inherit;cursor:pointer;
+  transition:all 0.15s;white-space:nowrap;
+}
+.subscribe-form button:hover{background:var(--accent-dark)}
+.subscribe-hint{font-size:0.75rem;color:var(--text-dim);margin-top:0.4rem}
+.subscribe-compact{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  font-size:0.8rem;color:var(--text-dim);
+  margin-top:0.75rem;
+}
+.subscribe-compact a{font-size:0.8rem}
+
 /* ── Edition cards ── */
 .edition-grid{display:grid;gap:0}
 .edition-card{
@@ -423,6 +452,12 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
     <h1>${headerSubtitle || headerTitle}</h1>
     ${headerSubtitle ? `<p>Curated documentation updates, feature announcements, community blogs, release highlights, and more.</p>` : ""}
     ${meta.readingTime ? `<div class="reading-time">📖 ${meta.readingTime} min read</div>` : ""}
+    ${meta.showSubscribe ? `
+    <form class="subscribe-form" action="https://buttondown.com/api/emails/embed-subscribe/rmmartins" method="post" target="_blank">
+      <input type="email" name="email" placeholder="you@example.com" required aria-label="Email address">
+      <button type="submit">Subscribe</button>
+    </form>
+    <div class="subscribe-hint">Get new editions delivered to your inbox. No spam, unsubscribe anytime.</div>` : ""}
   </div>` : "";
 
   return `<!DOCTYPE html>
@@ -458,6 +493,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
     <div class="footer">
       Built with <a href="https://github.com/ricmmartins/aks-newsletter-agent">aks-newsletter-agent</a> · Curated monthly updates on Azure Kubernetes Service
       · <a href="${SITE_URL}/feed.xml">RSS Feed</a>
+      · <a href="https://buttondown.com/rmmartins" target="_blank">Subscribe via Email</a>
     </div>
   </div>
   <button class="back-top" id="backTop" aria-label="Back to top" title="Back to top">↑</button>
@@ -733,7 +769,7 @@ function buildIndexPage(editions) {
     "AKS Newsletter",
     "Monthly curated updates on Azure Kubernetes Service",
     "",
-    { url: SITE_URL }
+    { url: SITE_URL, showSubscribe: true }
   );
 }
 

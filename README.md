@@ -52,6 +52,7 @@ npm run validate
 - Auto-deployed to GitHub Pages on push to `main`
 
 ### 📬 Distribution
+- **Email subscription** via [Buttondown](https://buttondown.com/rmmartins) — subscribe form on the homepage
 - **Slack/Teams webhook notifications** when a new draft PR is created
 - RSS feed for subscribers
 
