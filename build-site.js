@@ -453,7 +453,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
     ${headerSubtitle ? `<p>Curated documentation updates, feature announcements, community blogs, release highlights, and more.</p>` : ""}
     ${meta.readingTime ? `<div class="reading-time">📖 ${meta.readingTime} min read</div>` : ""}
     ${meta.showSubscribe ? `
-    <form class="subscribe-form" action="https://buttondown.com/api/emails/embed-subscribe/rmmartins" method="post" target="_blank">
+    <form class="subscribe-form" action="https://buttondown.com/api/emails/embed-subscribe/aksnewsletter" method="post" target="_blank">
       <input type="email" name="email" placeholder="you@example.com" required aria-label="Email address">
       <button type="submit">Subscribe</button>
     </form>
@@ -493,7 +493,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
     <div class="footer">
       Built with <a href="https://github.com/ricmmartins/aks-newsletter-agent">aks-newsletter-agent</a> · Curated monthly updates on Azure Kubernetes Service
       · <a href="${SITE_URL}/feed.xml">RSS Feed</a>
-      · <a href="https://buttondown.com/rmmartins" target="_blank">Subscribe via Email</a>
+      · <a href="https://buttondown.com/aksnewsletter" target="_blank">Subscribe via Email</a>
     </div>
   </div>
   <button class="back-top" id="backTop" aria-label="Back to top" title="Back to top">↑</button>
