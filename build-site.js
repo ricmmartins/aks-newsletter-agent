@@ -122,6 +122,7 @@ a:hover{color:var(--accent-dark)}
   background-size:cover;
 }
 .header-brand{font-size:0.95rem;font-weight:700;color:var(--text);letter-spacing:-0.01em}
+.header-brand span{color:var(--accent);font-weight:800}
 .badge{
   font-size:0.7rem;font-weight:600;
   padding:0.25rem 0.7rem;border-radius:100px;
@@ -433,8 +434,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
     <div class="header-inner">
       <div class="header-left">
         <a href="${meta.isEdition ? '../index.html' : 'index.html'}" style="display:flex;align-items:center;gap:0.6rem;text-decoration:none;color:inherit">
-          <div class="header-logo"></div>
-          <span class="header-brand">AKS Newsletter</span>
+          <span class="header-brand"><span>AKS</span> Newsletter</span>
         </a>
       </div>
       <div class="header-actions">
