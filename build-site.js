@@ -199,10 +199,17 @@ li:has(> strong > a) strong a{font-size:0.95rem}
 
 /* ── Footer ── */
 .footer{
-  margin-top:4rem;padding:1.5rem 0;
+  margin-top:4rem;padding:2rem 0 1.5rem;
   border-top:1px solid var(--border);
   font-size:0.8rem;color:var(--text-dim);text-align:center;
 }
+.footer-links{
+  display:flex;justify-content:center;gap:1.5rem;
+  margin-bottom:0.6rem;flex-wrap:wrap;
+}
+.footer-links a{color:var(--text-dim);transition:color 0.15s}
+.footer-links a:hover{color:var(--accent)}
+.footer-copy{color:var(--text-dim);opacity:0.7}
 
 /* ── Subscribe form ── */
 .subscribe-form{
@@ -491,9 +498,12 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
     ${nav ? `<div class="nav">${nav}</div>` : ""}
     ${body}
     <div class="footer">
-      Built with <a href="https://github.com/ricmmartins/aks-newsletter-agent">aks-newsletter-agent</a> · Curated monthly updates on Azure Kubernetes Service
-      · <a href="${SITE_URL}/feed.xml">RSS Feed</a>
-      · <a href="https://buttondown.com/aksnewsletter" target="_blank">Subscribe via Email</a>
+      <div class="footer-links">
+        <a href="${SITE_URL}/feed.xml">RSS Feed</a>
+        <a href="https://buttondown.com/aksnewsletter" target="_blank">Subscribe via Email</a>
+        <a href="https://github.com/ricmmartins/aks-newsletter-agent" target="_blank">GitHub</a>
+      </div>
+      <div class="footer-copy">Curated monthly updates on Azure Kubernetes Service</div>
     </div>
   </div>
   <button class="back-top" id="backTop" aria-label="Back to top" title="Back to top">↑</button>
