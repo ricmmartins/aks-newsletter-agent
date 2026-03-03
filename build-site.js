@@ -553,6 +553,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
       <div class="footer-links">
         <a href="${SITE_URL}/feed.xml">RSS Feed</a>
         <a href="https://buttondown.com/aksnewsletter" target="_blank">Subscribe via Email</a>
+        <a href="https://www.linkedin.com/newsletters/aks-newsletter-7239672730000773120/" target="_blank">LinkedIn Newsletter</a>
         <a href="https://github.com/ricmmartins/aks-newsletter-agent" target="_blank">GitHub</a>
       </div>
       <div class="footer-copy">Curated monthly updates on Azure Kubernetes Service</div>
