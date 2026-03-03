@@ -567,8 +567,12 @@ function buildEditionPage(edition, prevEdition, nextEdition) {
   // Add IDs to h2 headings for TOC anchoring
   let html = marked.parse(md);
   for (const entry of toc) {
+    // Match both raw & and HTML &amp; in rendered output
+    const escapedName = entry.name
+      .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+      .replace(/&/g, "(?:&|&amp;)");
     html = html.replace(
-      new RegExp(`(<h2[^>]*>)(.*?${entry.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}.*?)(</h2>)`, "i"),
+      new RegExp(`(<h2[^>]*>)(.*?${escapedName}.*?)(</h2>)`, "i"),
       `$1<a id="${entry.id}"></a>$2$3`
     );
   }
