@@ -880,6 +880,9 @@ function buildRssFeed(editions) {
   const items = editions.slice(0, 20).map(ed => {
     const md = fs.readFileSync(ed.file, "utf8");
     const count = countItems(md);
+    const contentHtml = marked.parse(md)
+      .replace(/<h1[^>]*>.*?<\/h1>/i, "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const pubDate = new Date(ed.year, ed.month - 1, 28).toUTCString();
     const url = `${SITE_URL}/${ed.year}/${ed.slug}.html`;
     return `    <item>
@@ -888,11 +891,12 @@ function buildRssFeed(editions) {
       <guid isPermaLink="true">${url}</guid>
       <pubDate>${pubDate}</pubDate>
       <description>${count} curated items covering documentation updates, feature announcements, community blogs, and more.</description>
+      <content:encoded><![CDATA[${marked.parse(md).replace(/<h1[^>]*>.*?<\/h1>/i, "")}]]></content:encoded>
     </item>`;
   }).join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>AKS Newsletter</title>
     <link>${SITE_URL}</link>
