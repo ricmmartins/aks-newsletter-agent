@@ -47,13 +47,11 @@ npm run validate
 - **Previous/Next navigation** between editions
 - **Reading time estimates** and section-level item counts
 - **Social sharing** — LinkedIn, X/Twitter, copy link buttons
-- **LinkedIn draft box** — toggle to reveal a ready-to-copy LinkedIn post
 - **RSS feed**, **sitemap.xml**, **robots.txt**, and **Open Graph meta tags**
 - **Back-to-top button** and **print-friendly styles**
 - Auto-deployed to GitHub Pages on push to `main`
 
 ### 📬 Distribution
-- Auto-generated **LinkedIn post draft** (`.txt` file) for each edition
 - **Slack/Teams webhook notifications** when a new draft PR is created
 - RSS feed for subscribers
 
@@ -109,7 +107,6 @@ Output: `newsletters/<YYYY>/<YYYY-MM>.md`
 Converts newsletter Markdown files into a styled static HTML site:
 
 - Generates edition pages, index page, RSS feed, sitemap, robots.txt, and OG image
-- LinkedIn post drafts (`.txt`) generated alongside each edition
 - Deployed automatically to GitHub Pages via `deploy-site.yml`
 
 ### AI-Assisted Final Editing

@@ -388,19 +388,6 @@ mark{background:rgba(0,120,212,0.12);color:var(--accent-dark);border-radius:2px;
 .filter-pill:hover{border-color:var(--accent);color:var(--accent)}
 .filter-pill.active{background:var(--accent);color:white;border-color:var(--accent)}
 
-/* ── LinkedIn copy box ── */
-.linkedin-box{
-  margin:1rem 0;padding:1rem 1.25rem;
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  display:none;
-}
-.linkedin-box.visible{display:block}
-.linkedin-box pre{
-  white-space:pre-wrap;font-size:0.82rem;line-height:1.6;
-  color:var(--text-secondary);background:none;border:none;padding:0;margin:0.5rem 0;
-}
-.linkedin-box-header{display:flex;align-items:center;justify-content:space-between}
-.linkedin-box-title{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim)}
 
 @media(max-width:640px){
   .edition-nav{grid-template-columns:1fr}
@@ -549,21 +536,12 @@ function buildEditionPage(edition, prevEdition, nextEdition) {
       </ul>
     </div>` : "";
 
-  const linkedinText = buildLinkedInDraft(edition).replace(/'/g, "\\'").replace(/\n/g, "\\n");
   const shareHtml = `
     <div class="share-bar">
       <span class="share-label">Share</span>
       <a class="share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(edUrl)}" target="_blank" rel="noopener">LinkedIn</a>
       <a class="share-btn" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(`AKS Newsletter – ${edition.monthName} ${edition.year}`)}&url=${encodeURIComponent(edUrl)}" target="_blank" rel="noopener">X / Twitter</a>
       <button class="share-btn" onclick="navigator.clipboard.writeText('${edUrl}');this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy link';this.classList.remove('copied')},2000)">Copy link</button>
-      <button class="share-btn" onclick="document.getElementById('liBox').classList.toggle('visible')">📝 LinkedIn draft</button>
-    </div>
-    <div class="linkedin-box" id="liBox">
-      <div class="linkedin-box-header">
-        <span class="linkedin-box-title">Ready-to-share LinkedIn post</span>
-        <button class="share-btn" onclick="navigator.clipboard.writeText('${linkedinText}');this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy text';this.classList.remove('copied')},2000)">Copy text</button>
-      </div>
-      <pre>${buildLinkedInDraft(edition).replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
     </div>`;
 
   // Prev / Next navigation
@@ -816,34 +794,6 @@ function buildOgImage() {
 </svg>`;
 }
 
-function buildLinkedInDraft(edition) {
-  const md = fs.readFileSync(edition.file, "utf8");
-  const stats = sectionStats(md);
-  const totalItems = Object.values(stats).reduce((a, b) => a + b, 0);
-  const url = `${SITE_URL}/${edition.year}/${edition.slug}.html`;
-
-  const highlights = [];
-  if (stats["Documentation Updates"]) highlights.push(`📄 ${stats["Documentation Updates"]} documentation updates`);
-  if (stats["Preview Feature Announcements"]) highlights.push(`🧪 ${stats["Preview Feature Announcements"]} preview feature announcements`);
-  if (stats["General Availability Announcements"]) highlights.push(`✅ ${stats["General Availability Announcements"]} GA announcements`);
-  if (stats["Community Blogs"]) highlights.push(`📚 ${stats["Community Blogs"]} community blog posts`);
-  const watchLearn = stats["Watch & Learn"] || stats["Watch  Learn"];
-  if (watchLearn) highlights.push(`🎥 ${watchLearn} videos`);
-
-  return `🚀 AKS Newsletter – ${edition.monthName} ${edition.year} Edition is out!
-
-The ${edition.monthName} edition of the AKS Newsletter is here, with ${totalItems} curated items covering the latest in Azure Kubernetes Service.
-
-${highlights.length > 0 ? "Highlights:\n" + highlights.join("\n") : ""}
-
-📖 Read the full edition: ${url}
-
-📬 Subscribe via RSS to never miss an update: ${SITE_URL}/feed.xml
-
-#Azure #AKS #Kubernetes #CloudNative #AzureKubernetesService #DevOps #CloudComputing
-`;
-}
-
 function build() {
   console.log("🔨 Building AKS Newsletter site...\n");
 
@@ -867,11 +817,6 @@ function build() {
     const outFile = path.join(yearDir, `${ed.slug}.html`);
     fs.writeFileSync(outFile, html, "utf8");
     console.log(`  ✓ ${ed.monthName} ${ed.year} → ${ed.slug}.html`);
-
-    // Generate LinkedIn post draft
-    const linkedinDraft = buildLinkedInDraft(ed);
-    fs.writeFileSync(path.join(yearDir, `${ed.slug}-linkedin.txt`), linkedinDraft, "utf8");
-    console.log(`  ✓ ${ed.monthName} ${ed.year} → ${ed.slug}-linkedin.txt`);
   }
 
   const indexHtml = buildIndexPage(editions);
