@@ -117,6 +117,34 @@ class ContentCollector {
     return AKS_STRICT_KEYWORDS.some((kw) => lower.includes(kw));
   }
 
+  // Fetch the actual page title from a doc's markdown frontmatter
+  async _fetchDocPageTitle(articleFile) {
+    try {
+      const rawUrl = `https://raw.githubusercontent.com/MicrosoftDocs/azure-aks-docs/main/${articleFile}`;
+      const resp = await this._safeFetch(rawUrl);
+      if (!resp) return null;
+      const text = await resp.text();
+      // Parse YAML frontmatter between --- delimiters
+      const fmMatch = text.match(/^---\s*\n([\s\S]*?)\n---/);
+      if (!fmMatch) return null;
+      const titleMatch = fmMatch[1].match(/^title:\s*['"]?(.*?)['"]?\s*$/m);
+      return titleMatch ? titleMatch[1].trim() : null;
+    } catch {
+      return null;
+    }
+  }
+
+  // Clean up a commit message into a reader-friendly summary
+  _cleanCommitMessage(msg) {
+    if (!msg) return "";
+    let s = msg.trim();
+    // Capitalize first letter
+    s = s.charAt(0).toUpperCase() + s.slice(1);
+    // Remove trailing period then re-add for consistency
+    s = s.replace(/\.+$/, "");
+    return s;
+  }
+
   async collectAKSBlog() {
     console.log("📡 Collecting AKS Engineering Blog...");
     const resp = await this._safeFetch(SOURCES.aks_blog.url);
@@ -271,7 +299,8 @@ class ContentCollector {
       // Deduplicate by article – keep the most recent commit per file
       if (!articleMap.has(articleFile)) {
         articleMap.set(articleFile, {
-          title: firstLine,
+          commitMessage: firstLine,
+          articleFile,
           url: learnUrl,
           date,
           source: "AKS Docs",
@@ -279,7 +308,21 @@ class ContentCollector {
       }
     }
 
-    this.collected.aks_docs_commits = Array.from(articleMap.values());
+    // Enrich each doc entry with the actual page title from the markdown frontmatter
+    const entries = Array.from(articleMap.values());
+    for (const entry of entries) {
+      const pageTitle = await this._fetchDocPageTitle(entry.articleFile);
+      if (pageTitle) {
+        entry.title = pageTitle;
+        entry.summary = this._cleanCommitMessage(entry.commitMessage);
+      } else {
+        entry.title = entry.commitMessage;
+      }
+      delete entry.commitMessage;
+      delete entry.articleFile;
+    }
+
+    this.collected.aks_docs_commits = entries;
 
     console.log(
       `  ✓ Found ${this.collected.aks_docs_commits.length} doc commits`
