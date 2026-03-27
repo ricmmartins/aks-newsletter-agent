@@ -7,7 +7,7 @@ const fetch = require("node-fetch");
 const cheerio = require("cheerio");
 const fs = require("fs");
 const path = require("path");
-const { SOURCES, AKS_KEYWORDS } = require("./config");
+const { SOURCES, AKS_KEYWORDS, AKS_STRICT_KEYWORDS } = require("./config");
 
 class ContentCollector {
   constructor(year, month, outputDir = "collected") {
@@ -110,6 +110,11 @@ class ContentCollector {
   _matchesAKS(text) {
     const lower = (text || "").toLowerCase();
     return AKS_KEYWORDS.some((kw) => lower.includes(kw));
+  }
+
+  _matchesAKSStrict(text) {
+    const lower = (text || "").toLowerCase();
+    return AKS_STRICT_KEYWORDS.some((kw) => lower.includes(kw));
   }
 
   async collectAKSBlog() {
@@ -410,7 +415,7 @@ class ContentCollector {
         if (!titleEl.length) return;
 
         const title = titleEl.text().trim();
-        if (!this._matchesAKS(title)) return;
+        if (!this._matchesAKSStrict(title)) return;
 
         const linkEl = $el.find("a[href]").first();
         let link = linkEl.attr("href") || "";
@@ -560,7 +565,7 @@ class ContentCollector {
           return items;
         });
         for (const item of results) {
-          if (this._matchesAKS(item.title) || this._matchesAKS(item.url)) {
+          if (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url)) {
             this.collected.techcommunity_search.push({
               ...item, source: "TechCommunity Search",
             });
@@ -623,7 +628,7 @@ class ContentCollector {
         );
 
         for (const item of allResults) {
-          if (this._matchesAKS(item.title) || this._matchesAKS(item.url) || this._matchesAKS(item.snippet)) {
+          if (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url) || this._matchesAKSStrict(item.snippet)) {
             this.collected.techcommunity_search.push({
               title: item.title, url: item.url, posted: item.posted,
               source: "TechCommunity Search",

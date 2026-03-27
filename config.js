@@ -112,4 +112,21 @@ const AKS_KEYWORDS = [
   "kubectl",
 ];
 
-module.exports = { SOURCES, SECTION_HEADERS, AKS_KEYWORDS };
+// Stricter keywords for filtering community blogs — avoids false positives
+// from "container apps", "container registry", etc.
+const AKS_STRICT_KEYWORDS = [
+  "aks",
+  "azure kubernetes",
+  "k8s",
+  "node pool",
+  "kubectl",
+  "kubelet",
+  "kube-proxy",
+  "cilium",
+  "istio",
+  "helm",
+  "karpenter",
+  "kaito",
+];
+
+module.exports = { SOURCES, SECTION_HEADERS, AKS_KEYWORDS, AKS_STRICT_KEYWORDS };

@@ -41,14 +41,54 @@ class NewsletterGenerator {
   }
 
   generateIntro() {
-    const lines = [
-      `${this.monthName} ${this.year} edition of the AKS Newsletter.`,
-      "",
-      "This edition covers documentation updates, feature announcements, behavioral changes, community blogs, and more.",
-      "",
-      "Let's dive in.",
-      "",
-    ];
+    const updates = this.data.azure_updates || [];
+    const gaItems = updates.filter((u) => {
+      const lower = (u.title || "").toLowerCase();
+      return lower.includes("generally available") || lower.split(/\s+/).includes("ga");
+    });
+    const previewItems = updates.filter((u) =>
+      (u.title || "").toLowerCase().includes("preview")
+    );
+
+    const lines = [];
+    lines.push(
+      `Welcome to the ${this.monthName} ${this.year} edition of the AKS Newsletter.`
+    );
+    lines.push("");
+
+    // Summarize the key highlights
+    const highlights = [];
+    if (gaItems.length) {
+      highlights.push(`**${gaItems.length} feature${gaItems.length > 1 ? "s" : ""} reaching General Availability**`);
+    }
+    if (previewItems.length) {
+      highlights.push(`**${previewItems.length} new Preview announcement${previewItems.length > 1 ? "s" : ""}**`);
+    }
+
+    if (highlights.length) {
+      lines.push(`This month brings ${highlights.join(" and ")}. Here are some of the highlights:`);
+      lines.push("");
+
+      // List top GA items
+      for (const item of gaItems.slice(0, 3)) {
+        const title = (item.title || "")
+          .replace(/^Generally Available:\s*/i, "")
+          .replace(/\s*[–-]\s*now generally available$/i, "");
+        lines.push(`- **${title}** is now generally available`);
+      }
+
+      // List top Preview items
+      for (const item of previewItems.slice(0, 3)) {
+        const title = (item.title || "")
+          .replace(/^Public Preview:\s*/i, "")
+          .replace(/\s*\(preview\)$/i, "");
+        lines.push(`- **${title}** enters public preview`);
+      }
+      lines.push("");
+    }
+
+    lines.push("Let's dive in.");
+    lines.push("");
     return lines.join("\n");
   }
 
@@ -165,13 +205,49 @@ class NewsletterGenerator {
   }
 
   generateClosing() {
-    return [
-      `## ${SECTION_HEADERS.closing_thoughts}\n`,
-      `${this.monthName} ${this.year} brought continued progress across the AKS platform.`,
-      "",
-      "Stay tuned for next month's edition.",
-      "",
-    ].join("\n");
+    const lines = [`## ${SECTION_HEADERS.closing_thoughts}\n`];
+
+    // Extract themes from GA and Preview titles
+    const updates = this.data.azure_updates || [];
+    const allTitles = updates.map((u) => (u.title || "").toLowerCase()).join(" ");
+    const themes = [];
+    const themeKeywords = [
+      { keywords: ["network", "cni", "egress", "ingress", "dns", "routing", "gateway"], label: "Networking capabilities" },
+      { keywords: ["monitor", "observab", "metrics", "logs", "telemetry", "otel", "prometheus"], label: "Observability and monitoring" },
+      { keywords: ["security", "identity", "auth", "rbac", "encryption", "mTLS"], label: "Security and identity" },
+      { keywords: ["gpu", "ai", "ml", "kaito", "inference", "llm"], label: "AI and GPU workloads" },
+      { keywords: ["scale", "autoscal", "provision", "karpenter", "node pool"], label: "Scaling and node management" },
+      { keywords: ["storage", "disk", "volume", "container storage"], label: "Storage" },
+      { keywords: ["fleet", "multi-cluster", "cross-cluster"], label: "Multi-cluster and fleet management" },
+    ];
+    for (const theme of themeKeywords) {
+      if (theme.keywords.some((kw) => allTitles.includes(kw))) {
+        themes.push(theme.label);
+      }
+    }
+
+    if (themes.length) {
+      lines.push(
+        `${this.monthName} ${this.year} showed continued investment across key areas of the AKS platform:`
+      );
+      lines.push("");
+      themes.forEach((t) => lines.push(`- ${t}`));
+      lines.push("");
+      lines.push(
+        "These updates reflect the platform's ongoing focus on production readiness, operational simplicity, and support for modern cloud-native workloads."
+      );
+    } else {
+      lines.push(
+        `${this.monthName} ${this.year} brought continued progress across the AKS platform.`
+      );
+    }
+
+    lines.push("");
+    lines.push(
+      "Stay tuned for next month's edition, and feel free to share feedback or suggestions for future coverage."
+    );
+    lines.push("");
+    return lines.join("\n");
   }
 
   generate() {
