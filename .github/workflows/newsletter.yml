@@ -2,9 +2,8 @@ name: AKS Newsletter – Monthly Collection
 
 on:
   schedule:
-    # Run at 18:00 UTC on the last day of each month
-    # Cron doesn't support "last day", so we run on the 28th-31st and check
-    - cron: '0 18 28-31 * *'
+    # Run at 14:00 UTC (9 AM EST) every Friday; only proceeds on the last Friday of the month
+    - cron: '0 14 * * 5'
   workflow_dispatch:
     inputs:
       year:
@@ -18,42 +17,42 @@ jobs:
   collect-and-generate:
     runs-on: ubuntu-latest
 
-    # Only run on the actual last day of the month (for scheduled runs)
+    # Only run on the actual last Friday of the month (for scheduled runs)
     # workflow_dispatch always runs
     steps:
-      - name: Check if last day of month
+      - name: Check if last Friday of month
         id: check-date
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "is_last_day=true" >> $GITHUB_OUTPUT
+            echo "is_last_friday=true" >> $GITHUB_OUTPUT
           else
-            today=$(date +%d)
-            tomorrow=$(date -d "+1 day" +%d)
-            # If tomorrow's day (01) < today's day, today is the last day
-            if [ "$tomorrow" -lt "$today" ]; then
-              echo "is_last_day=true" >> $GITHUB_OUTPUT
+            # If today + 7 days is in a different month, this is the last Friday
+            this_month=$(date +%m)
+            next_friday_month=$(date -d "+7 days" +%m)
+            if [ "$this_month" != "$next_friday_month" ]; then
+              echo "is_last_friday=true" >> $GITHUB_OUTPUT
             else
-              echo "is_last_day=false" >> $GITHUB_OUTPUT
+              echo "is_last_friday=false" >> $GITHUB_OUTPUT
             fi
           fi
 
       - name: Checkout repository
-        if: steps.check-date.outputs.is_last_day == 'true'
+        if: steps.check-date.outputs.is_last_friday == 'true'
         uses: actions/checkout@v4
 
       - name: Setup Node.js
-        if: steps.check-date.outputs.is_last_day == 'true'
+        if: steps.check-date.outputs.is_last_friday == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        if: steps.check-date.outputs.is_last_day == 'true'
+        if: steps.check-date.outputs.is_last_friday == 'true'
         run: npm install
 
       - name: Determine target month
-        if: steps.check-date.outputs.is_last_day == 'true'
+        if: steps.check-date.outputs.is_last_friday == 'true'
         id: target
         run: |
           if [ -n "${{ inputs.year }}" ] && [ -n "${{ inputs.month }}" ]; then
@@ -65,7 +64,7 @@ jobs:
           fi
 
       - name: Check if newsletter already exists
-        if: steps.check-date.outputs.is_last_day == 'true'
+        if: steps.check-date.outputs.is_last_friday == 'true'
         id: check-existing
         run: |
           MONTH_PAD=$(printf '%02d' ${{ steps.target.outputs.month }})
@@ -79,17 +78,17 @@ jobs:
           fi
 
       - name: Run AKS Newsletter Agent (collect)
-        if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
+        if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --collect-only
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run AKS Newsletter Agent (generate draft)
-        if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
+        if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --generate-only
 
       - name: Quality gate – check content completeness
-        if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
+        if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         run: |
           MONTH_PAD=$(printf '%02d' ${{ steps.target.outputs.month }})
           FILE="newsletters/${{ steps.target.outputs.year }}/${{ steps.target.outputs.year }}-${MONTH_PAD}.md"
@@ -113,7 +112,7 @@ jobs:
           fi
 
       - name: Upload collected data
-        if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
+        if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: newsletter-${{ steps.target.outputs.year }}-${{ steps.target.outputs.month }}
@@ -123,7 +122,7 @@ jobs:
           retention-days: 90
 
       - name: Create Pull Request with draft
-        if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
+        if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -149,7 +148,7 @@ jobs:
           delete-branch: true
 
       - name: Send webhook notification
-        if: steps.check-date.outputs.is_last_day == 'true' && steps.check-existing.outputs.exists != 'true'
+        if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         continue-on-error: true
         run: |
           MONTH_PAD=$(printf '%02d' ${{ steps.target.outputs.month }})
