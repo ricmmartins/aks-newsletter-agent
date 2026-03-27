@@ -118,6 +118,29 @@ class ContentCollector {
     }
   }
 
+  // Fetch description from a learn.microsoft.com doc page (or azure-monitor) via GitHub raw frontmatter
+  async _fetchDocDescription(url) {
+    if (!url) return "";
+    try {
+      // Map learn.microsoft.com URL to raw GitHub markdown
+      const docMatch = url.match(/learn\.microsoft\.com\/(?:en-us\/)?azure\/(aks|azure-monitor)\/(.*?)(?:#.*)?$/);
+      if (!docMatch) return "";
+      const repo = docMatch[1] === "aks" ? "azure-aks-docs" : "azure-monitor-docs";
+      const path = docMatch[1] === "aks" ? `articles/aks/${docMatch[2]}` : `articles/azure-monitor/${docMatch[2]}`;
+      const articleFile = path.endsWith(".md") ? path : `${path}.md`;
+      const rawUrl = `https://raw.githubusercontent.com/MicrosoftDocs/${repo}/main/${articleFile}`;
+      const resp = await this._safeFetch(rawUrl);
+      if (!resp) return "";
+      const text = await resp.text();
+      const fmMatch = text.match(/^---\s*\n([\s\S]*?)\n---/);
+      if (!fmMatch) return "";
+      const descMatch = fmMatch[1].match(/^description:\s*['"]?(.*?)['"]?\s*$/m);
+      return descMatch ? descMatch[1].trim() : "";
+    } catch {
+      return "";
+    }
+  }
+
   // Clean up a commit message into a reader-friendly summary
   _cleanCommitMessage(msg) {
     if (!msg) return "";
@@ -179,6 +202,23 @@ class ContentCollector {
         });
       }
     });
+
+    // Enrich blog posts missing summaries by fetching the individual post page
+    for (const post of this.collected.aks_blog) {
+      if (!post.summary && post.url) {
+        try {
+          const postResp = await this._safeFetch(post.url);
+          if (postResp) {
+            const postHtml = await postResp.text();
+            const $post = cheerio.load(postHtml);
+            // Try meta description first, then first paragraph in the article
+            const metaDesc = $post('meta[name="description"]').attr("content") || "";
+            const firstP = $post("article p, .post-content p, .entry-content p").first().text().trim();
+            post.summary = metaDesc || firstP || "";
+          }
+        } catch { /* skip */ }
+      }
+    }
 
     console.log(`  ✓ Found ${this.collected.aks_blog.length} posts`);
   }
@@ -378,14 +418,14 @@ class ContentCollector {
     }
 
     // Supplement with items from release notes
-    this._extractUpdatesFromReleases();
+    await this._extractUpdatesFromReleases();
 
     console.log(
       `  ✓ Found ${this.collected.azure_updates.length} updates`
     );
   }
 
-  _extractUpdatesFromReleases() {
+  async _extractUpdatesFromReleases() {
     const releases = this.collected.aks_releases || [];
     const existingUrls = new Set(this.collected.azure_updates.map((u) => u.url));
 
@@ -397,11 +437,12 @@ class ContentCollector {
       for (const item of previewItems) {
         if (existingUrls.has(item.url)) continue;
         existingUrls.add(item.url);
+        const desc = item.description || await this._fetchDocDescription(item.url);
         this.collected.azure_updates.push({
           title: `${item.title} (preview)`,
           url: item.url,
           date: release.date,
-          summary: item.description,
+          summary: desc,
           source: "AKS Release Notes",
         });
       }
@@ -411,11 +452,12 @@ class ContentCollector {
       for (const item of gaItems) {
         if (existingUrls.has(item.url)) continue;
         existingUrls.add(item.url);
+        const desc = item.description || await this._fetchDocDescription(item.url);
         this.collected.azure_updates.push({
           title: `${item.title} – now generally available`,
           url: item.url,
           date: release.date,
-          summary: item.description,
+          summary: desc,
           source: "AKS Release Notes",
         });
       }
@@ -750,6 +792,7 @@ class ContentCollector {
           if (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url) || this._matchesAKSStrict(item.snippet)) {
             this.collected.techcommunity_search.push({
               title: item.title, url: item.url, posted: item.posted,
+              summary: item.snippet || "",
               source: "TechCommunity Search",
             });
           }
@@ -763,6 +806,7 @@ class ContentCollector {
           if (inWindow && (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url) || this._matchesAKSStrict(item.snippet))) {
             this.collected.techcommunity_search.push({
               title: item.title, url: item.url, posted: item.posted,
+              summary: item.snippet || "",
               source: "TechCommunity Search",
             });
           }
@@ -794,6 +838,13 @@ class ContentCollector {
             document.querySelectorAll(sel).forEach((a) => {
               const href = a.href || "";
               const text = (a.textContent || "").trim();
+              // Try to find a snippet near the link (sibling or parent container)
+              let snippet = "";
+              const container = a.closest('[class*="result"], [class*="search"], li, article, div');
+              if (container) {
+                const pEl = container.querySelector('p, [class*="snippet"], [class*="body"], [class*="excerpt"]');
+                if (pEl && pEl !== a) snippet = (pEl.textContent || "").trim();
+              }
               if (
                 href && text.length > 10 && text.length < 300 &&
                 !seen.has(href) &&
@@ -803,7 +854,7 @@ class ContentCollector {
                 !text.startsWith("Place ")
               ) {
                 seen.add(href);
-                items.push({ title: text, url: href });
+                items.push({ title: text, url: href, summary: snippet });
               }
             });
           }

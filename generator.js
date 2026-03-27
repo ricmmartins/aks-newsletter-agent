@@ -40,7 +40,10 @@ class NewsletterGenerator {
     if (summary) {
       const lowerSummary = summary.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
       const lowerTitle = title.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
-      if (lowerTitle.includes(lowerSummary) || lowerSummary === "is now generally available") {
+      if (lowerTitle.includes(lowerSummary) || 
+          lowerSummary === "is now generally available" ||
+          lowerSummary === "is now available" ||
+          lowerSummary.length < 15) {
         summary = "";
       }
     }
