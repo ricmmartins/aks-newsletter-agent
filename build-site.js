@@ -186,8 +186,8 @@ ul,ol{margin:0.75rem 0;padding-left:0;list-style:none}
 li{margin:0 0 0.5rem;color:var(--text-secondary);font-size:0.95rem}
 li p{margin:0.2rem 0}
 /* Restore normal bullets for plain lists (intro highlights, closing thoughts, etc.) */
-ul:not(:has(> li > strong > a)):not(:has(> li > p > strong > a)){padding-left:1.5rem}
-ul:not(:has(> li > strong > a)):not(:has(> li > p > strong > a)) > li{list-style:disc}
+ul:not(.toc-list):not(:has(> li > strong > a)):not(:has(> li > p > strong > a)){padding-left:1.5rem}
+ul:not(.toc-list):not(:has(> li > strong > a)):not(:has(> li > p > strong > a)) > li{list-style:disc}
 hr{border:none;border-top:1px solid var(--border);margin:2rem 0}
 strong{color:var(--text);font-weight:600}
 
