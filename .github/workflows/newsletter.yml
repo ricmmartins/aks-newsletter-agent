@@ -2,8 +2,8 @@ name: AKS Newsletter – Monthly Collection
 
 on:
   schedule:
-    # Run at 14:00 UTC (9 AM EST) every Friday; only proceeds on the last Friday of the month
-    - cron: '0 14 * * 5'
+    # Run at 14:30 UTC (9:30 AM EST) every Friday; only proceeds on the last Friday of the month
+    - cron: '30 14 * * 5'
   workflow_dispatch:
     inputs:
       year:
