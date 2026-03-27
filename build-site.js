@@ -205,18 +205,21 @@ th,td{border:1px solid var(--border);padding:0.6rem 0.85rem;text-align:left;font
 th{background:var(--surface);font-weight:600;color:var(--text)}
 td{color:var(--text-secondary)}
 
-/* ── Content items ── */
-li:has(> strong > a){
+/* ── Content items (handle both direct and p-wrapped markup from blank-line-separated lists) ── */
+li:has(> strong > a),
+li:has(> p > strong > a){
   padding:1rem 1.25rem;margin:0.5rem 0;
   border:1px solid var(--border);border-radius:var(--radius);
   transition:all 0.15s ease;
 }
-li:has(> strong > a):hover{
+li:has(> strong > a):hover,
+li:has(> p > strong > a):hover{
   border-color:var(--border-hover);
   box-shadow:0 1px 3px rgba(0,120,212,0.08);
   transform:translateY(-1px);
 }
-li:has(> strong > a) strong a{font-size:0.95rem}
+li:has(> strong > a) strong a,
+li:has(> p > strong > a) strong a{font-size:0.95rem}
 
 /* ── Empty section ── */
 .empty-section{
