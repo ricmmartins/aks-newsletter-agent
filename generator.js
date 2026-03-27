@@ -161,6 +161,16 @@ class NewsletterGenerator {
     const lines = [`## ${SECTION_HEADERS.community_blogs}\n`];
     const blogs = [...(this.data.aks_blog || []), ...(this.data.techcommunity || []), ...(this.data.techcommunity_search || [])];
 
+    // AKS blog posts are always relevant; for TechCommunity posts,
+    // re-check the title for AKS relevance to filter out tangential matches
+    const aksPatterns = [
+      /\baks\b/i, /azure kubernetes/i, /\bk8s\b/i,
+      /\bkubernetes\b/i, /\bkubectl\b/i, /\bnode\s*pool/i,
+      /\bcilium\b/i, /\bistio\b/i, /\bhelm\b/i, /\bkarpenter\b/i,
+      /\bkaito\b/i, /\bkubecon\b/i, /\bcontainer.*(runtime|network|storage)/i,
+      /\bingress\b/i, /\bapp\s*routing\b/i, /\bvirtual\s*node/i,
+    ];
+
     if (!blogs.length) {
       lines.push("No community blog posts identified this month.\n");
     } else {
@@ -168,7 +178,14 @@ class NewsletterGenerator {
       blogs.forEach((item) => {
         if (item.url && !seen.has(item.url)) {
           seen.add(item.url);
-          lines.push(this._formatEntry(item));
+          const title = (item.title || "").toLowerCase();
+          const url = (item.url || "").toLowerCase();
+          // AKS blog posts pass through; TechCommunity posts need title/URL match
+          const isAKSBlog = (item.source || "").includes("AKS");
+          const matchesTitle = aksPatterns.some((p) => p.test(title) || p.test(url));
+          if (isAKSBlog || matchesTitle) {
+            lines.push(this._formatEntry(item));
+          }
         }
       });
       lines.push("");
