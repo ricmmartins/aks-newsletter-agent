@@ -1,0 +1,498 @@
+{
+  "metadata": {
+    "year": 2026,
+    "month": 3,
+    "monthName": "March",
+    "collectedAt": "2026-03-27T15:13:48.545Z",
+    "windowStart": "2026-03-01T00:00:00.000Z",
+    "windowEnd": "2026-03-31T23:59:59.000Z"
+  },
+  "aks_blog": [
+    {
+      "title": "Announcing Gateway API support for App Routing (preview)",
+      "url": "https://blog.aks.azure.com/2026/03/18/app-routing-gateway-api",
+      "date": "2026-03-18T00:00:00.000Z",
+      "summary": "",
+      "source": "AKS Engineering Blog"
+    },
+    {
+      "title": "Scaling multi-node LLM inference with NVIDIA Dynamo and NVIDIA GPUs on AKS (Part 3)",
+      "url": "https://blog.aks.azure.com/2026/03/16/dynamo-on-aks-part-3",
+      "date": "2026-03-16T00:00:00.000Z",
+      "summary": "This blog post is co-authored with Nikhar Maheshwari,\nAnish Maddipoti,\nRohan Varma,\nClement Pakkam Isaac, and\nStephen Mccoulough\nfrom NVIDIA.",
+      "source": "AKS Engineering Blog"
+    },
+    {
+      "title": "Dynamic Resource Allocation (DRA) with NVIDIA virtualized GPU (vGPU) on AKS",
+      "url": "https://blog.aks.azure.com/2026/03/06/dra-with-vGPUs-on-aks",
+      "date": "2026-03-06T00:00:00.000Z",
+      "summary": "Recently, dynamic resource allocation (DRA) has emerged as the standard mechanism to consume GPU resources in Kubernetes. With DRA, accelerators like GPUs are no longer exposed as static extended resources (for example, nvidia.com/gpu) but are dynamically allocated through DeviceClasses and ResourceClaims. This unlocks richer scheduling semantics and better integration with virtualization technologies like NVIDIA vGPU.",
+      "source": "AKS Engineering Blog"
+    },
+    {
+      "title": "Running more with less: Multi-instance GPU (MIG) with Dynamic Resource Allocation (DRA) on AKS",
+      "url": "https://blog.aks.azure.com/2026/03/03/multi-instance-gpu-with-dra-on-aks",
+      "date": "2026-03-03T00:00:00.000Z",
+      "summary": "GPUs power a wide range of production Kubernetes workloads across industries. For example, media platforms rely on them for video encoding/transcoding, financial services firms run quantitative risk simulations, and research groups process and visualize large datasets. In each of these scenarios, GPUs significantly improve job throughput, yet individual workloads often consume only a portion of the available device.",
+      "source": "AKS Engineering Blog"
+    }
+  ],
+  "azure_updates": [
+    {
+      "title": "Public Preview: Blue-green agent pool upgrade in AKS",
+      "url": "https://azure.microsoft.com/en-us/updates/557862/",
+      "date": "2026-03",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Public Preview: Cross-cluster networking in Azure Kubernetes Fleet Manager",
+      "url": "https://azure.microsoft.com/en-us/updates/557877/",
+      "date": "2026-03",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Public Preview: AKS managed GPU metrics in Azure Monitor",
+      "url": "https://azure.microsoft.com/en-us/updates/557882/",
+      "date": "2026-03",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Public Preview: AI Agent for container networking troubleshooting",
+      "url": "https://azure.microsoft.com/en-us/updates/557887/",
+      "date": "2026-03",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Generally Available: Container network logs in AKS",
+      "url": "https://azure.microsoft.com/en-us/updates/557892/",
+      "date": "2026-03",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Generally Available: Container network metrics filtering for AKS",
+      "url": "https://azure.microsoft.com/en-us/updates/557902/",
+      "date": "2026-03",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Generally Available: Azure Container Storage v2.1.0 now with Elastic SAN integration and on demand installation",
+      "url": "https://azure.microsoft.com/en-us/updates/557912/",
+      "date": "2026-03",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Public Preview: Microsoft Azure Kubernetes Application Network",
+      "url": "https://azure.microsoft.com/en-us/updates/557922/",
+      "date": "2026-03",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Public Preview: Application routing with meshless Istio in AKS",
+      "url": "https://azure.microsoft.com/en-us/updates/557927/",
+      "date": "2026-03",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Azure Monitor Profile OTLP gRPC support (preview)",
+      "url": "https://learn.microsoft.com/azure/azure-monitor/containers/container-insights-overview",
+      "date": "2026-03-11T23:12:21Z",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "ACNS (preview)",
+      "url": "https://learn.microsoft.com/azure/aks/advanced-container-networking-services-overview",
+      "date": "2026-03-11T23:12:21Z",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Node Auto Provisioning (preview)",
+      "url": "https://learn.microsoft.com/azure/aks/node-autoprovision",
+      "date": "2026-03-11T23:12:21Z",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Application Monitoring auto-instrumentation – now generally available",
+      "url": "https://learn.microsoft.com/azure/azure-monitor/app/kubernetes-codeless",
+      "date": "2026-03-11T23:12:21Z",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "AI Toolchain Operator (KAITO) add-on – now generally available",
+      "url": "https://learn.microsoft.com/azure/aks/ai-toolchain-operator",
+      "date": "2026-03-11T23:12:21Z",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Private IP support in Static Egress Gateway – now generally available",
+      "url": "https://learn.microsoft.com/azure/aks/configure-static-egress-gateway#static-private-ip-support",
+      "date": "2026-03-11T23:12:21Z",
+      "source": "AKS Release Notes"
+    }
+  ],
+  "aks_releases": [
+    {
+      "title": "Release Notes - 2026-03-05",
+      "url": "https://github.com/Azure/AKS/releases/tag/2026-03-05",
+      "date": "2026-03-11T23:12:21Z",
+      "body": "Monitor the release status by regions at [AKS-Release-Tracker](https://releases.aks.azure.com/).\r\n\r\n### Announcements\r\n* Azure Kubernetes Service support for [Flatcar Container Linux for AKS (preview)](https://github.com/Azure/AKS/issues/5648) will be retired on 8 June 2026, transition to a supported alternative by that date. From now to 7 June 2026, you can continue to use Flatcar Container Linux for AKS (preview) on Azure Kubernetes Service without disruption. Starting on 8 June 2026, Azure Kubernetes Service will no longer support Flatcar Container Linux for AKS (preview). You will no longer be able to create new node pools. AKS will not produce new node images and will no longer provide security patches for existing node pools. AKS will remove Flatcar Container Linux for AKS (preview) node images and existing code on 8 September 2026, meaning that scaling and remediation operations will fail.\r\n* Azure Linux has expanded GPU support to include NVIDIA A100, H100, and H200 VMs. Find the full list of supported GPUs with Azure Linux on AKS [here](https://learn.microsoft.com/azure/azure-linux/intro-azure-linux#azure-linux-container-host-supported-gpu-virtual-machine-sizes).\r\n\r\n### Kubernetes Version\r\n* New Kubernetes patch versions are now available: `1.32.11`, `1.33.7`, `1.34.3`.\r\n* AKS Kubernetes Long Term Support (LTS) version `1.28` is deprecated. Please upgrade your clusters to a supported version. Refer to [AKS Support Calendar](https://learn.microsoft.com/azure/aks/supported-kubernetes-versions?tabs=azure-cli#aks-kubernetes-release-calendar) for more information.\r\n\r\nFor deprecation, rollouts and patch timelines by region, please check the [AKS-Release-Tracker](https://releases.aks.azure.com/).\r\n\r\n### Preview Features\r\n* [Azure Monitor Profile OTLP gRPC support](https://learn.microsoft.com/azure/azure-monitor/containers/container-insights-overview) is now available in public preview, enabling OpenTelemetry Protocol gRPC endpoints for Azure Monitor metrics collection.\r\n* [ACNS](https://learn.microsoft.com/azure/aks/advanced-container-networking-services-overview) preview feature is now supported on dual-stack clusters.\r\n* [Node Auto Provisioning](https://learn.microsoft.com/azure/aks/node-autoprovision) has been updated to Karpenter Azure provider [v1.7.2](https://github.com/Azure/karpenter-provider-azure/releases/tag/v1.7.2). This release adds a new alpha resource `NodeOverlay` for controlling node priorities and supports two new scheduling labels: `kubernetes.azure.com/scalesetpriority` and `kubernetes.azure.com/os-sku`.\r\n\r\n### Features\r\n* [Application Monitoring auto-instrumentation](https://learn.microsoft.com/azure/azure-monitor/app/kubernetes-codeless) is now generally available.\r\n* Azure Linux now supports the [AI Toolchain Operator (KAITO) add-on](https://learn.microsoft.com/azure/aks/ai-toolchain-operator) for running AI and ML workloads on AKS.\r\n* [Private IP support in Static Egress Gateway](https://learn.microsoft.com/azure/aks/configure-static-egress-gateway#static-private-ip-support) is now generally available.\r\n\r\n### Behavioral Changes\r\n* [AKS Automatic clusters](https://learn.microsoft.com/azure/aks/automatic/aks-automatic-managed-system-node-pools-about#restrictions-that-prevent-running-workloads-on-the-managed-system-node-pool) now enforce multiple layers of defense against remote code execution via `nodes/proxy` permissions:\r\n  - A ValidatingAdmissionPolicy (VAP) restricts creation or updates of ClusterRole and Role objects granting `nodes/proxy`, except for approved system users and groups.\r\n  - An authorization policy denies `nodes/proxy` by default. Approved system users, groups, and kube-system service accounts are exempt.\r\n* On clusters where ACNS performance is used to enable [eBPF host routing](https://learn.microsoft.com/azure/aks/how-to-enable-ebpf-host-routing), nodes will be labeled with `kubernetes.azure.com/ebpf-host-routing=true`. This is done by a node image upgrade.\r\n* [Service tags for API server authorized IP ranges](https://learn.microsoft.com/azure/aks/api-server-service-tags) are now supported for AKS clusters with API server VNet integration.\r\n* AKS now supports [configuring Standard V2 Azure NAT Gateway](https://learn.microsoft.com/azure/aks/nat-gateway#create-an-aks-cluster-with-a-user-assigned-nat-gateway) as a user‑assigned NAT gateway for outbound (egress) traffic.\r\n\r\n### Component Updates\r\n* Cilium has been updated from v1.18.2 to [v1.18.6](https://github.com/cilium/cilium/releases/tag/v1.18.6) to address CVEs: [CVE-2025-64715](https://nvd.nist.gov/vuln/detail/CVE-2025-64715) and [CVE-2026-26963](https://nvd.nist.gov/vuln/detail/CVE-2026-26963).\r\n* Retina has been updated to [v1.0.3](https://github.com/microsoft/retina/releases/tag/v1.0.3) to address [CVE-2013-3900](https://nvd.nist.gov/vuln/detail/CVE-2013-3900).\r\n* Retina Enterprise has been updated to [v0.1.16](https://github.com/azure-networking/retina-enterprise/releases/tag/v0.1.16).\r\n* Konnectivity has been updated to [v0.32.1](https://github.com/kubernetes-sigs/apiserver-network-proxy/releases/tag/v0.32.1) with bug fixes and dependency updates.\r\n* Microsoft Defender for Containers sensor has been upgraded to v0.9.51 on AKS >= 1.35 and to v0.8.48 on AKS < 1.35. See [release notes](https://learn.microsoft.com/azure/defender-for-cloud/defender-sensor-change-log#sensor-v09-deployed-by-helm-or-arc-for-k8s-in-preview-mode). The following defender for containers components were updated:\r\n  * Inspektor Gadget upgraded from v0.41.1 to [v0.41.2](https://github.com/inspektor-gadget/inspektor-gadget/tree/v0.41.2).\r\n  * Fluent Bit updated from 4.1.1 to [4.2.2](https://fluentbit.io/announcements/v4.2.2/).\r\n  * Multiple CVEs remediated as part of this change, listed below:\r\n    * [CVE-2025-68121](https://nvd.nist.gov/vuln/detail/CVE-2025-68121)\r\n    * [CVE-2024-25621](https://nvd.nist.gov/vuln/detail/CVE-2024-25621)\r\n    * [CVE-2025-68156](https://nvd.nist.gov/vuln/detail/CVE-2025-68156)\r\n    * [CVE-2025-52881](https://nvd.nist.gov/vuln/detail/CVE-2025-52881)\r\n    * [CVE-2025-58183](https://nvd.nist.gov/vuln/detail/CVE-2025-58183)\r\n    * [CVE-2025-61726](https://nvd.nist.gov/vuln/detail/CVE-2025-61726)\r\n    * [CVE-2025-61728](https://nvd.nist.gov/vuln/detail/CVE-2025-61728)\r\n    * [CVE-2025-61729](https://nvd.nist.gov/vuln/detail/CVE-2025-61729)\r\n    * [CVE-2025-61730](https://nvd.nist.gov/vuln/detail/CVE-2025-61730)\r\n    * [CVE-2025-64329](https://nvd.nist.gov/vuln/detail/CVE-2025-64329)\r\n    * [CVE-2026-24137](https://nvd.nist.gov/vuln/detail/CVE-2026-24137)\r\n    * [CVE-2025-47914](https://nvd.nist.gov/vuln/detail/CVE-2025-47914)\r\n    * [CVE-2025-58181](https://nvd.nist.gov/vuln/detail/CVE-2025-58181)\r\n    * [CVE-2025-47912](https://nvd.nist.gov/vuln/detail/CVE-2025-47912)\r\n    * [CVE-2025-58185](https://nvd.nist.gov/vuln/detail/CVE-2025-58185)\r\n    * [CVE-2025-58186](https://nvd.nist.gov/vuln/detail/CVE-2025-58186)\r\n    * [CVE-2025-58187](https://nvd.nist.gov/vuln/detail/CVE-2025-58187)\r\n    * [CVE-2025-58188](https://nvd.nist.gov/vuln/detail/CVE-2025-58188)\r\n    * [CVE-2025-58189](https://nvd.nist.gov/vuln/detail/CVE-2025-58189)\r\n    * [CVE-2025-61723](https://nvd.nist.gov/vuln/detail/CVE-2025-61723)\r\n    * [CVE-2025-61724](https://nvd.nist.gov/vuln/detail/CVE-2025-61724)\r\n    * [CVE-2025-61725](https://nvd.nist.gov/vuln/detail/CVE-2025-61725)\r\n    * [CVE-2025-61727](https://nvd.nist.gov/vuln/detail/CVE-2025-61727)\r\n* [Cluster autoscaler images](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) have been updated with CVE fixes across all supported Kubernetes versions: v1.29.5-aks-5, v1.30.7-aks-5, v1.31.5-aks-7, v1.32.3-aks-7, v1.33.1-aks-7, v1.34.1-aks-4.\r\n* Container Insights has been updated to [3.1.35](https://github.com/microsoft/Docker-Provider/releases/tag/3.1.35).\r\n* AKS Azure Linux images:\r\n  * v3.0 - [202603.04.0](vhd-notes/AzureLinuxv3/202603.04.0.txt).\r\n* AKS Ubuntu images:\r\n  * Ubuntu 22.04 - [202603.04.0](vhd-notes/",
+      "source": "AKS GitHub Releases"
+    }
+  ],
+  "aks_docs_commits": [
+    {
+      "title": "Removed the line breaks",
+      "url": "https://learn.microsoft.com/azure/aks/blue-green-node-pool-upgrade",
+      "date": "2026-03-27T02:23:54Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "updates content and cli samples",
+      "url": "https://learn.microsoft.com/azure/aks/reliability-availability-zones-configure",
+      "date": "2026-03-26T22:13:56Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Java freshness updates",
+      "url": "https://learn.microsoft.com/azure/aks/howto-deploy-java-liberty-app",
+      "date": "2026-03-26T21:42:39Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Clarify FQDN rules for AKS konnectivity",
+      "url": "https://learn.microsoft.com/azure/aks/outbound-rules-control-egress",
+      "date": "2026-03-26T16:15:00Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Add a permission grant instruction for virtual-nodes-cli.md",
+      "url": "https://learn.microsoft.com/azure/aks/virtual-nodes-cli",
+      "date": "2026-03-26T05:48:03Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Address Acrolinx feedback: clarify pronoun and fix phrasing",
+      "url": "https://learn.microsoft.com/azure/aks/cluster-health-monitor",
+      "date": "2026-03-25T21:07:35Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Add Kubernetes and Cilium version prerequisites for mTLS Transit Encryption",
+      "url": "https://learn.microsoft.com/azure/aks/container-network-security-cilium-mutual-tls-how-to",
+      "date": "2026-03-24T19:35:17Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "fixes markdown, minor edits",
+      "url": "https://learn.microsoft.com/azure/aks/use-vertical-pod-autoscaler",
+      "date": "2026-03-24T15:40:39Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix YAML formatting for PersistentVolumeClaim",
+      "url": "https://learn.microsoft.com/azure/aks/create-volume-azure-disk",
+      "date": "2026-03-24T10:00:05Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update the role assignment for MI",
+      "url": "https://learn.microsoft.com/azure/aks/create-volume-azure-files",
+      "date": "2026-03-24T05:14:00Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update supported-kubernetes-versions.md to reflect author changes and add Kubernetes 1.36 details",
+      "url": "https://learn.microsoft.com/azure/aks/supported-kubernetes-versions",
+      "date": "2026-03-23T19:54:03Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update container-network-security-cilium-mutual-tls-concepts.md",
+      "url": "https://learn.microsoft.com/azure/aks/container-network-security-cilium-mutual-tls-concepts",
+      "date": "2026-03-23T09:55:49Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "adding Absolute links",
+      "url": "https://learn.microsoft.com/azure/aks/update-azure-cni",
+      "date": "2026-03-22T12:04:05Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "doc: replace em-dashes for consistency",
+      "url": "https://learn.microsoft.com/azure/aks/security-bulletins/overview",
+      "date": "2026-03-20T20:29:28Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix formatting and update link in NAT gateway doc",
+      "url": "https://learn.microsoft.com/azure/aks/nat-gateway",
+      "date": "2026-03-19T17:38:18Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "fixed links on lines 121 and 122",
+      "url": "https://learn.microsoft.com/azure/aks/upgrade-options",
+      "date": "2026-03-19T17:16:19Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update userAssignedNatGateway recommendation details",
+      "url": "https://learn.microsoft.com/azure/aks/egress-outboundtype",
+      "date": "2026-03-19T15:04:44Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update terminology for resource customization allow list",
+      "url": "https://learn.microsoft.com/azure/aks/app-routing-gateway-api",
+      "date": "2026-03-19T10:53:56Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix typo in ConfigMap customization section",
+      "url": "https://learn.microsoft.com/azure/aks/istio-gateway-api",
+      "date": "2026-03-19T10:46:07Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Fix YAML indentation issue caused by indented code blocks under bullet lists",
+      "url": "https://learn.microsoft.com/azure/aks/agentic-cli-for-aks-service-account-workload-identity-setup",
+      "date": "2026-03-19T05:11:38Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Content dev review for external IdP content",
+      "url": "https://learn.microsoft.com/azure/aks/external-identity-provider-authentication-configure",
+      "date": "2026-03-18T22:47:53Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update terminology and enhance clarity in AKS article",
+      "url": "https://learn.microsoft.com/azure/aks/configure-node-binpack-scheduler",
+      "date": "2026-03-18T20:29:37Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Add OS SKU change limitation to node pool rollback docs",
+      "url": "https://learn.microsoft.com/azure/aks/roll-back-node-pool-version",
+      "date": "2026-03-17T22:56:59Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update Azure Container Storage recommendation",
+      "url": "https://learn.microsoft.com/azure/aks/csi-storage-drivers",
+      "date": "2026-03-17T21:57:48Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "Update virtual-machines-node-pools.md",
+      "url": "https://learn.microsoft.com/azure/aks/virtual-machines-node-pools",
+      "date": "2026-03-17T20:19:57Z",
+      "source": "AKS Docs"
+    },
+    {
+      "title": "content edits and style",
+      "url": "https://learn.microsoft.com/azure/aks/scale-cluster",
+      "date": "2026-03-17T18:38:57Z",
+      "source": "AKS Docs"
+    }
+  ],
+  "techcommunity": [],
+  "techcommunity_search": [
+    {
+      "title": "New in Microsoft Marketplace: March 27, 2026",
+      "url": "https://techcommunity.microsoft.com/blog/marketplace-blog/new-in-microsoft-marketplace-march-27-2026/4499191",
+      "posted": "2026-03-27T06:00:00.039-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "AI apps and agents: choosing your Marketplace offer type",
+      "url": "https://techcommunity.microsoft.com/blog/marketplace-blog/ai-apps-and-agents-choosing-your-marketplace-offer-type/4505694",
+      "posted": "2026-03-26T07:28:40.322-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "🚀 Securing Enterprise AI: From Red Teaming to Risk Cards and Azure Guardrails",
+      "url": "https://techcommunity.microsoft.com/blog/azureinfrastructureblog/securing-enterprise-ai-from-red-teaming-to-risk-cards-and-azure-guardrails/4505388",
+      "posted": "2026-03-24T21:55:17.356-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Announcing Public Preview of Argo CD extension on AKS and Azure Arc enabled Kubernetes clusters",
+      "url": "https://techcommunity.microsoft.com/blog/azurearcblog/announcing-public-preview-of-argo-cd-extension-on-aks-and-azure-arc-enabled-kube/4504497",
+      "posted": "2026-03-24T01:00:00.035-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Announcing public preview: Cilium mTLS encryption for Azure Kubernetes Service",
+      "url": "https://techcommunity.microsoft.com/blog/azurenetworkingblog/announcing-public-preview-cilium-mtls-encryption-for-azure-kubernetes-service/4504423",
+      "posted": "2026-03-22T18:50:18.584-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Building an Enterprise Platform for Inference at Scale",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/building-an-enterprise-platform-for-inference-at-scale/4498820",
+      "posted": "2026-03-17T11:28:24.766-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Migrating to the next generation of Virtual Nodes on Azure Container Instances (ACI)",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/migrating-to-the-next-generation-of-virtual-nodes-on-azure-container-instances-a/4496565",
+      "posted": "2026-03-03T01:13:14.372-08:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Azure Network Security Ninja Training",
+      "url": "https://techcommunity.microsoft.com/blog/azurenetworksecurityblog/azure-network-security-ninja-training/2356101",
+      "posted": "2021-05-14T14:17:24.612-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "The Swarm Diaries: What Happens When You Let AI Agents Loose on a Codebase",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/the-swarm-diaries-what-happens-when-you-let-ai-agents-loose-on-a-codebase/4501393",
+      "posted": "2026-03-18T11:08:04.306-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "After Ingress NGINX: Migrating to Application Gateway for Containers",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/after-ingress-nginx-migrating-to-application-gateway-for-containers/4503110",
+      "posted": "2026-03-17T14:03:22.285-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "The LLM Inference Optimization Stack: A Prioritized Playbook for Enterprise Teams",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/the-llm-inference-optimization-stack-a-prioritized-playbook-for-enterprise-teams/4498818",
+      "posted": "2026-03-06T15:26:22.360-08:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Porting C++ from IBM Power to x86: Solving Silent Endianness Corruption with C++and Github Copilot",
+      "url": "https://techcommunity.microsoft.com/blog/azuremigrationblog/porting-c-from-ibm-power-to-x86-solving-silent-endianness-corruption-with-c-and-/4501666",
+      "posted": "2026-03-17T00:34:04.597-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Inference at Enterprise Scale: Why LLM Inference Is a Capital Allocation Problem",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/inference-at-enterprise-scale-why-llm-inference-is-a-capital-allocation-problem/4498754",
+      "posted": "2026-03-02T11:36:47.353-08:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "NVIDIA’s Open Models on Microsoft Foundry:",
+      "url": "https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/nvidia-s-open-models-on-microsoft-foundry/4501643",
+      "posted": "2026-03-16T13:32:52.638-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Building Microsoft’s Sovereign AI on Azure Local with NVIDIA RTX PRO and Next Gen NVIDIA Rubin",
+      "url": "https://techcommunity.microsoft.com/blog/azurearcblog/building-microsoft-s-sovereign-ai-on-azure-local-with-nvidia-rtx-pro-and-next-ge/4502383",
+      "posted": "2026-03-16T13:08:55.857-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Introducing the Startup-Scale Landing Zone: Get Azure right from day one",
+      "url": "https://techcommunity.microsoft.com/blog/startupsatmicrosoftblog/introducing-the-startup-scale-landing-zone-get-azure-right-from-day-one/4501566",
+      "posted": "2026-03-12T08:04:19.670-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Overview of Azure Workload Modernization",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/overview-of-azure-workload-modernization/4502371",
+      "posted": "2026-03-15T17:44:27.373-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Check This Out! (CTO!) Guide (February 2026)",
+      "url": "https://techcommunity.microsoft.com/blog/coreinfrastructureandsecurityblog/check-this-out-cto-guide-february-2026/4501272",
+      "posted": "2026-03-11T08:55:52.908-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Scaling DNS on AKS with Cilium: NodeLocal DNSCache, LRP, and FQDN Policies",
+      "url": "https://techcommunity.microsoft.com/blog/linuxandopensourceblog/scaling-dns-on-aks-with-cilium-nodelocal-dnscache-lrp-and-fqdn-policies/4486323",
+      "posted": "2026-01-23T09:28:47.377-08:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Microsoft Azure at KubeCon Europe 2026 | Amsterdam, NL - March 23-26",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/microsoft-azure-at-kubecon-europe-2026-amsterdam-nl-march-23-26/4500716",
+      "posted": "2026-03-10T02:15:00.032-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "How to Create a Harness Pipeline and integrate with Azure",
+      "url": "https://techcommunity.microsoft.com/blog/azureinfrastructureblog/how-to-create-a-harness-pipeline-and-integrate-with-azure/4499862",
+      "posted": "2026-03-10T02:06:01.096-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "AI Inferencing in Air-Gapped Environments",
+      "url": "https://techcommunity.microsoft.com/blog/azurehighperformancecomputingblog/ai-inferencing-in-air-gapped-environments/4498594",
+      "posted": "2026-03-09T02:18:31.639-07:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Microsoft at NVIDIA GTC 2026",
+      "url": "https://techcommunity.microsoft.com/blog/azurehighperformancecomputingblog/microsoft-at-nvidia-gtc-2026/4497670",
+      "posted": "2026-02-27T08:47:56.278-08:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "What’s New in Microsoft Sentinel: March 2026",
+      "url": "https://techcommunity.microsoft.com/blog/microsoftsentinelblog/what-s-new-in-microsoft-sentinel-march-2026/4499508",
+      "posted": "2026-03-04T10:10:42.637-08:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Defending Container Runtime from Malware with Microsoft Defender for Containers",
+      "url": "https://techcommunity.microsoft.com/blog/microsoftdefendercloudblog/defending-container-runtime-from-malware-with-microsoft-defender-for-containers/4499264",
+      "posted": "2026-03-04T04:49:58.914-08:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "The Hidden Architecture of Nano Architectures",
+      "url": "https://techcommunity.microsoft.com/blog/educatordeveloperblog/the-hidden-architecture-of-nano-architectures/4493391",
+      "posted": "2026-03-03T00:00:00.031-08:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Logic Apps Aviators Newsletter - March 2026",
+      "url": "https://techcommunity.microsoft.com/blog/integrationsonazureblog/logic-apps-aviators-newsletter-march-2026/4498260",
+      "posted": "2026-03-02T08:00:00.030-08:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "The Azure FinOps Guide",
+      "url": "https://techcommunity.microsoft.com/blog/fasttrackforazureblog/the-azure-finops-guide/3704132",
+      "posted": "2023-01-08T23:44:41.677-08:00",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Magento e-commerce in AKS guidance now available!",
+      "url": "https://techcommunity.microsoft.com/blog/adformysql/magento-e-commerce-in-aks-guidance-now-available/1883255",
+      "posted": "2020-11-13T17:42:27.769-08:00",
+      "source": "TechCommunity Search"
+    }
+  ],
+  "youtube": [
+    {
+      "title": "AI Reduces Time-To-Resolution (TTR) for your Kubernetes Cluster Issues",
+      "url": "https://www.youtube.com/watch?v=hNS9fuPo574",
+      "date": "2026-03-10T10:01:07+00:00",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "Context is crucial with AI Debugging - AI Debugging Best Practices",
+      "url": "https://www.youtube.com/watch?v=IYpva6_Jo9k",
+      "date": "2026-03-06T20:35:11+00:00",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "AKS MCP Server with Julia Yin: AKS Troubleshooting Series: Azure Kubernetes Service",
+      "url": "https://www.youtube.com/watch?v=RaPivLnCzRw",
+      "date": "2026-03-05T11:30:30+00:00",
+      "source": "AKS Community YouTube"
+    }
+  ],
+  "roadmap_url": "https://github.com/orgs/Azure/projects/685/views/1",
+  "releases_url": "https://github.com/Azure/AKS/releases/"
+}
