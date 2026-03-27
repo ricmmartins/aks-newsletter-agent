@@ -121,7 +121,7 @@ The generated draft is a structured starting point. For the best results:
 
 The GitHub Actions workflow (`.github/workflows/newsletter.yml`):
 
-1. **Runs on the last day of each month** at 18:00 UTC (cron runs 28-31, checks if it's the actual last day)
+1. **Runs on the last Friday of each month** at 14:30 UTC / 9:30 AM EST (cron runs every Friday, checks if it's the actual last Friday)
 2. **Skips if newsletter already exists** — prevents overwriting polished editions
 3. Collects content for the **full calendar month** (1st to last day)
 4. Runs a **quality gate** checking for empty sections and minimum item counts
