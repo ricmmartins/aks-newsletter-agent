@@ -13,7 +13,6 @@ const SOURCES = {
   azure_updates: {
     name: "Azure Updates (AKS)",
     url: "https://azure.microsoft.com/en-us/updates/?query=AKS",
-    feedUrl: "https://azure.microsoft.com/en-us/updates/feed/",
     mandatory: true,
     type: "updates",
   },
@@ -76,12 +75,14 @@ const SOURCES = {
   aks_youtube: {
     name: "AKS Community YouTube",
     url: "https://www.youtube.com/@theakscommunity/videos",
+    feedUrl: "https://www.youtube.com/feeds/videos.xml?channel_id=UCWgpFvYA0JCI1ixOvv8q8EQ",
     mandatory: true,
     type: "youtube",
   },
   azure_youtube: {
     name: "Microsoft Azure YouTube",
     url: "https://www.youtube.com/@MicrosoftAzure/videos",
+    feedUrl: "https://www.youtube.com/feeds/videos.xml?channel_id=UC0m-80FnNY2Qb7obvTL_2fA",
     mandatory: true,
     type: "youtube",
   },

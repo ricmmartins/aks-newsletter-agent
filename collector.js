@@ -168,7 +168,7 @@ class ContentCollector {
           title: release.name || release.tag_name || "Unknown",
           url: release.html_url || "",
           date: pubDate,
-          body: (release.body || "").substring(0, 3000),
+          body: (release.body || "").substring(0, 8000),
           source: "AKS GitHub Releases",
         });
       }
@@ -271,38 +271,55 @@ class ContentCollector {
   }
 
   async collectAzureUpdates() {
-    console.log("📡 Collecting Azure Updates (RSS feed)...");
-    const resp = await this._safeFetch(SOURCES.azure_updates.feedUrl, {
-      headers: { Accept: "application/rss+xml, application/xml, text/xml" },
+    console.log("📡 Collecting Azure Updates...");
+
+    // Use the Azure Updates OData API to get AKS-related updates
+    const monthStr = `${this.year}-${String(this.month).padStart(2, "0")}`;
+    const lastDay = new Date(Date.UTC(this.year, this.month, 0)).getDate();
+    const monthEnd = `${monthStr}-${lastDay}`;
+
+    const productFilter =
+      "products/any(p: p eq 'Azure Kubernetes Service (AKS)')";
+    const dateFilter = [
+      `(generalAvailabilityDate ge '${monthStr}' and generalAvailabilityDate le '${monthEnd}')`,
+      `(previewAvailabilityDate ge '${monthStr}' and previewAvailabilityDate le '${monthEnd}')`,
+      `(privatePreviewAvailabilityDate ge '${monthStr}' and privatePreviewAvailabilityDate le '${monthEnd}')`,
+    ].join(" or ");
+
+    const filter = encodeURIComponent(
+      `${productFilter} and (${dateFilter})`
+    );
+    const apiUrl = `https://www.microsoft.com/releasecommunications/api/v2/azure?$count=true&top=100&$filter=${filter}`;
+
+    const resp = await this._safeFetch(apiUrl, {
+      headers: { Accept: "application/json" },
     });
-    if (!resp) {
-      console.log("  ⚠ RSS feed unavailable, falling back to release notes parsing");
-      this._extractUpdatesFromReleases();
-      return;
+
+    if (resp) {
+      try {
+        const data = await resp.json();
+        for (const item of data.value || []) {
+          const gaDate = item.generalAvailabilityDate || "";
+          const previewDate = item.previewAvailabilityDate || "";
+          const dateStr = gaDate.startsWith(monthStr)
+            ? gaDate
+            : previewDate.startsWith(monthStr)
+              ? previewDate
+              : item.privatePreviewAvailabilityDate || "";
+
+          this.collected.azure_updates.push({
+            title: (item.title || "").trim(),
+            url: `https://azure.microsoft.com/en-us/updates/${item.id}/`,
+            date: dateStr,
+            source: "Azure Updates",
+          });
+        }
+      } catch (e) {
+        console.log(`  ⚠ Failed to parse API response: ${e.message}`);
+      }
     }
 
-    const xml = await resp.text();
-    const $ = cheerio.load(xml, { xmlMode: true });
-
-    $("item").each((_, el) => {
-      const $el = $(el);
-      const title = $el.find("title").text().trim();
-      const link = $el.find("link").text().trim();
-      const pubDate = $el.find("pubDate").text().trim();
-      const description = $el.find("description").text().trim();
-
-      if (this._matchesAKS(title) && this._isWithinWindow(pubDate)) {
-        this.collected.azure_updates.push({
-          title,
-          url: link,
-          date: pubDate ? new Date(pubDate).toISOString() : "",
-          summary: description.replace(/<[^>]*>/g, "").substring(0, 500),
-          source: "Azure Updates",
-        });
-      }
-    });
-
-    // Also supplement with items parsed from release notes
+    // Supplement with items from release notes
     this._extractUpdatesFromReleases();
 
     console.log(
@@ -433,43 +450,42 @@ class ContentCollector {
     ];
 
     for (const [key, name] of ytSources) {
-      const resp = await this._safeFetch(SOURCES[key].url);
-      if (!resp) continue;
-
-      const html = await resp.text();
-      // Extract ytInitialData JSON and parse video renderers properly
-      // to ensure videoId and title are paired from the same object
-      const jsonMatch = html.match(/var ytInitialData = (.+?);\s*<\/script>/s);
-      if (!jsonMatch) {
-        console.log(`  ⚠ Could not extract ytInitialData from ${name}`);
+      const feedUrl = SOURCES[key].feedUrl;
+      if (!feedUrl) {
+        console.log(`  ⚠ No feed URL configured for ${name}`);
         continue;
       }
 
-      try {
-        const data = JSON.parse(jsonMatch[1]);
-        const tabs = data?.contents?.twoColumnBrowseResultsRenderer?.tabs || [];
-        for (const tab of tabs) {
-          const items = tab?.tabRenderer?.content?.richGridRenderer?.contents || [];
-          for (const item of items) {
-            const vr = item?.richItemRenderer?.content?.videoRenderer;
-            if (!vr) continue;
-            const videoId = vr.videoId;
-            const title = vr.title?.runs?.[0]?.text || "";
-            // publishedTimeText contains relative date like "2 weeks ago"
-            const timeText = vr.publishedTimeText?.simpleText || "";
-            if (videoId && title && this._matchesAKS(title) && this._isRecentVideo(timeText)) {
-              this.collected.youtube.push({
-                title,
-                url: `https://www.youtube.com/watch?v=${videoId}`,
-                publishedText: timeText,
-                source: name,
-              });
-            }
+      const resp = await this._safeFetch(feedUrl, {
+        headers: { Accept: "application/atom+xml, application/xml, text/xml" },
+      });
+      if (!resp) continue;
+
+      const xml = await resp.text();
+      const $ = cheerio.load(xml, { xmlMode: true });
+
+      $("entry").each((_, el) => {
+        const $el = $(el);
+        const title = $el.find("title").text().trim();
+        const videoId = $el.find("yt\\:videoId, videoId").text().trim();
+        const published = $el.find("published").text().trim();
+        const link = videoId
+          ? `https://www.youtube.com/watch?v=${videoId}`
+          : $el.find("link[rel='alternate']").attr("href") || "";
+
+        if (title && link && this._isWithinWindow(published)) {
+          // For AKS Community channel, include all videos (they're all AKS-related)
+          // For Microsoft Azure channel, filter by AKS keywords
+          if (key === "aks_youtube" || this._matchesAKS(title)) {
+            this.collected.youtube.push({
+              title,
+              url: link,
+              date: published,
+              source: name,
+            });
           }
         }
-      } catch (e) {
-        console.log(`  ⚠ Failed to parse ytInitialData from ${name}: ${e.message}`);
-      }
+      });
     }
 
     // Deduplicate
