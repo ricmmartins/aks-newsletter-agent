@@ -113,8 +113,10 @@ class NewsletterGenerator {
     if (!docs.length) {
       lines.push("No documentation updates were identified this month.\n");
     } else {
-      docs.forEach((item) => lines.push(this._formatEntry(item)));
-      lines.push("");
+      docs.forEach((item) => {
+        lines.push(this._formatEntry(item));
+        lines.push(""); // blank line between entries for readability
+      });
     }
     return lines.join("\n");
   }
@@ -128,8 +130,10 @@ class NewsletterGenerator {
     if (!updates.length) {
       lines.push("None this month.\n");
     } else {
-      updates.forEach((item) => lines.push(this._formatEntry(item)));
-      lines.push("");
+      updates.forEach((item) => {
+        lines.push(this._formatEntry(item));
+        lines.push("");
+      });
     }
     return lines.join("\n");
   }
@@ -144,29 +148,42 @@ class NewsletterGenerator {
     if (!updates.length) {
       lines.push("None this month.\n");
     } else {
-      updates.forEach((item) => lines.push(this._formatEntry(item)));
-      lines.push("");
+      updates.forEach((item) => {
+        lines.push(this._formatEntry(item));
+        lines.push("");
+      });
     }
     return lines.join("\n");
   }
 
   generateBehavioralChanges() {
     const lines = [`## ${SECTION_HEADERS.behavioral_changes}\n`];
-    const releases = this.data.aks_releases || [];
-    let found = false;
 
-    for (const release of releases) {
-      const body = (release.body || "").toLowerCase();
-      if (["breaking change", "behavioral change", "deprecat", "removed"].some((kw) => body.includes(kw))) {
-        lines.push(this._formatEntry(release));
-        found = true;
-      }
-    }
+    // Use structured behavioral changes if available
+    const behavioral = this.data.behavioral_changes || [];
+    const announcements = this.data.announcements || [];
+    const allChanges = [...behavioral, ...announcements];
 
-    if (!found) {
-      lines.push("No behavioral changes identified this month.\n");
+    if (allChanges.length) {
+      allChanges.forEach((item) => {
+        lines.push(this._formatEntry(item));
+        lines.push("");
+      });
     } else {
-      lines.push("");
+      // Fallback: link to release notes
+      const releases = this.data.aks_releases || [];
+      let found = false;
+      for (const release of releases) {
+        const body = (release.body || "").toLowerCase();
+        if (["breaking change", "behavioral change", "deprecat", "removed", "announcement"].some((kw) => body.includes(kw))) {
+          lines.push(this._formatEntry(release));
+          lines.push("");
+          found = true;
+        }
+      }
+      if (!found) {
+        lines.push("No behavioral changes identified this month.\n");
+      }
     }
     return lines.join("\n");
   }
@@ -199,10 +216,10 @@ class NewsletterGenerator {
           const matchesTitle = aksPatterns.some((p) => p.test(title) || p.test(url));
           if (isAKSBlog || matchesTitle) {
             lines.push(this._formatEntry(item));
+            lines.push(""); // blank line between entries
           }
         }
       });
-      lines.push("");
     }
     return lines.join("\n");
   }
@@ -216,10 +233,35 @@ class NewsletterGenerator {
     const releases = this.data.aks_releases || [];
     if (releases.length) {
       lines.push("### Release Highlights\n");
-      releases.forEach((r) => lines.push(this._formatEntry(r)));
-      lines.push("");
+      for (const r of releases) {
+        // Extract key info from release body for a richer summary
+        const body = r.body || "";
+        const summary = this._extractReleaseSummary(body);
+        lines.push(this._formatEntry({ ...r, summary }));
+        lines.push("");
+      }
     }
     return lines.join("\n");
+  }
+
+  _extractReleaseSummary(body) {
+    const parts = [];
+    // Extract Kubernetes versions
+    const k8sMatch = body.match(/new Kubernetes patch versions[^:]*:\s*`([^`]+)`(?:,\s*`([^`]+)`)*(?:,\s*`([^`]+)`)?/i);
+    if (k8sMatch) {
+      const versions = [k8sMatch[1], k8sMatch[2], k8sMatch[3]].filter(Boolean).join(", ");
+      parts.push(`Kubernetes patch versions ${versions}`);
+    }
+    // Count component updates
+    const componentSection = body.split(/###\s*Component\s*Updates?/i)[1];
+    if (componentSection) {
+      const componentCount = (componentSection.split(/###\s/)[0].match(/\n\s*\*/g) || []).length;
+      if (componentCount > 0) parts.push(`${componentCount} component updates`);
+    }
+    // Check for CVE mentions
+    const cveCount = (body.match(/CVE-\d{4}-\d+/g) || []).length;
+    if (cveCount > 0) parts.push(`${cveCount} CVE remediations`);
+    return parts.length ? `This release includes ${parts.join(", ")}.` : "";
   }
 
   generateWatchLearn() {
@@ -229,8 +271,10 @@ class NewsletterGenerator {
     if (!videos.length) {
       lines.push("No AKS-related videos identified this month.\n");
     } else {
-      videos.forEach((item) => lines.push(this._formatEntry(item)));
-      lines.push("");
+      videos.forEach((item) => {
+        lines.push(this._formatEntry(item));
+        lines.push(""); // blank line between entries
+      });
     }
     return lines.join("\n");
   }

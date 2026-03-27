@@ -108,7 +108,11 @@ class ContentCollector {
       const fmMatch = text.match(/^---\s*\n([\s\S]*?)\n---/);
       if (!fmMatch) return null;
       const titleMatch = fmMatch[1].match(/^title:\s*['"]?(.*?)['"]?\s*$/m);
-      return titleMatch ? titleMatch[1].trim() : null;
+      const descMatch = fmMatch[1].match(/^description:\s*['"]?(.*?)['"]?\s*$/m);
+      return {
+        title: titleMatch ? titleMatch[1].trim() : null,
+        description: descMatch ? descMatch[1].trim() : null,
+      };
     } catch {
       return null;
     }
@@ -301,13 +305,14 @@ class ContentCollector {
       }
     }
 
-    // Enrich each doc entry with the actual page title from the markdown frontmatter
+    // Enrich each doc entry with the actual page title and description from frontmatter
     const entries = Array.from(articleMap.values());
     for (const entry of entries) {
-      const pageTitle = await this._fetchDocPageTitle(entry.articleFile);
-      if (pageTitle) {
-        entry.title = pageTitle;
-        entry.summary = this._cleanCommitMessage(entry.commitMessage);
+      const pageMeta = await this._fetchDocPageTitle(entry.articleFile);
+      if (pageMeta?.title) {
+        entry.title = pageMeta.title;
+        // Use the page's frontmatter description (much more informative than commit messages)
+        entry.summary = pageMeta.description || this._cleanCommitMessage(entry.commitMessage);
       } else {
         entry.title = entry.commitMessage;
       }
@@ -363,6 +368,7 @@ class ContentCollector {
             title: (item.title || "").trim(),
             url: `https://azure.microsoft.com/en-us/updates/${item.id}/`,
             date: dateStr,
+            summary: (item.description || "").replace(/<[^>]+>/g, "").trim().split(/\.\s/)[0] + ".",
             source: "Azure Updates",
           });
         }
@@ -407,6 +413,32 @@ class ContentCollector {
         existingUrls.add(item.url);
         this.collected.azure_updates.push({
           title: `${item.title} – now generally available`,
+          url: item.url,
+          date: release.date,
+          summary: item.description,
+          source: "AKS Release Notes",
+        });
+      }
+
+      // Parse "### Behavioral Changes" section into structured items
+      const behavioralItems = this._parseReleaseSection(body, /###\s*Behavioral\s*Changes?\s*/i);
+      if (!this.collected.behavioral_changes) this.collected.behavioral_changes = [];
+      for (const item of behavioralItems) {
+        this.collected.behavioral_changes.push({
+          title: item.title,
+          url: item.url,
+          date: release.date,
+          summary: item.description,
+          source: "AKS Release Notes",
+        });
+      }
+
+      // Parse "### Announcements" section
+      const announcements = this._parseReleaseSection(body, /###\s*Announcements?\s*/i);
+      if (!this.collected.announcements) this.collected.announcements = [];
+      for (const item of announcements) {
+        this.collected.announcements.push({
+          title: item.title,
           url: item.url,
           date: release.date,
           summary: item.description,
