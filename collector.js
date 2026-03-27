@@ -118,10 +118,23 @@ class ContentCollector {
   _cleanCommitMessage(msg) {
     if (!msg) return "";
     let s = msg.trim();
+    // Remove common prefixes
+    s = s.replace(/^(doc|docs|fix|update|add|chore|feat|refactor|style):\s*/i, "");
+    // Remove file name references (.md, article paths)
+    s = s.replace(/\s+(for\s+)?\S+\.md\b/g, "");
+    s = s.replace(/\barticles\/aks\/\S*/g, "");
+    // Remove internal developer references ("from Sam", "per John")
+    s = s.replace(/\s+(from|by|per|via)\s+[A-Z][a-z]+(\s+[A-Z][a-z]+)?\s*$/g, "").trim();
+    // Remove "to reflect author changes and" patterns
+    s = s.replace(/\bto reflect author changes and\s*/i, "");
+    // Fix trailing prepositions left after cleanup ("for", "in", "to", "with")
+    s = s.replace(/\s+(for|in|to|with|and|or)\s*$/i, "").trim();
     // Capitalize first letter
-    s = s.charAt(0).toUpperCase() + s.slice(1);
+    if (s) s = s.charAt(0).toUpperCase() + s.slice(1);
     // Remove trailing period then re-add for consistency
     s = s.replace(/\.+$/, "");
+    // If result is too short or vague, return empty (title alone is enough)
+    if (s.length < 15) return "";
     return s;
   }
 
@@ -382,6 +395,7 @@ class ContentCollector {
           title: `${item.title} (preview)`,
           url: item.url,
           date: release.date,
+          summary: item.description,
           source: "AKS Release Notes",
         });
       }
@@ -395,6 +409,7 @@ class ContentCollector {
           title: `${item.title} – now generally available`,
           url: item.url,
           date: release.date,
+          summary: item.description,
           source: "AKS Release Notes",
         });
       }
@@ -409,7 +424,7 @@ class ContentCollector {
     // Take content until the next ### heading
     const sectionContent = sectionMatch.split(/###\s/)[0];
 
-    // Parse each bullet point and extract the first markdown link
+    // Parse each bullet point and extract the first markdown link + remaining text as description
     const bullets = sectionContent.split(/\n\s*\*\s+/).filter(Boolean);
     const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/;
     for (const bullet of bullets) {
@@ -417,8 +432,20 @@ class ContentCollector {
       if (!match) continue;
       const title = match[1].trim();
       const url = match[2].trim();
+      // Extract the description text after the first link
+      const afterLink = bullet.substring(match.index + match[0].length).trim();
+      // Clean up: remove leading punctuation, trim, take first sentence
+      let description = afterLink
+        .replace(/^\s*[–\-:,]\s*/, "")
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // convert remaining links to plain text
+        .replace(/\s*\n\s*/g, " ") // flatten newlines
+        .split(/\.\s/)[0]; // first sentence
+      if (description && !description.endsWith(".")) description += ".";
+      // Capitalize first letter
+      if (description) description = description.charAt(0).toUpperCase() + description.slice(1);
+      if (description.length < 10) description = "";
       if (url.includes("releases.aks.azure.com")) continue;
-      items.push({ title, url });
+      items.push({ title, url, description });
     }
     return items;
   }
@@ -511,6 +538,9 @@ class ContentCollector {
         const link = videoId
           ? `https://www.youtube.com/watch?v=${videoId}`
           : $el.find("link[rel='alternate']").attr("href") || "";
+        // Extract description from media:group > media:description
+        const description = $el.find("media\\:group media\\:description, description").text().trim();
+        const summary = description ? description.split("\n")[0].substring(0, 200) : "";
 
         if (title && link && this._isWithinWindow(published)) {
           // For AKS Community channel, include all videos (they're all AKS-related)
@@ -520,6 +550,7 @@ class ContentCollector {
               title,
               url: link,
               date: published,
+              summary,
               source: name,
             });
           }
@@ -602,11 +633,9 @@ class ContentCollector {
         }
       });
 
-      // Load search page — use window dates to build the URL date params
-      const startISO = this.windowStart.toISOString().split("T")[0];
-      const endISO = this.windowEnd.toISOString().split("T")[0];
+      // Load search page to capture bearer token (pastMonth is fine here — real filtering uses GraphQL dates)
       const searchUrl =
-        `https://techcommunity.microsoft.com/search?q=aks&contentType=BLOG&lastUpdate=pastYear&sortBy=newest`;
+        `https://techcommunity.microsoft.com/search?q=aks&contentType=BLOG&lastUpdate=pastMonth&sortBy=newest`;
       await page.goto(searchUrl, { waitUntil: "networkidle2", timeout: 60000 });
 
       // Wait for search results to render
@@ -673,6 +702,8 @@ class ContentCollector {
         );
 
         for (const item of allResults) {
+          // Filter by actual post date (GraphQL date filter uses activity time, not publish time)
+          if (item.posted && !this._isWithinWindow(item.posted)) continue;
           if (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url) || this._matchesAKSStrict(item.snippet)) {
             this.collected.techcommunity_search.push({
               title: item.title, url: item.url, posted: item.posted,

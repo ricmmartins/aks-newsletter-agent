@@ -29,7 +29,21 @@ class NewsletterGenerator {
   _formatEntry(item) {
     const title = item.title || "Untitled";
     const url = item.url || "";
-    const summary = item.summary || "";
+    let summary = item.summary || "";
+    // Clean up newlines in summaries (e.g., multi-line blog excerpts)
+    summary = summary.replace(/\s*\n\s*/g, " ").trim();
+    // Truncate long summaries (e.g., first paragraph from blog posts)
+    if (summary.length > 200) {
+      summary = summary.substring(0, 197).replace(/\s+\S*$/, "") + "...";
+    }
+    // Remove summaries that are redundant with the title
+    if (summary) {
+      const lowerSummary = summary.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+      const lowerTitle = title.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+      if (lowerTitle.includes(lowerSummary) || lowerSummary === "is now generally available") {
+        summary = "";
+      }
+    }
 
     let line = url ? `* **[${title}](${url})**` : `* **${title}**`;
     if (summary) line += `: ${summary}`;
