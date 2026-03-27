@@ -59,26 +59,6 @@ class ContentCollector {
     return this._isWithinWindow(dateStr);
   }
 
-  // Check if YouTube relative time text (e.g. "2 weeks ago") falls within target month
-  _isRecentVideo(timeText) {
-    if (!timeText) return true; // include if no time info
-    const lower = timeText.toLowerCase();
-    const match = lower.match(/(\d+)\s+(hour|day|week|month|year)/);
-    if (!match) return true;
-    const num = parseInt(match[1], 10);
-    const unit = match[2];
-    const daysAgo =
-      unit === "hour" ? 0 :
-      unit === "day" ? num :
-      unit === "week" ? num * 7 :
-      unit === "month" ? num * 30 :
-      unit === "year" ? num * 365 : 0;
-    // Calculate approximate publish date and check against window
-    const approxDate = new Date();
-    approxDate.setDate(approxDate.getDate() - daysAgo);
-    return approxDate >= this.windowStart && approxDate <= this.windowEnd;
-  }
-
   _githubHeaders() {
     const headers = { Accept: "application/vnd.github.v3+json" };
     if (this.githubToken) {
@@ -172,7 +152,7 @@ class ContentCollector {
       const summaryEl = $el.find("p").first();
       const summary = summaryEl.text().trim() || "";
 
-      if (this._isTargetMonth(dateStr) || !dateStr) {
+      if (this._isTargetMonth(dateStr)) {
         this.collected.aks_blog.push({
           title,
           url: link,
@@ -484,7 +464,7 @@ class ContentCollector {
         const timeEl = $el.find("time");
         const dateStr = timeEl.attr("datetime") || "";
 
-        if (this._isWithinWindow(dateStr) || !dateStr) {
+        if (this._isWithinWindow(dateStr)) {
           this.collected.techcommunity.push({
             title,
             url: link,
@@ -622,9 +602,11 @@ class ContentCollector {
         }
       });
 
-      // Load search page
+      // Load search page — use window dates to build the URL date params
+      const startISO = this.windowStart.toISOString().split("T")[0];
+      const endISO = this.windowEnd.toISOString().split("T")[0];
       const searchUrl =
-        "https://techcommunity.microsoft.com/search?q=aks&contentType=BLOG&lastUpdate=pastMonth&sortBy=newest";
+        `https://techcommunity.microsoft.com/search?q=aks&contentType=BLOG&lastUpdate=pastYear&sortBy=newest`;
       await page.goto(searchUrl, { waitUntil: "networkidle2", timeout: 60000 });
 
       // Wait for search results to render
@@ -633,23 +615,12 @@ class ContentCollector {
       } catch {}
       await new Promise((r) => setTimeout(r, 5000));
 
-      // Strategy 1: Use captured GraphQL response data (most reliable)
-      if (capturedResults?.length) {
-        console.log("  ✓ Captured GraphQL response directly");
-        for (const item of capturedResults) {
-          if (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url) || this._matchesAKSStrict(item.snippet)) {
-            this.collected.techcommunity_search.push({
-              title: item.title, url: item.url, posted: item.posted,
-              source: "TechCommunity Search",
-            });
-          }
-        }
-      }
-      // Strategy 2: Use bearer token to make additional GraphQL call
-      else if (bearerToken) {
-        console.log("  ✓ Using captured bearer token");
-        const dateGte = this.windowStart.toISOString();
-        const dateLte = this.windowEnd.toISOString();
+      const dateGte = this.windowStart.toISOString();
+      const dateLte = this.windowEnd.toISOString();
+
+      // Strategy 1: Use bearer token to make our own GraphQL call with exact window dates (most reliable)
+      if (bearerToken) {
+        console.log("  ✓ Using bearer token with exact date range");
         const allResults = await page.evaluate(
           async (token, dateFrom, dateTo) => {
             const body = {
@@ -703,6 +674,19 @@ class ContentCollector {
 
         for (const item of allResults) {
           if (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url) || this._matchesAKSStrict(item.snippet)) {
+            this.collected.techcommunity_search.push({
+              title: item.title, url: item.url, posted: item.posted,
+              source: "TechCommunity Search",
+            });
+          }
+        }
+      }
+      // Strategy 2: Use captured GraphQL response data, filtered by window dates
+      else if (capturedResults?.length) {
+        console.log("  ✓ Captured GraphQL response, filtering by date window");
+        for (const item of capturedResults) {
+          const inWindow = item.posted ? this._isWithinWindow(item.posted) : false;
+          if (inWindow && (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url) || this._matchesAKSStrict(item.snippet))) {
             this.collected.techcommunity_search.push({
               title: item.title, url: item.url, posted: item.posted,
               source: "TechCommunity Search",
