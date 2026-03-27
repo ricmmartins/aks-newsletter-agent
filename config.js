@@ -13,6 +13,7 @@ const SOURCES = {
   azure_updates: {
     name: "Azure Updates (AKS)",
     url: "https://azure.microsoft.com/en-us/updates/?query=AKS",
+    feedUrl: "https://azure.microsoft.com/en-us/updates/feed/",
     mandatory: true,
     type: "updates",
   },

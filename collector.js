@@ -271,43 +271,100 @@ class ContentCollector {
   }
 
   async collectAzureUpdates() {
-    console.log("📡 Collecting Azure Updates...");
-    const resp = await this._safeFetch(SOURCES.azure_updates.url);
-    if (!resp) return;
+    console.log("📡 Collecting Azure Updates (RSS feed)...");
+    const resp = await this._safeFetch(SOURCES.azure_updates.feedUrl, {
+      headers: { Accept: "application/rss+xml, application/xml, text/xml" },
+    });
+    if (!resp) {
+      console.log("  ⚠ RSS feed unavailable, falling back to release notes parsing");
+      this._extractUpdatesFromReleases();
+      return;
+    }
 
-    const html = await resp.text();
-    const $ = cheerio.load(html);
+    const xml = await resp.text();
+    const $ = cheerio.load(xml, { xmlMode: true });
 
-    $("[class*='update'], [class*='card'], [class*='item']").each(
-      (_, el) => {
-        const $el = $(el);
-        const titleEl = $el.find("h2, h3, a").first();
-        if (!titleEl.length) return;
+    $("item").each((_, el) => {
+      const $el = $(el);
+      const title = $el.find("title").text().trim();
+      const link = $el.find("link").text().trim();
+      const pubDate = $el.find("pubDate").text().trim();
+      const description = $el.find("description").text().trim();
 
-        const title = titleEl.text().trim();
-        const linkEl = $el.find("a[href]").first();
-        let link = linkEl.attr("href") || "";
-        if (link && !link.startsWith("http")) {
-          link = new URL(link, "https://azure.microsoft.com").href;
-        }
-
-        const timeEl = $el.find("time");
-        const dateStr = timeEl.attr("datetime") || timeEl.text().trim() || "";
-
-        if (this._matchesAKS(title) && (this._isWithinWindow(dateStr) || !dateStr)) {
-          this.collected.azure_updates.push({
-            title,
-            url: link,
-            date: dateStr,
-            source: "Azure Updates",
-          });
-        }
+      if (this._matchesAKS(title) && this._isWithinWindow(pubDate)) {
+        this.collected.azure_updates.push({
+          title,
+          url: link,
+          date: pubDate ? new Date(pubDate).toISOString() : "",
+          summary: description.replace(/<[^>]*>/g, "").substring(0, 500),
+          source: "Azure Updates",
+        });
       }
-    );
+    });
+
+    // Also supplement with items parsed from release notes
+    this._extractUpdatesFromReleases();
 
     console.log(
       `  ✓ Found ${this.collected.azure_updates.length} updates`
     );
+  }
+
+  _extractUpdatesFromReleases() {
+    const releases = this.collected.aks_releases || [];
+    const existingUrls = new Set(this.collected.azure_updates.map((u) => u.url));
+
+    for (const release of releases) {
+      const body = release.body || "";
+
+      // Parse "### Preview Features" section
+      const previewItems = this._parseReleaseSection(body, /###\s*Preview\s*Features?\s*/i);
+      for (const item of previewItems) {
+        if (existingUrls.has(item.url)) continue;
+        existingUrls.add(item.url);
+        this.collected.azure_updates.push({
+          title: `${item.title} (preview)`,
+          url: item.url,
+          date: release.date,
+          source: "AKS Release Notes",
+        });
+      }
+
+      // Parse "### Features" section (GA announcements)
+      const gaItems = this._parseReleaseSection(body, /###\s*Features\s*/i);
+      for (const item of gaItems) {
+        if (existingUrls.has(item.url)) continue;
+        existingUrls.add(item.url);
+        this.collected.azure_updates.push({
+          title: `${item.title} – now generally available`,
+          url: item.url,
+          date: release.date,
+          source: "AKS Release Notes",
+        });
+      }
+    }
+  }
+
+  _parseReleaseSection(body, sectionRegex) {
+    const items = [];
+    const sectionMatch = body.split(sectionRegex)[1];
+    if (!sectionMatch) return items;
+
+    // Take content until the next ### heading
+    const sectionContent = sectionMatch.split(/###\s/)[0];
+
+    // Parse each bullet point and extract the first markdown link
+    const bullets = sectionContent.split(/\n\s*\*\s+/).filter(Boolean);
+    const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/;
+    for (const bullet of bullets) {
+      const match = bullet.match(linkRegex);
+      if (!match) continue;
+      const title = match[1].trim();
+      const url = match[2].trim();
+      if (url.includes("releases.aks.azure.com")) continue;
+      items.push({ title, url });
+    }
+    return items;
   }
 
   async collectTechCommunity() {
