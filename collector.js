@@ -540,50 +540,71 @@ class ContentCollector {
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
       });
       const page = await browser.newPage();
+      // Set a realistic user agent to avoid bot detection
+      await page.setUserAgent(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      );
 
-      // Capture Bearer token from the initial GraphQL request
+      // Capture bearer token AND GraphQL response data
       let bearerToken = "";
+      let capturedResults = null;
       page.on("request", (req) => {
-        if (req.url().includes("opname=MessageSearch")) {
+        if (req.url().includes("graphql") && req.url().includes("opname=MessageSearch")) {
           bearerToken = req.headers()["authorization"] || "";
         }
       });
+      page.on("response", async (resp) => {
+        if (resp.url().includes("graphql") && resp.url().includes("opname=MessageSearch")) {
+          try {
+            const data = await resp.json();
+            const results = data?.data?.messageSearch?.results;
+            if (results?.edges?.length) {
+              capturedResults = results.edges.map((e) => {
+                const msg = e.node.message;
+                const boardId = (msg.board?.displayId || "").toLowerCase();
+                const slug = (msg.subject || "")
+                  .toLowerCase().replace(/[^a-z0-9]+/g, "-")
+                  .replace(/^-|-$/g, "").substring(0, 80);
+                const snippetText = (e.node.snippet || [])
+                  .map((s) => (s.content || []).join(" ")).join(" ");
+                return {
+                  title: msg.subject || "",
+                  url: `https://techcommunity.microsoft.com/blog/${boardId}/${slug}/${msg.uid}`,
+                  posted: msg.postTime || "",
+                  snippet: snippetText,
+                };
+              });
+            }
+          } catch {}
+        }
+      });
 
-      // Load search page to trigger auth and obtain token
+      // Load search page
       const searchUrl =
         "https://techcommunity.microsoft.com/search?q=aks&contentType=BLOG&lastUpdate=pastMonth&sortBy=newest";
       await page.goto(searchUrl, { waitUntil: "networkidle2", timeout: 60000 });
+
+      // Wait for search results to render
+      try {
+        await page.waitForSelector('[class*="search-result"], [class*="SearchResult"], [class*="lia-message"], a[href*="/blog/"]', { timeout: 15000 });
+      } catch {}
       await new Promise((r) => setTimeout(r, 5000));
 
-      if (!bearerToken) {
-        // Fallback: scrape visible DOM links if token capture fails
-        console.log("  ⚠ Auth token not captured, falling back to DOM scraping");
-        const results = await page.evaluate(() => {
-          const items = [];
-          const links = new Set();
-          document.querySelectorAll("a").forEach((a) => {
-            const href = a.href || "";
-            const text = (a.textContent || "").trim();
-            if (
-              href && text.length > 10 && !links.has(href) &&
-              (href.includes("/blog/") || href.includes("/ba-p/")) &&
-              !href.includes("/category/") && !text.startsWith("Place ")
-            ) {
-              links.add(href);
-              items.push({ title: text, url: href });
-            }
-          });
-          return items;
-        });
-        for (const item of results) {
-          if (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url)) {
+      // Strategy 1: Use captured GraphQL response data (most reliable)
+      if (capturedResults?.length) {
+        console.log("  ✓ Captured GraphQL response directly");
+        for (const item of capturedResults) {
+          if (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url) || this._matchesAKSStrict(item.snippet)) {
             this.collected.techcommunity_search.push({
-              ...item, source: "TechCommunity Search",
+              title: item.title, url: item.url, posted: item.posted,
+              source: "TechCommunity Search",
             });
           }
         }
-      } else {
-        // Use GraphQL API to fetch ALL results (avoids pagination limits)
+      }
+      // Strategy 2: Use bearer token to make additional GraphQL call
+      else if (bearerToken) {
+        console.log("  ✓ Using captured bearer token");
         const dateGte = this.windowStart.toISOString();
         const dateLte = this.windowEnd.toISOString();
         const allResults = await page.evaluate(
@@ -624,7 +645,6 @@ class ContentCollector {
               const slug = (msg.subject || "")
                 .toLowerCase().replace(/[^a-z0-9]+/g, "-")
                 .replace(/^-|-$/g, "").substring(0, 80);
-              // Include snippet text for keyword matching against body
               const snippetText = (e.node.snippet || [])
                 .map((s) => (s.content || []).join(" ")).join(" ");
               return {
@@ -643,6 +663,56 @@ class ContentCollector {
             this.collected.techcommunity_search.push({
               title: item.title, url: item.url, posted: item.posted,
               source: "TechCommunity Search",
+            });
+          }
+        }
+      }
+      // Strategy 3: Enhanced DOM scraping fallback
+      else {
+        console.log("  ⚠ Auth token not captured, falling back to DOM scraping");
+        // Scroll to load more results
+        await page.evaluate(async () => {
+          for (let i = 0; i < 5; i++) {
+            window.scrollBy(0, 800);
+            await new Promise((r) => setTimeout(r, 1000));
+          }
+        });
+        await new Promise((r) => setTimeout(r, 3000));
+
+        const results = await page.evaluate(() => {
+          const items = [];
+          const seen = new Set();
+          // Try multiple selector patterns for search results
+          const selectors = [
+            'a[href*="/blog/"]',
+            'a[href*="/ba-p/"]',
+            '[class*="search"] a[href*="techcommunity"]',
+            '[class*="result"] a',
+          ];
+          for (const sel of selectors) {
+            document.querySelectorAll(sel).forEach((a) => {
+              const href = a.href || "";
+              const text = (a.textContent || "").trim();
+              if (
+                href && text.length > 10 && text.length < 300 &&
+                !seen.has(href) &&
+                (href.includes("/blog/") || href.includes("/ba-p/")) &&
+                !href.includes("/category/") &&
+                !href.includes("/tag/") &&
+                !text.startsWith("Place ")
+              ) {
+                seen.add(href);
+                items.push({ title: text, url: href });
+              }
+            });
+          }
+          return items;
+        });
+
+        for (const item of results) {
+          if (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url)) {
+            this.collected.techcommunity_search.push({
+              ...item, source: "TechCommunity Search",
             });
           }
         }
