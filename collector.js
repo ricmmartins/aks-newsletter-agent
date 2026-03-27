@@ -464,6 +464,8 @@ class ContentCollector {
       if (!match) continue;
       const title = match[1].trim();
       const url = match[2].trim();
+      // Skip generic link text ("here", "this", "link", etc.)
+      if (/^(here|this|link|more|details|see)$/i.test(title)) continue;
       // Extract the description text after the first link
       const afterLink = bullet.substring(match.index + match[0].length).trim();
       // Clean up: remove leading punctuation, trim, take first sentence
@@ -572,7 +574,16 @@ class ContentCollector {
           : $el.find("link[rel='alternate']").attr("href") || "";
         // Extract description from media:group > media:description
         const description = $el.find("media\\:group media\\:description, description").text().trim();
-        const summary = description ? description.split("\n")[0].substring(0, 200) : "";
+        // Take first 2 sentences or 250 chars, whichever is shorter
+        let summary = "";
+        if (description) {
+          const firstLine = description.split("\n")[0];
+          const sentences = firstLine.match(/[^.!?]+[.!?]+/g) || [firstLine];
+          summary = sentences.slice(0, 2).join(" ").trim();
+          if (summary.length > 250) {
+            summary = summary.substring(0, 247).replace(/\s+\S*$/, "") + "...";
+          }
+        }
 
         if (title && link && this._isWithinWindow(published)) {
           // For AKS Community channel, include all videos (they're all AKS-related)
