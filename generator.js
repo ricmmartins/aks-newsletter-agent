@@ -32,18 +32,17 @@ class NewsletterGenerator {
     let summary = item.summary || "";
     // Clean up newlines in summaries (e.g., multi-line blog excerpts)
     summary = summary.replace(/\s*\n\s*/g, " ").trim();
-    // Truncate long summaries (e.g., first paragraph from blog posts)
-    if (summary.length > 200) {
-      summary = summary.substring(0, 197).replace(/\s+\S*$/, "") + "...";
-    }
-    // Remove summaries that are redundant with the title
+    // Remove HTML remnants from TechCommunity scraping
+    summary = summary.replace(/<[^>]+>/g, "").trim();
+    // Remove summaries that are near-identical to the title (but keep short opinionated commentary)
     if (summary) {
       const lowerSummary = summary.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
       const lowerTitle = title.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
-      if (lowerTitle.includes(lowerSummary) || 
-          lowerSummary === "is now generally available" ||
-          lowerSummary === "is now available" ||
-          lowerSummary.length < 15) {
+      if (lowerTitle.includes(lowerSummary) || lowerSummary.includes(lowerTitle)) {
+        summary = "";
+      }
+      // Remove generic non-descriptions
+      if (/^(is now (generally )?available|is now in (public )?preview)\.?$/i.test(summary)) {
         summary = "";
       }
     }
