@@ -9,6 +9,7 @@
 const fs = require("fs");
 const path = require("path");
 const { marked } = require("marked");
+const { Resvg } = require("@resvg/resvg-js");
 
 const NEWSLETTERS_DIR = path.join(__dirname, "newsletters");
 const OUTPUT_DIR = path.join(__dirname, "docs");
@@ -500,7 +501,7 @@ mark{background:rgba(0,120,212,0.12);color:var(--accent-dark);border-radius:2px;
 function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = "", badge = "", meta = {}) {
   const ogUrl = meta.url || SITE_URL;
   const ogDesc = meta.description || "Monthly curated updates on Azure Kubernetes Service — docs, features, blogs, releases, and more.";
-  const ogImage = meta.image || `${SITE_URL}/og-image.svg`;
+  const ogImage = meta.image || `${SITE_URL}/og-image.png`;
 
   const headerHtml = `
   <div class="header">
@@ -740,6 +741,7 @@ function buildEditionPage(edition, prevEdition, nextEdition) {
     {
       url: edUrl,
       description: `${edition.monthName} ${edition.year} edition of the AKS Newsletter — ${Object.values(stats).reduce((a, b) => a + b, 0)} curated items covering docs, features, blogs, and more.`,
+      image: `${SITE_URL}/${edition.year}/${edition.slug}-social.png`,
       readingTime: rt,
       isEdition: true,
     }
@@ -944,19 +946,124 @@ ${urls.join("\n")}
 </urlset>`;
 }
 
-function buildOgImage() {
-  // SVG-based OG image for social sharing
+/**
+ * Generate a social sharing image SVG for a newsletter edition (or generic).
+ * @param {object} [opts] - Options: monthName, year, totalItems. Omit for generic site image.
+ * @returns {string} SVG markup (1200×630, LinkedIn/OG compatible)
+ */
+function buildSocialSvg(opts = {}) {
+  const monthName = opts.monthName || null;
+  const year = opts.year || null;
+  const totalItems = opts.totalItems || 0;
+  const isEdition = !!(monthName && year);
+
+  const FONT = "Segoe UI, Arial, Helvetica, sans-serif";
+
+  // Decorative hexagons (Kubernetes-themed)
+  function hexPts(cx, cy, r) {
+    return Array.from({ length: 6 }, (_, i) => {
+      const a = (Math.PI / 3) * i - Math.PI / 6;
+      return `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`;
+    }).join(" ");
+  }
+
+  const hexes = [
+    { cx: 980, cy: 120, r: 50, o: 0.07 },
+    { cx: 1070, cy: 180, r: 40, o: 0.05 },
+    { cx: 1030, cy: 270, r: 55, o: 0.06 },
+    { cx: 920, cy: 210, r: 35, o: 0.08 },
+    { cx: 1120, cy: 110, r: 30, o: 0.04 },
+    { cx: 960, cy: 310, r: 45, o: 0.05 },
+    { cx: 1100, cy: 310, r: 35, o: 0.04 },
+    { cx: 1060, cy: 390, r: 25, o: 0.03 },
+  ];
+
+  const hexSvg = hexes
+    .map(
+      (h) =>
+        `<polygon points="${hexPts(h.cx, h.cy, h.r)}" fill="none" stroke="#3b82f6" stroke-width="1.5" opacity="${h.o}"/>`
+    )
+    .join("\n  ");
+
+  // Center content changes between edition-specific and generic
+  const centerContent = isEdition
+    ? `
+  <text x="80" y="255" font-family="${FONT}" font-weight="800" font-size="90" fill="white" letter-spacing="3">${monthName.toUpperCase()}</text>
+  <text x="80" y="365" font-family="${FONT}" font-weight="800" font-size="100" fill="url(#yearFill)" letter-spacing="6">${year}</text>
+  <rect x="80" y="400" width="100" height="4" rx="2" fill="#0078d4"/>
+  <rect x="195" y="400" width="70" height="4" rx="2" fill="#3b82f6"/>
+  <rect x="280" y="400" width="45" height="4" rx="2" fill="#8b5cf6"/>
+  <text x="80" y="460" font-family="${FONT}" font-weight="400" font-size="24" fill="#94a3b8">Monthly curated updates on Azure Kubernetes Service</text>
+  ${
+    totalItems > 0
+      ? `<rect x="80" y="492" width="${Math.max(200, String(totalItems).length * 12 + 210)}" height="36" rx="18" fill="#0078d4" fill-opacity="0.12" stroke="#0078d4" stroke-opacity="0.25" stroke-width="1"/>
+  <text x="100" y="515" font-family="${FONT}" font-weight="600" font-size="16" fill="#60a5fa">${totalItems} curated items this edition</text>`
+      : ""
+  }`
+    : `
+  <text x="80" y="240" font-family="${FONT}" font-weight="800" font-size="80" fill="white">AKS</text>
+  <text x="80" y="340" font-family="${FONT}" font-weight="800" font-size="80" fill="url(#yearFill)">Newsletter</text>
+  <rect x="80" y="375" width="100" height="4" rx="2" fill="#0078d4"/>
+  <rect x="195" y="375" width="70" height="4" rx="2" fill="#3b82f6"/>
+  <rect x="280" y="375" width="45" height="4" rx="2" fill="#8b5cf6"/>
+  <text x="80" y="435" font-family="${FONT}" font-weight="400" font-size="26" fill="#94a3b8">Monthly curated updates on</text>
+  <text x="80" y="475" font-family="${FONT}" font-weight="400" font-size="26" fill="#94a3b8">Azure Kubernetes Service</text>`;
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#0f172a"/>
-  <rect x="60" y="60" width="64" height="64" rx="16" fill="#0078d4"/>
-  <text x="92" y="102" font-family="system-ui,sans-serif" font-weight="700" font-size="32" fill="white" text-anchor="middle" dominant-baseline="middle">K</text>
-  <text x="60" y="280" font-family="system-ui,sans-serif" font-weight="700" font-size="72" fill="white">AKS Newsletter</text>
-  <text x="60" y="360" font-family="system-ui,sans-serif" font-weight="400" font-size="32" fill="#94a3b8">Monthly curated updates on</text>
-  <text x="60" y="410" font-family="system-ui,sans-serif" font-weight="400" font-size="32" fill="#94a3b8">Azure Kubernetes Service</text>
-  <rect x="60" y="500" width="120" height="6" rx="3" fill="#0078d4"/>
-  <rect x="200" y="500" width="80" height="6" rx="3" fill="#3b82f6"/>
-  <rect x="300" y="500" width="60" height="6" rx="3" fill="#6366f1"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0%" stop-color="#0c1222"/>
+      <stop offset="100%" stop-color="#162033"/>
+    </linearGradient>
+    <linearGradient id="accentBar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0078d4"/>
+      <stop offset="40%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="yearFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="75%" cy="30%" r="45%">
+      <stop offset="0%" stop-color="#0078d4" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#0078d4" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="16" cy="16" r="0.8" fill="#334155" opacity="0.4"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <rect y="0" width="1200" height="5" fill="url(#accentBar)"/>
+
+  ${hexSvg}
+  <circle cx="1020" cy="210" r="130" fill="none" stroke="#3b82f6" stroke-width="0.8" opacity="0.05"/>
+  <circle cx="1020" cy="210" r="180" fill="none" stroke="#6366f1" stroke-width="0.5" opacity="0.03"/>
+
+  <rect x="80" y="65" width="52" height="52" rx="13" fill="#0078d4"/>
+  <text x="106" y="97" font-family="${FONT}" font-weight="700" font-size="26" fill="white" text-anchor="middle" dominant-baseline="middle">K</text>
+  <text x="148" y="97" font-family="${FONT}" font-weight="600" font-size="22" fill="#64748b" dominant-baseline="middle">AKS Newsletter</text>
+
+  ${centerContent}
+
+  <text x="80" y="585" font-family="${FONT}" font-weight="400" font-size="18" fill="#475569">aksnewsletter.com</text>
+
+  <rect y="625" width="1200" height="5" fill="url(#accentBar)"/>
 </svg>`;
+}
+
+/**
+ * Convert an SVG string to a PNG Buffer using resvg.
+ */
+function svgToPng(svgString) {
+  const resvg = new Resvg(svgString, {
+    font: { loadSystemFonts: true },
+    fitTo: { mode: "width", value: 1200 },
+  });
+  return resvg.render().asPng();
 }
 
 function build() {
@@ -981,7 +1088,15 @@ function build() {
     const html = buildEditionPage(ed, prev, next);
     const outFile = path.join(yearDir, `${ed.slug}.html`);
     fs.writeFileSync(outFile, html, "utf8");
-    console.log(`  ✓ ${ed.monthName} ${ed.year} → ${ed.slug}.html`);
+
+    // Generate per-edition social image (PNG for LinkedIn/OG)
+    const edMd = fs.readFileSync(ed.file, "utf8");
+    const edStats = sectionStats(edMd);
+    const edTotal = Object.values(edStats).reduce((a, b) => a + b, 0);
+    const socialSvg = buildSocialSvg({ monthName: ed.monthName, year: ed.year, totalItems: edTotal });
+    const socialPng = svgToPng(socialSvg);
+    fs.writeFileSync(path.join(yearDir, `${ed.slug}-social.png`), socialPng);
+    console.log(`  ✓ ${ed.monthName} ${ed.year} → ${ed.slug}.html + social.png`);
   }
 
   const indexHtml = buildIndexPage(editions);
@@ -1003,9 +1118,12 @@ function build() {
     `User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`, "utf8");
   console.log(`  ✓ robots.txt`);
 
-  // OG image
-  fs.writeFileSync(path.join(OUTPUT_DIR, "og-image.svg"), buildOgImage(), "utf8");
-  console.log(`  ✓ og-image.svg`);
+  // Generic OG image (site-level, PNG)
+  const genericSvg = buildSocialSvg();
+  const genericPng = svgToPng(genericSvg);
+  fs.writeFileSync(path.join(OUTPUT_DIR, "og-image.png"), genericPng);
+  fs.writeFileSync(path.join(OUTPUT_DIR, "og-image.svg"), genericSvg, "utf8");
+  console.log(`  ✓ og-image.png + og-image.svg`);
 
   // CNAME for custom domain
   const domain = SITE_URL.replace(/^https?:\/\//, "");
