@@ -139,7 +139,7 @@ a:hover{color:var(--accent-dark)}
   background:var(--accent);
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230078d4'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-weight='700' font-size='15' fill='white'%3EK%3C/text%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='15.3,3.8 15.3,9.3 10.5,12.0 5.7,9.3 5.7,3.8 10.5,1.0' fill='%237c3aed'/%3E%3Cpolygon points='26.3,3.8 26.3,9.3 21.5,12.0 16.7,9.3 16.7,3.8 21.5,1.0' fill='%238b5cf6'/%3E%3Cpolygon points='9.8,13.3 9.8,18.8 5.0,21.5 0.2,18.8 0.2,13.3 5.0,10.5' fill='%236366f1'/%3E%3Cpolygon points='20.8,13.3 20.8,18.8 16.0,21.5 11.2,18.8 11.2,13.3 16.0,10.5' fill='%230078d4'/%3E%3Cpolygon points='31.8,13.3 31.8,18.8 27.0,21.5 22.2,18.8 22.2,13.3 27.0,10.5' fill='%233b82f6'/%3E%3Cpolygon points='15.3,22.8 15.3,28.3 10.5,31.0 5.7,28.3 5.7,22.8 10.5,20.0' fill='%23818cf8'/%3E%3Cpolygon points='26.3,22.8 26.3,28.3 21.5,31.0 16.7,28.3 16.7,22.8 21.5,20.0' fill='%23a78bfa'/%3E%3C/svg%3E");
   background-size:cover;
 }
 .header-brand{font-size:0.95rem;font-weight:700;color:var(--text);letter-spacing:-0.01em}
@@ -553,7 +553,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
   <meta name="twitter:description" content="${ogDesc}">
   <meta name="twitter:image" content="${ogImage}">
   <link rel="alternate" type="application/rss+xml" title="AKS Newsletter RSS" href="${SITE_URL}/feed.xml">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230078d4'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-weight='700' font-size='15' fill='white'%3EK%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='15.3,3.8 15.3,9.3 10.5,12.0 5.7,9.3 5.7,3.8 10.5,1.0' fill='%237c3aed'/%3E%3Cpolygon points='26.3,3.8 26.3,9.3 21.5,12.0 16.7,9.3 16.7,3.8 21.5,1.0' fill='%238b5cf6'/%3E%3Cpolygon points='9.8,13.3 9.8,18.8 5.0,21.5 0.2,18.8 0.2,13.3 5.0,10.5' fill='%236366f1'/%3E%3Cpolygon points='20.8,13.3 20.8,18.8 16.0,21.5 11.2,18.8 11.2,13.3 16.0,10.5' fill='%230078d4'/%3E%3Cpolygon points='31.8,13.3 31.8,18.8 27.0,21.5 22.2,18.8 22.2,13.3 27.0,10.5' fill='%233b82f6'/%3E%3Cpolygon points='15.3,22.8 15.3,28.3 10.5,31.0 5.7,28.3 5.7,22.8 10.5,20.0' fill='%23818cf8'/%3E%3Cpolygon points='26.3,22.8 26.3,28.3 21.5,31.0 16.7,28.3 16.7,22.8 21.5,20.0' fill='%23a78bfa'/%3E%3C/svg%3E">
   <style>${CSS}</style>
   <script>
   (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
