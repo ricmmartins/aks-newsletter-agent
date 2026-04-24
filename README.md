@@ -47,6 +47,7 @@ npm run validate
 - **Previous/Next navigation** between editions
 - **Reading time estimates** and section-level item counts
 - **Social sharing** — LinkedIn, X/Twitter, copy link buttons
+- **Auto-generated social images** — per-edition PNG (1200×630) with dynamic month/year, section stats, and AKS branding for LinkedIn posts and OG meta tags
 - **RSS feed**, **sitemap.xml**, **robots.txt**, and **Open Graph meta tags**
 - **Back-to-top button** and **print-friendly styles**
 - Auto-deployed to GitHub Pages on push to `main`
@@ -107,7 +108,9 @@ Output: `newsletters/<YYYY>/<YYYY-MM>.md`
 ### Phase 3: Website (`build-site.js`)
 Converts newsletter Markdown files into a styled static HTML site:
 
-- Generates edition pages, index page, RSS feed, sitemap, robots.txt, and OG image
+- Generates edition pages, index page, RSS feed, sitemap, robots.txt
+- Auto-generates **per-edition social images** (PNG) with dynamic month/year, section breakdown, and item count — ready for LinkedIn posts
+- Generates a generic OG image for the site homepage
 - Deployed automatically to GitHub Pages via `deploy-site.yml`
 
 ### AI-Assisted Final Editing
@@ -161,7 +164,7 @@ aks-newsletter-agent/
 ├── collected/                   # Intermediate collected data (JSON)
 ├── newsletters/                 # Final newsletters (Markdown)
 │   └── 2026/
-└── docs/                        # Generated website (git-ignored)
+└── docs/                        # Generated website (git-ignored, includes social PNGs)
 ```
 
 ## Scripts
@@ -196,6 +199,7 @@ The January 2026 edition (`reference/2026-01.md`) serves as the canonical format
 ## Editorial Guidelines
 
 - **Technical, not marketing** — explain "what changed" and "why it matters"
+- **Every item gets a description** — opinionated, engineering-focused summaries for every link. No copy-pasted metadata, no empty descriptions. See `agent_prompt.md` for explicit rules and examples.
 - **No exaggeration** — avoid invented benchmarks or numbers
 - **Engineering-focused voice** — architectural context over product announcements
 - **All links embedded** — use `**[Title](URL)**` format, no naked URLs
