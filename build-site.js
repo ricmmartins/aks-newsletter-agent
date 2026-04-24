@@ -955,11 +955,12 @@ function buildSocialSvg(opts = {}) {
   const monthName = opts.monthName || null;
   const year = opts.year || null;
   const totalItems = opts.totalItems || 0;
+  const stats = opts.stats || {};
   const isEdition = !!(monthName && year);
 
   const FONT = "Segoe UI, Arial, Helvetica, sans-serif";
 
-  // Decorative hexagons (Kubernetes-themed)
+  // Flat-top hexagon helper
   function hexPts(cx, cy, r) {
     return Array.from({ length: 6 }, (_, i) => {
       const a = (Math.PI / 3) * i - Math.PI / 6;
@@ -967,7 +968,44 @@ function buildSocialSvg(opts = {}) {
     }).join(" ");
   }
 
-  const hexes = [
+  // AKS logo: honeycomb cluster of 7 hexagons (purple-blue gradient)
+  function aksLogo(cx, cy) {
+    const r = 7;
+    const positions = [
+      { dx: -7.5, dy: -13, fill: "#7c3aed" },
+      { dx: 7.5, dy: -13, fill: "#8b5cf6" },
+      { dx: -15, dy: 0, fill: "#6366f1" },
+      { dx: 0, dy: 0, fill: "#0078d4" },
+      { dx: 15, dy: 0, fill: "#3b82f6" },
+      { dx: -7.5, dy: 13, fill: "#818cf8" },
+      { dx: 7.5, dy: 13, fill: "#a78bfa" },
+    ];
+    return positions
+      .map((h) => `<polygon points="${hexPts(cx + h.dx, cy + h.dy, r)}" fill="${h.fill}"/>`)
+      .join("\n    ");
+  }
+
+  // Build section summary (e.g., "17 docs · 2 previews · 10 GA · 15 blogs")
+  const SHORT_LABELS = {
+    "Documentation Updates": "docs",
+    "Preview Feature": "previews",
+    "General Availability": "GA",
+    "Behavioral Changes": "changes",
+    "Community Blogs": "blogs",
+    "Releases and Roadmap": "releases",
+    "Watch & Learn": "videos",
+  };
+  const summaryParts = Object.entries(stats)
+    .filter(([, count]) => count > 0)
+    .map(([name, count]) => {
+      const match = Object.entries(SHORT_LABELS).find(([k]) => name.includes(k));
+      return match ? `${count} ${match[1]}` : null;
+    })
+    .filter(Boolean);
+  const summaryText = summaryParts.join("  \u00B7  ");
+
+  // Background decorative hexagons
+  const bgHexes = [
     { cx: 980, cy: 120, r: 50, o: 0.07 },
     { cx: 1070, cy: 180, r: 40, o: 0.05 },
     { cx: 1030, cy: 270, r: 55, o: 0.06 },
@@ -977,37 +1015,24 @@ function buildSocialSvg(opts = {}) {
     { cx: 1100, cy: 310, r: 35, o: 0.04 },
     { cx: 1060, cy: 390, r: 25, o: 0.03 },
   ];
-
-  const hexSvg = hexes
-    .map(
-      (h) =>
-        `<polygon points="${hexPts(h.cx, h.cy, h.r)}" fill="none" stroke="#3b82f6" stroke-width="1.5" opacity="${h.o}"/>`
-    )
+  const bgHexSvg = bgHexes
+    .map((h) => `<polygon points="${hexPts(h.cx, h.cy, h.r)}" fill="none" stroke="#3b82f6" stroke-width="1.5" opacity="${h.o}"/>`)
     .join("\n  ");
 
-  // Center content changes between edition-specific and generic
+  // Edition-specific vs generic center content
   const centerContent = isEdition
     ? `
-  <text x="80" y="255" font-family="${FONT}" font-weight="800" font-size="90" fill="white" letter-spacing="3">${monthName.toUpperCase()}</text>
-  <text x="80" y="365" font-family="${FONT}" font-weight="800" font-size="100" fill="url(#yearFill)" letter-spacing="6">${year}</text>
-  <rect x="80" y="400" width="100" height="4" rx="2" fill="#0078d4"/>
-  <rect x="195" y="400" width="70" height="4" rx="2" fill="#3b82f6"/>
-  <rect x="280" y="400" width="45" height="4" rx="2" fill="#8b5cf6"/>
-  <text x="80" y="460" font-family="${FONT}" font-weight="400" font-size="24" fill="#94a3b8">Monthly curated updates on Azure Kubernetes Service</text>
-  ${
-    totalItems > 0
-      ? `<rect x="80" y="492" width="${Math.max(200, String(totalItems).length * 12 + 210)}" height="36" rx="18" fill="#0078d4" fill-opacity="0.12" stroke="#0078d4" stroke-opacity="0.25" stroke-width="1"/>
-  <text x="100" y="515" font-family="${FONT}" font-weight="600" font-size="16" fill="#60a5fa">${totalItems} curated items this edition</text>`
-      : ""
-  }`
+  <text x="80" y="260" font-family="${FONT}" font-weight="800" font-size="90" fill="white" letter-spacing="3">${monthName.toUpperCase()}</text>
+  <text x="80" y="370" font-family="${FONT}" font-weight="800" font-size="100" fill="url(#yearFill)" letter-spacing="6">${year}</text>
+  <text x="80" y="440" font-family="${FONT}" font-weight="400" font-size="24" fill="#94a3b8">Monthly curated updates on Azure Kubernetes Service</text>
+  ${summaryText ? `<text x="80" y="490" font-family="${FONT}" font-weight="600" font-size="18" fill="#60a5fa" letter-spacing="0.5">${summaryText}</text>` : ""}
+  ${totalItems > 0 ? `<rect x="80" y="515" width="${Math.max(195, String(totalItems).length * 12 + 210)}" height="34" rx="17" fill="#0078d4" fill-opacity="0.12" stroke="#0078d4" stroke-opacity="0.25" stroke-width="1"/>
+  <text x="100" y="537" font-family="${FONT}" font-weight="600" font-size="15" fill="#60a5fa">${totalItems} curated items this edition</text>` : ""}`
     : `
-  <text x="80" y="240" font-family="${FONT}" font-weight="800" font-size="80" fill="white">AKS</text>
-  <text x="80" y="340" font-family="${FONT}" font-weight="800" font-size="80" fill="url(#yearFill)">Newsletter</text>
-  <rect x="80" y="375" width="100" height="4" rx="2" fill="#0078d4"/>
-  <rect x="195" y="375" width="70" height="4" rx="2" fill="#3b82f6"/>
-  <rect x="280" y="375" width="45" height="4" rx="2" fill="#8b5cf6"/>
-  <text x="80" y="435" font-family="${FONT}" font-weight="400" font-size="26" fill="#94a3b8">Monthly curated updates on</text>
-  <text x="80" y="475" font-family="${FONT}" font-weight="400" font-size="26" fill="#94a3b8">Azure Kubernetes Service</text>`;
+  <text x="80" y="250" font-family="${FONT}" font-weight="800" font-size="80" fill="white">AKS</text>
+  <text x="80" y="350" font-family="${FONT}" font-weight="800" font-size="80" fill="url(#yearFill)">Newsletter</text>
+  <text x="80" y="430" font-family="${FONT}" font-weight="400" font-size="26" fill="#94a3b8">Monthly curated updates on</text>
+  <text x="80" y="470" font-family="${FONT}" font-weight="400" font-size="26" fill="#94a3b8">Azure Kubernetes Service</text>`;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
@@ -1039,12 +1064,11 @@ function buildSocialSvg(opts = {}) {
 
   <rect y="0" width="1200" height="5" fill="url(#accentBar)"/>
 
-  ${hexSvg}
+  ${bgHexSvg}
   <circle cx="1020" cy="210" r="130" fill="none" stroke="#3b82f6" stroke-width="0.8" opacity="0.05"/>
   <circle cx="1020" cy="210" r="180" fill="none" stroke="#6366f1" stroke-width="0.5" opacity="0.03"/>
 
-  <rect x="80" y="65" width="52" height="52" rx="13" fill="#0078d4"/>
-  <text x="106" y="97" font-family="${FONT}" font-weight="700" font-size="26" fill="white" text-anchor="middle" dominant-baseline="middle">K</text>
+  ${aksLogo(106, 91)}
   <text x="148" y="97" font-family="${FONT}" font-weight="600" font-size="22" fill="#64748b" dominant-baseline="middle">AKS Newsletter</text>
 
   ${centerContent}
@@ -1093,7 +1117,7 @@ function build() {
     const edMd = fs.readFileSync(ed.file, "utf8");
     const edStats = sectionStats(edMd);
     const edTotal = Object.values(edStats).reduce((a, b) => a + b, 0);
-    const socialSvg = buildSocialSvg({ monthName: ed.monthName, year: ed.year, totalItems: edTotal });
+    const socialSvg = buildSocialSvg({ monthName: ed.monthName, year: ed.year, totalItems: edTotal, stats: edStats });
     const socialPng = svgToPng(socialSvg);
     fs.writeFileSync(path.join(yearDir, `${ed.slug}-social.png`), socialPng);
     console.log(`  ✓ ${ed.monthName} ${ed.year} → ${ed.slug}.html + social.png`);
