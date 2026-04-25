@@ -57,26 +57,26 @@ If the AKS Engineering Blog has no posts for that month, explicitly state:
 - If delayed, mention holiday time off naturally.
 - State what sections are included.
 
-3️⃣ **🔎 Documentation Updates**
-- One entry per Learn documentation update.
-- Format: **[Title](URL)**: 1–3 sentences explaining what was refreshed and why it matters.
-- Practical, platform-focused explanation. Never copy/paste the Learn page's meta description.
-- Explain the architectural or operational context: who benefits, what problem it solves, or what changed.
+3️⃣ **✅ General Availability Announcements**
+- One entry per GA feature.
+- Format: **[Title](URL)**: 1–3 sentences on what the feature does, what pain point it solves, and who benefits.
+- If none, explicitly state: "None this month."
 
 4️⃣ **🧪 Preview Feature Announcements**
 - One entry per preview feature.
 - Format: **[Title](URL)**: 1–3 sentences on what the feature does and why it matters.
 - If none, explicitly state: "None this month."
 
-5️⃣ **✅ General Availability Announcements**
-- One entry per GA feature.
-- Format: **[Title](URL)**: 1–3 sentences on what the feature does, what pain point it solves, and who benefits.
-- If none, explicitly state: "None this month."
-
-6️⃣ **🔁 Behavioral Changes**
+5️⃣ **🔁 Behavioral Changes**
 - Each change as: **[Title](URL)**: impact explanation.
 - Focus on breaking changes or operational impact.
 - Explain what operators need to know and what action, if any, they should take.
+
+6️⃣ **🔎 Documentation Updates**
+- One entry per Learn documentation update.
+- Format: **[Title](URL)**: 1–3 sentences explaining what was refreshed and why it matters.
+- Practical, platform-focused explanation. Never copy/paste the Learn page's meta description.
+- Explain the architectural or operational context: who benefits, what problem it solves, or what changed.
 
 7️⃣ **📚 Community Blogs**
 - Include AKS blog + TechCommunity posts.

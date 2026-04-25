@@ -94,10 +94,10 @@ Output: `collected/<YYYY-MM>.json`
 Assembles collected data into a structured Markdown newsletter:
 
 1. Title & Intro
-2. 🔎 Documentation Updates
+2. ✅ General Availability Announcements
 3. 🧪 Preview Feature Announcements
-4. ✅ General Availability Announcements
-5. 🔁 Behavioral Changes
+4. 🔁 Behavioral Changes
+5. 🔎 Documentation Updates
 6. 📚 Community Blogs
 7. 🔗 Releases & Roadmap
 8. 🎥 Watch & Learn

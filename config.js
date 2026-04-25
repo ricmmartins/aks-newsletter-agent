@@ -89,10 +89,10 @@ const SOURCES = {
 };
 
 const SECTION_HEADERS = {
-  documentation_updates: "🔎 Documentation Updates",
-  preview_announcements: "🧪 Preview Feature Announcements",
   ga_announcements: "✅ General Availability Announcements",
+  preview_announcements: "🧪 Preview Feature Announcements",
   behavioral_changes: "🔁 Behavioral Changes",
+  documentation_updates: "🔎 Documentation Updates",
   community_blogs: "📚 Community Blogs",
   releases_roadmap: "🔗 Releases and Roadmap",
   watch_learn: "🎥 Watch & Learn",
