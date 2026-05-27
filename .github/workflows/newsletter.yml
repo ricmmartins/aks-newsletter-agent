@@ -85,7 +85,13 @@ jobs:
 
       - name: Run AKS Newsletter Agent (generate draft)
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
-        run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --generate-only
+        run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --generate-only --no-polish
+
+      - name: Run AKS Newsletter Agent (AI polish)
+        if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
+        run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --polish-only
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Quality gate – check content completeness
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'

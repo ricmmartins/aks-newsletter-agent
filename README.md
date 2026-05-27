@@ -14,14 +14,20 @@ Automated agent for generating the monthly **AKS Newsletter** — a technical, e
 # Install dependencies
 npm install
 
-# Full run: collect data + generate newsletter for a specific month
+# Full run: collect data + generate + AI polish for a specific month
 node run.js 2026 2
 
 # Collect data only
 node run.js 2026 2 --collect-only
 
-# Generate from previously collected data
+# Generate + polish from previously collected data
 node run.js 2026 2 --generate-only
+
+# Polish an existing draft (requires GITHUB_TOKEN)
+node run.js 2026 2 --polish-only
+
+# Generate without AI polish (raw draft only)
+node run.js 2026 2 --no-polish
 
 # Build the static website
 npm run build:site
@@ -103,7 +109,18 @@ Assembles collected data into a structured Markdown newsletter:
 8. 🎥 Watch & Learn
 9. 🧠 Closing Thoughts
 
-Output: `newsletters/<YYYY>/<YYYY-MM>.md`
+Output: `newsletters/<YYYY>/<YYYY-MM>.md` (raw draft)
+
+### Phase 2.5: AI Polish (`polisher.js`)
+Takes the raw draft and polishes it using GitHub Models API (GPT-4o):
+
+- Rewrites descriptions to be opinionated and engineering-focused
+- Removes noise items (TOC changes, typo fixes)
+- Matches tone and quality of the reference edition
+- Uses `GITHUB_TOKEN` for authentication (free in GitHub Actions)
+- Falls back gracefully if AI is unavailable
+
+Output: Overwrites `newsletters/<YYYY>/<YYYY-MM>.md` with polished version
 
 ### Phase 3: Website (`build-site.js`)
 Converts newsletter Markdown files into a styled static HTML site:
@@ -114,11 +131,13 @@ Converts newsletter Markdown files into a styled static HTML site:
 - Deployed automatically to GitHub Pages via `deploy-site.yml`
 
 ### AI-Assisted Final Editing
-The generated draft is a structured starting point. For the best results:
+The AI polish step is now **automated** via `polisher.js` using GitHub Models API. It runs automatically after draft generation (both locally and in GitHub Actions). The polisher:
 
-1. Run the collector to gather raw data
-2. Review `collected/<YYYY-MM>.json` for completeness
-3. Use `agent_prompt.md` with an AI assistant (Copilot, etc.) along with the collected data to produce the final polished newsletter
+1. Reads the raw draft + collected data + `agent_prompt.md` + reference edition
+2. Sends to GPT-4o via GitHub Models API (authenticated with `GITHUB_TOKEN`)
+3. Produces a polished newsletter matching the reference quality
+
+To skip AI polish: use `--no-polish` flag. To polish manually later: use `--polish-only`.
 
 ## Automated Monthly Scheduling
 
@@ -154,7 +173,8 @@ aks-newsletter-agent/
 ├── package.json                 # Dependencies and scripts
 ├── config.js                    # Source URLs, section headers, AKS keywords
 ├── collector.js                 # Data collection from 14+ sources
-├── generator.js                 # Markdown newsletter assembly
+├── generator.js                 # Markdown newsletter assembly (raw draft)
+├── polisher.js                  # AI polish via GitHub Models API (GPT-4o)
 ├── build-site.js                # Static site generator (HTML, RSS, sitemap)
 ├── validate-links.js            # Link checker for newsletter URLs
 ├── run.js                       # CLI entry point
@@ -171,9 +191,10 @@ aks-newsletter-agent/
 
 | Command | Description |
 |---------|-------------|
-| `npm start` | Full run (collect + generate) |
+| `npm start` | Full run (collect + generate + AI polish) |
 | `npm run collect` | Collect data only |
-| `npm run generate` | Generate draft from collected data |
+| `npm run generate` | Generate raw draft (no AI polish) |
+| `npm run polish` | AI polish an existing draft |
 | `npm run build:site` | Build the static website to `docs/` |
 | `npm run validate` | Validate all links in newsletters |
 
