@@ -297,7 +297,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
 
     // Strategy: Polish section by section to stay within token limits
     // This is more reliable and produces better results per section
-    const draft = this._loadFile(this.draftPath, "Draft newsletter");
+    let draft = this._loadFile(this.draftPath, "Draft newsletter");
     const collected = this._loadFile(this.collectedPath, "Collected data");
     const collectedData = collected ? JSON.parse(collected) : null;
 
@@ -305,6 +305,9 @@ Return ONLY the polished section content in Markdown. No commentary.`;
       console.error("❌ No draft found to polish.");
       return null;
     }
+
+    // Strip POLISHER NOTE hints before processing (they're generator-internal)
+    draft = draft.replace(/\n<!--\s*POLISHER NOTE:.*?-->\s*\n?/gs, "\n");
 
     console.log("📋 Using section-by-section polishing strategy...");
     const polished = await this._polishBySection(draft, collectedData);
