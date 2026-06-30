@@ -102,6 +102,21 @@ ${summary}`;
     ];
   }
 
+  /**
+   * Enforce UTM tracking on all links in the final output.
+   * Applied as the LAST step to guarantee no link escapes without tracking.
+   */
+  _enforceUtm(content) {
+    const campaign = `${this.year}-${this.monthPad}`;
+    return content.replace(/\]\((https?:\/\/[^)]+)\)/g, (match, url) => {
+      // Skip GitHub, YouTube, and links that already have UTM
+      if (/github\.com|youtube\.com|youtu\.be/i.test(url)) return match;
+      if (url.includes("utm_source=aksnewsletter")) return match;
+      const sep = url.includes("?") ? "&" : "?";
+      return `](${url}${sep}utm_source=aksnewsletter&utm_medium=website&utm_campaign=${campaign})`;
+    });
+  }
+
   // Build a compact system message for section-by-section polishing
   _buildSectionSystemMessage() {
     return `You are an editorial agent for Ricardo Martins' monthly AKS Newsletter.
@@ -312,9 +327,12 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     draft = draft.replace(/\n<!--\s*POLISHER NOTE:.*?-->\s*\n?/gs, "\n");
 
     console.log("📋 Using section-by-section polishing strategy...");
-    const polished = await this._polishBySection(draft, collectedData);
+    let polished = await this._polishBySection(draft, collectedData);
 
     if (polished) {
+      // Enforce UTM tracking on ALL links as a final post-polish step
+      polished = this._enforceUtm(polished);
+
       // Final validation — pass original draft to check URL preservation
       const issues = this._validateOutput(polished, draft);
       if (issues.length === 0) {
