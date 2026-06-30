@@ -714,14 +714,18 @@ class ContentCollector {
               capturedResults = results.edges.map((e) => {
                 const msg = e.node.message;
                 const boardId = (msg.board?.displayId || "").toLowerCase();
-                const slug = (msg.subject || "")
-                  .toLowerCase().replace(/[^a-z0-9]+/g, "-")
-                  .replace(/^-|-$/g, "").substring(0, 80);
                 const snippetText = (e.node.snippet || [])
                   .map((s) => (s.content || []).join(" ")).join(" ");
+                // Prefer canonical viewHref from API; fall back to UID-based URL
+                let url = "";
+                if (msg.viewHref) {
+                  url = msg.viewHref.startsWith("http") ? msg.viewHref : `https://techcommunity.microsoft.com${msg.viewHref}`;
+                } else {
+                  url = `https://techcommunity.microsoft.com/blog/${boardId}/ct-p/${msg.uid}`;
+                }
                 return {
                   title: msg.subject || "",
-                  url: `https://techcommunity.microsoft.com/blog/${boardId}/${slug}/${msg.uid}`,
+                  url,
                   posted: msg.postTime || "",
                   snippet: snippetText,
                 };
@@ -783,14 +787,18 @@ class ContentCollector {
             return (results.edges || []).map((e) => {
               const msg = e.node.message;
               const boardId = (msg.board?.displayId || "").toLowerCase();
-              const slug = (msg.subject || "")
-                .toLowerCase().replace(/[^a-z0-9]+/g, "-")
-                .replace(/^-|-$/g, "").substring(0, 80);
               const snippetText = (e.node.snippet || [])
                 .map((s) => (s.content || []).join(" ")).join(" ");
+              // Prefer canonical viewHref from API; fall back to UID-based URL
+              let url = "";
+              if (msg.viewHref) {
+                url = msg.viewHref.startsWith("http") ? msg.viewHref : `https://techcommunity.microsoft.com${msg.viewHref}`;
+              } else {
+                url = `https://techcommunity.microsoft.com/blog/${boardId}/ct-p/${msg.uid}`;
+              }
               return {
                 title: msg.subject || "",
-                url: `https://techcommunity.microsoft.com/blog/${boardId}/${slug}/${msg.uid}`,
+                url,
                 posted: msg.postTime || "",
                 snippet: snippetText,
               };
