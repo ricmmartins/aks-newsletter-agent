@@ -114,7 +114,9 @@ RULES:
 - Use patterns like: "This documentation was refreshed with...", "Updated to cover...", "Refreshed with current guidance on..."
 - Remove noise items (TOC-only changes, typo fixes, trivial edits)
 - Remove [NEEDS DESCRIPTION] markers from output
-- Keep all legitimate links
+- **NEVER change, merge, remove, or substitute URLs.** Each item's URL is its source — preserve it EXACTLY.
+- **NEVER merge two items into one.** Each entry with a unique URL stays separate.
+- You may shorten the title but the URL in parentheses must remain unchanged.
 - Be technical, not marketing
 
 GOOD EXAMPLE:
@@ -313,8 +315,8 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     const polished = await this._polishBySection(draft, collectedData);
 
     if (polished) {
-      // Final validation
-      const issues = this._validateOutput(polished);
+      // Final validation — pass original draft to check URL preservation
+      const issues = this._validateOutput(polished, draft);
       if (issues.length === 0) {
         console.log("✅ Polish passed quality validation.");
       } else {
@@ -398,7 +400,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     return polishedSections.join("\n\n---\n\n");
   }
 
-  _validateOutput(content) {
+  _validateOutput(content, originalDraft) {
     const issues = [];
     const lines = content.split("\n");
 
@@ -446,6 +448,30 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     }
     if (totalItems < 5) {
       issues.push(`Only ${totalItems} items found — model may have dropped content`);
+    }
+
+    // Check URL preservation: every URL in the original draft should appear in the output
+    if (originalDraft) {
+      const urlRegex = /\]\(([^)]+)\)/g;
+      const originalUrls = new Set();
+      let match;
+      while ((match = urlRegex.exec(originalDraft)) !== null) {
+        // Strip UTM params for comparison (they're added post-generation)
+        const url = match[1].replace(/[?&]utm_source=aksnewsletter[^)]*/, "");
+        if (!staticLinks.some((s) => url.includes(s))) {
+          originalUrls.add(url);
+        }
+      }
+      const outputUrls = new Set();
+      const urlRegex2 = /\]\(([^)]+)\)/g;
+      while ((match = urlRegex2.exec(content)) !== null) {
+        const url = match[1].replace(/[?&]utm_source=aksnewsletter[^)]*/, "");
+        outputUrls.add(url);
+      }
+      const droppedUrls = [...originalUrls].filter((u) => !outputUrls.has(u));
+      if (droppedUrls.length > 0) {
+        issues.push(`${droppedUrls.length} URLs from original draft were dropped by polisher: ${droppedUrls.slice(0, 3).join(", ")}${droppedUrls.length > 3 ? "..." : ""}`);
+      }
     }
 
     return issues;

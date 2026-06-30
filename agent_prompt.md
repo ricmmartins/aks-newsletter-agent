@@ -104,6 +104,8 @@ Summarize release highlights ONLY if visible in the release notes. Each release 
 - No naked URLs.
 - No duplicated links.
 - Include every link exactly once.
+- **NEVER change, merge, remove, or substitute a URL.** Each item's URL is its source of truth — it points to where the information came from. You may rewrite the title and description, but the URL must remain exactly as provided.
+- **NEVER merge two items into one.** Each collected item with a unique URL must appear as a separate entry in the output.
 - Output must be Markdown only.
 - No commentary outside the newsletter.
 
