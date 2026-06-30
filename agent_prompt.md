@@ -116,6 +116,8 @@ Before final output, verify:
 5. Section order matches the reference edition.
 6. Tone matches January 2026 edition.
 7. **Every single item has an opinionated description/summary. No exceptions.**
+8. **No item has a description starting with "Learn how to...", "Learn about...", or "In this article..."** — these are metadata patterns that must be rewritten.
+9. **No item has the [NEEDS DESCRIPTION] marker** — all must be replaced with real descriptions.
 
 ### DESCRIPTION REQUIREMENTS (NON-NEGOTIABLE)
 
@@ -126,6 +128,7 @@ Descriptions must:
 - Be practical and platform-focused — not marketing copy
 - Provide architectural context when relevant
 - Be 1-3 sentences minimum (not just the metadata from the source link)
+- Use patterns like: "This documentation was refreshed/updated with...", "Updated to cover...", "New guide explaining...", "Refreshed with current guidance on..."
 
 **NEVER** do any of the following:
 - Leave an item with no description (e.g., `* **[Feature Name](url)**` with nothing after it)

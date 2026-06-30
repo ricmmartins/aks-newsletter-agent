@@ -3,7 +3,7 @@
     "year": 2026,
     "month": 6,
     "monthName": "June",
-    "collectedAt": "2026-06-26T14:58:12.026Z",
+    "collectedAt": "2026-06-30T13:46:12.976Z",
     "windowStart": "2026-06-01T00:00:00.000Z",
     "windowEnd": "2026-06-30T23:59:59.000Z"
   },
@@ -120,266 +120,177 @@
   ],
   "aks_docs_commits": [
     {
-      "url": "https://learn.microsoft.com/azure/aks/optimize-aks-costs",
-      "date": "2026-06-25T22:34:34Z",
+      "url": "https://learn.microsoft.com/azure/aks/azure-cni-powered-by-cilium",
+      "date": "2026-06-26T22:27:02Z",
       "source": "AKS Docs",
-      "title": "Optimize Azure Kubernetes Service (AKS) Usage and Costs",
-      "summary": "Learn how to optimize Azure Kubernetes Service (AKS) usage and costs with AKS Automatic as the recommended default for most production workloads."
+      "title": "Configure Azure CNI Powered by Cilium in Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to create an Azure Kubernetes Service (AKS) cluster with Azure CNI Powered by Cilium. This networking configuration is the default for AKS Automatic clusters and available as an option for AKS Standard clusters.",
+      "summaryIsMetadata": true,
+      "commitContext": "Adding AKS Automatic"
     },
     {
-      "url": "https://learn.microsoft.com/azure/aks/use-cvm",
-      "date": "2026-06-25T19:33:49Z",
+      "url": "https://learn.microsoft.com/azure/aks/workload-identity-overview",
+      "date": "2026-06-26T22:01:49Z",
       "source": "AKS Docs",
-      "title": "Use Confidential Virtual Machines (CVMs) in Azure Kubernetes Service (AKS)",
-      "summary": "Learn how to create Confidential Virtual Machine (CVM) node pools with Azure Kubernetes Service (AKS)"
+      "title": "Use a Microsoft Entra Workload ID on Azure Kubernetes Service (AKS)",
+      "summary": "Learn about Microsoft Entra Workload ID for Azure Kubernetes Service (AKS), how workload identity is preconfigured on AKS Automatic clusters, and how to migrate your application to authenticate using this identity.",
+      "summaryIsMetadata": true,
+      "commitContext": "Adding AKS Automatic"
     },
     {
-      "url": "https://learn.microsoft.com/azure/aks/istio-cni",
-      "date": "2026-06-24T23:43:50Z",
+      "url": "https://learn.microsoft.com/azure/aks/use-nvidia-gpu",
+      "date": "2026-06-25T20:42:41Z",
       "source": "AKS Docs",
-      "title": "Enable Istio CNI for Istio-based service mesh add-on for Azure Kubernetes Service",
-      "summary": "Enable Istio CNI for enhanced security in Istio-based service mesh add-on for Azure Kubernetes Service"
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/best-practices-gpu",
-      "date": "2026-06-24T23:15:25Z",
-      "source": "AKS Docs",
-      "title": "GPU Best Practices for Azure Kubernetes Service (AKS)",
-      "summary": "Learn best practices for managing GPU-enabled node pools on AKS, including placement, lifecycle management, isolation, and how to use AKS Automatic as the recommended production-ready default for most workloads."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/concepts-identity",
-      "date": "2026-06-24T23:00:55Z",
-      "source": "AKS Docs",
-      "title": "Concepts - Access and Identity in Azure Kubernetes Service (AKS)",
-      "summary": "Learn the five identity scenarios in Azure Kubernetes Service (AKS), how they map to AKS Automatic and AKS Standard, and where to find the right deep-dive documentation."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/node-auto-provisioning",
-      "date": "2026-06-24T22:50:44Z",
-      "source": "AKS Docs",
-      "title": "Overview of Node Auto-Provisioning (NAP) in Azure Kubernetes Service (AKS)",
-      "summary": "Learn about node auto-provisioning in AKS, including how it works, upgrade behavior, prerequisites, limitations, and when to use AKS Automatic as the recommended production-ready default."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/concepts-ai-ml-language-models",
-      "date": "2026-06-24T22:32:57Z",
-      "source": "AKS Docs",
-      "title": "Concepts - Small and Large Language Models",
-      "summary": "Learn about small and large language models, when to use each model type, and how to run AI and machine learning workflows on Azure Kubernetes Service (AKS), with AKS Automatic as the recommended production default for most workloads."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/blue-green-node-pool-upgrade",
-      "date": "2026-06-24T20:40:46Z",
-      "source": "AKS Docs",
-      "title": "Blue-Green Node Pool Upgrades in Azure Kubernetes Service (AKS) (preview)",
-      "summary": "Perform upgrades of AKS node pools using a blue-green deployment strategy to ensure workload availability during updates."
+      "title": "Use GPUs on Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to use GPUs for high performance compute or graphics-intensive workloads on Azure Kubernetes Service (AKS).",
+      "summaryIsMetadata": true,
+      "commitContext": "Recommend managed GPU feature as primary approach for GPU node management on AKS, and self-managed as alternative path"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/node-auto-provisioning-aksnodeclass",
       "date": "2026-06-24T13:07:44Z",
       "source": "AKS Docs",
       "title": "Configure AKSNodeClass Resources for Node Auto-Provisioning (NAP) in Azure Kubernetes Service (AKS)",
-      "summary": "Learn how to configure Azure-specific settings for AKS node auto-provisioning using AKSNodeClass resources."
+      "summary": "Learn how to configure Azure-specific settings for AKS node auto-provisioning using AKSNodeClass resources.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update default OS version information for Ubuntu"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/configure-aks-scheduler",
       "date": "2026-06-23T22:36:16Z",
       "source": "AKS Docs",
       "title": "Configure Scheduler Profiles on Azure Kubernetes Service (AKS) (preview)",
-      "summary": "Learn how to set scheduler profiles to achieve advanced scheduling behaviors on Azure Kubernetes Service (AKS)."
+      "summary": "Learn how to set scheduler profiles to achieve advanced scheduling behaviors on Azure Kubernetes Service (AKS).",
+      "summaryIsMetadata": true,
+      "commitContext": "Update article on configuring AKS scheduler profiles"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/tutorial-kubernetes-deploy-application",
       "date": "2026-06-23T21:54:59Z",
       "source": "AKS Docs",
       "title": "Kubernetes on Azure tutorial - Deploy an application to Azure Kubernetes Service (AKS)",
-      "summary": "In this Azure Kubernetes Service (AKS) tutorial, you deploy a multi-container application to your cluster using images stored in Azure Container Registry."
+      "summary": "In this Azure Kubernetes Service (AKS) tutorial, you deploy a multi-container application to your cluster using images stored in Azure Container Registry.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update RabbitMQ version and remove unnecessary configurations in AKS tutorials"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/intro-aks-automatic",
       "date": "2026-06-23T18:03:45Z",
       "source": "AKS Docs",
       "title": "Introduction to Azure Kubernetes Service (AKS) Automatic",
-      "summary": "Simplify deployment and management of container-based applications in Azure by learning about the features and benefits of Azure Kubernetes Service Automatic."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/azure-cni-powered-by-cilium",
-      "date": "2026-06-23T16:51:42Z",
-      "source": "AKS Docs",
-      "title": "Configure Azure CNI Powered by Cilium in Azure Kubernetes Service (AKS)",
-      "summary": "Learn how to create an Azure Kubernetes Service (AKS) cluster with Azure CNI Powered by Cilium."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/ai-toolchain-operator",
-      "date": "2026-06-22T22:11:25Z",
-      "source": "AKS Docs",
-      "title": "Deploy an AI model on Azure Kubernetes Service (AKS) with the AI toolchain operator add-on",
-      "summary": "Learn how to enable the AI toolchain operator add-on on Azure Kubernetes Service (AKS) to simplify OSS AI model management and deployment."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/reliability-zone-resiliency-recommendations",
-      "date": "2026-06-22T21:52:08Z",
-      "source": "AKS Docs",
-      "title": "Zone Resiliency Recommendations for Azure Kubernetes Service (AKS)",
-      "summary": "Learn recommendations for designing and validating zone resiliency in Azure Kubernetes Service (AKS), including guidance for AKS Automatic and AKS Standard."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/concepts-vulnerability-management",
-      "date": "2026-06-22T21:45:06Z",
-      "source": "AKS Docs",
-      "title": "Vulnerability Management for Azure Kubernetes Service (AKS)",
-      "summary": "Learn how Microsoft manages security vulnerabilities for Azure Kubernetes Service (AKS) clusters, including the production-ready default experience with AKS Automatic."
+      "summary": "Simplify deployment and management of container-based applications in Azure by learning about the features and benefits of Azure Kubernetes Service Automatic.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update aks automatic doc and remove limitations"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/use-node-public-ips",
       "date": "2026-06-22T07:00:14Z",
       "source": "AKS Docs",
       "title": "Use instance-level public IPs in Azure Kubernetes Service (AKS)",
-      "summary": "Learn how to manage instance-level public IPs Azure Kubernetes Service (AKS)"
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/app-routing-gateway-api-dns-tls",
-      "date": "2026-06-19T16:17:13Z",
-      "source": "AKS Docs",
-      "title": "Configure Azure DNS and TLS with the Application Routing Gateway API Implementation",
-      "summary": "Use the Application Routing add-on to automatically manage Azure DNS records and Azure Key Vault TLS certificates for ingress traffic on Azure Kubernetes Service (AKS) with the Kubernetes Gateway API."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/outbound-rules-control-egress",
-      "date": "2026-06-18T22:31:30Z",
-      "source": "AKS Docs",
-      "title": "Outbound Network and FQDN Rules for Azure Kubernetes Service (AKS) Clusters",
-      "summary": "Learn what ports and addresses are required to control egress traffic in Azure Kubernetes Service (AKS)"
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/nat-gateway",
-      "date": "2026-06-18T21:32:54Z",
-      "source": "AKS Docs",
-      "title": "Create a managed or user-assigned NAT gateway for your Azure Kubernetes Service (AKS) cluster",
-      "summary": "Learn how to create an AKS cluster with managed NAT integration and user-assigned NAT gateway."
+      "summary": "Learn how to manage instance-level public IPs Azure Kubernetes Service (AKS)",
+      "summaryIsMetadata": true,
+      "commitContext": "Clarify feature flag registration for dual-stack IPs"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/long-term-support",
       "date": "2026-06-18T17:42:02Z",
       "source": "AKS Docs",
       "title": "Long-Term Support for Azure Kubernetes Service (AKS) Versions",
-      "summary": "Learn about Azure Kubernetes Service (AKS) long-term support for Kubernetes"
+      "summary": "Learn about Azure Kubernetes Service (AKS) long-term support for Kubernetes",
+      "summaryIsMetadata": true,
+      "commitContext": "Document ACC SGX as unsupported for AKS LTS"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/localdns-custom",
       "date": "2026-06-18T07:00:41Z",
       "source": "AKS Docs",
       "title": "Configure LocalDNS in Azure Kubernetes Service (AKS)",
-      "summary": "Learn how to improve your Domain Name System (DNS) resolution performance and resiliency in AKS using localDNS."
+      "summary": "Learn how to improve your Domain Name System (DNS) resolution performance and resiliency in AKS using localDNS.",
+      "summaryIsMetadata": true,
+      "commitContext": "Add note about TCP connection cap for LocalDNS"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/learn/quick-kubernetes-deploy-powershell",
       "date": "2026-06-18T01:39:30Z",
       "source": "AKS Docs",
       "title": "Quickstart: Deploy an Azure Kubernetes Service (AKS) cluster using Azure PowerShell",
-      "summary": "Learn how to quickly deploy a Kubernetes cluster and deploy an application in Azure Kubernetes Service (AKS) using PowerShell."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/container-network-observability-how-to",
-      "date": "2026-06-17T18:59:58Z",
-      "source": "AKS Docs",
-      "title": "Set up Container Network Observability for Azure Kubernetes Service (AKS) - Azure managed Prometheus and Grafana",
-      "summary": "Get started with Container Network Observability for your AKS cluster using Azure managed Prometheus and Grafana."
+      "summary": "Learn how to quickly deploy a Kubernetes cluster and deploy an application in Azure Kubernetes Service (AKS) using PowerShell.",
+      "summaryIsMetadata": true,
+      "commitContext": "Freshness review of AKS PowerShell quickstart"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/use-capacity-reservation-groups",
       "date": "2026-06-17T18:25:02Z",
       "source": "AKS Docs",
       "title": "Assign Capacity Reservation Groups to Node Pools in Azure Kubernetes Service (AKS)",
-      "summary": "Learn how to use capacity reservation groups with node pools in Azure Kubernetes Service (AKS) to guarantee allocated capacity for your node pools."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/automatic-pod-disruption-budget-management",
-      "date": "2026-06-17T16:42:11Z",
-      "source": "AKS Docs",
-      "title": "Automatic Pod Disruption Budget management in AKS (preview)",
-      "summary": "Learn how to use automatic Pod Disruption Budget management (preview) to manage Pod Disruption Budgets and unblock node drain operations in AKS clusters."
+      "summary": "Learn how to use capacity reservation groups with node pools in Azure Kubernetes Service (AKS) to guarantee allocated capacity for your node pools.",
+      "summaryIsMetadata": true,
+      "commitContext": "Fix author name and improve code block formatting"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/supported-kubernetes-versions",
       "date": "2026-06-17T00:02:25Z",
       "source": "AKS Docs",
       "title": "Supported Kubernetes Versions in Azure Kubernetes Service (AKS)",
-      "summary": "Learn the Kubernetes version support policy and lifecycle of clusters in Azure Kubernetes Service (AKS)."
+      "summary": "Learn the Kubernetes version support policy and lifecycle of clusters in Azure Kubernetes Service (AKS).",
+      "summaryIsMetadata": true,
+      "commitContext": "Add Kubernetes 1.36 component version breaking changes table"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/istio-gateway-api",
       "date": "2026-06-16T20:33:57Z",
       "source": "AKS Docs",
       "title": "Kubernetes Gateway API Ingress for Istio Service Mesh Add-on for Azure Kubernetes Service (AKS)",
-      "summary": "Configure ingresses for the Istio service mesh add-on for AKS using the Kubernetes Gateway API."
+      "summary": "Configure ingresses for the Istio service mesh add-on for AKS using the Kubernetes Gateway API.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update GatewayClass and Gateway"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/app-routing-gateway-api",
       "date": "2026-06-16T19:28:15Z",
       "source": "AKS Docs",
       "title": "Azure Kubernetes Service (AKS) application routing add-on with the Kubernetes Gateway API",
-      "summary": "Use the application routing add-on to manage ingress traffic on Azure Kubernetes Service (AKS) using the Kubernetes Gateway API."
+      "summary": "Use the application routing add-on to manage ingress traffic on Azure Kubernetes Service (AKS) using the Kubernetes Gateway API.",
+      "summaryIsMetadata": true,
+      "commitContext": "Added notes about access logs"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/aks-end-of-support-notifications",
       "date": "2026-06-16T18:46:53Z",
       "source": "AKS Docs",
       "title": "AKS end of support notifications",
-      "summary": "Learn how to receive and set up alerts for Kubernetes version end of support notifications in Azure Kubernetes Service."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/gpu-profiling",
-      "date": "2026-06-15T20:00:56Z",
-      "source": "AKS Docs",
-      "title": "gpu-profiling: Include flame graph images (#3332)"
+      "summary": "Learn how to receive and set up alerts for Kubernetes version end of support notifications in Azure Kubernetes Service.",
+      "summaryIsMetadata": true,
+      "commitContext": "Updated ms author metadata value"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/create-node-pools",
       "date": "2026-06-15T14:51:19Z",
       "source": "AKS Docs",
       "title": "Create Node Pools in Azure Kubernetes Service (AKS)",
-      "summary": "Learn how to create multiple node pools for a cluster in Azure Kubernetes Service (AKS)."
+      "summary": "Learn how to create multiple node pools for a cluster in Azure Kubernetes Service (AKS).",
+      "summaryIsMetadata": true,
+      "commitContext": "Update AKS node pools documentation"
     },
     {
       "url": "https://learn.microsoft.com/azure/aks/concepts-network-isolated",
       "date": "2026-06-15T06:59:48Z",
       "source": "AKS Docs",
       "title": "Network isolated AKS clusters",
-      "summary": "Learn how network isolated AKS clusters work"
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/custom-certificate-authority",
-      "date": "2026-06-12T17:11:36Z",
-      "source": "AKS Docs",
-      "title": "Custom Certificate Authority (CA) in Azure Kubernetes Service (AKS)",
-      "summary": "Learn how to use a custom certificate authority (CA) to add certificates to your nodes in an Azure Kubernetes Service (AKS) cluster."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/workload-identity-migrate-from-pod-identity",
-      "date": "2026-06-11T22:16:23Z",
-      "source": "AKS Docs",
-      "title": "Migrate Azure Kubernetes Service (AKS) Pods to Microsoft Entra Workload ID",
-      "summary": "Migrate AKS pods from pod-managed identities to Microsoft Entra Workload ID using Azure Identity SDK versions or migration sidecar approaches."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/extended-zones",
-      "date": "2026-06-11T22:14:21Z",
-      "source": "AKS Docs",
-      "title": "Azure Kubernetes Service (AKS) for Extended Zones",
-      "summary": "Learn how to deploy an Azure Kubernetes Service (AKS) for Azure Extended Zones."
-    },
-    {
-      "url": "https://learn.microsoft.com/azure/aks/app-routing-nginx-prometheus",
-      "date": "2026-06-11T19:13:08Z",
-      "source": "AKS Docs",
-      "title": "Monitor the ingress-nginx controller metrics in the application routing add-on with Prometheus",
-      "summary": "Configure Prometheus to scrape the ingress-nginx controller metrics."
+      "summary": "Learn how network isolated AKS clusters work",
+      "summaryIsMetadata": true,
+      "commitContext": "Update network isolated BYO ACR limitation"
     }
   ],
   "techcommunity": [],
   "techcommunity_search": [
+    {
+      "title": "Secure containers from code to runtime | Microsoft Defender",
+      "url": "https://techcommunity.microsoft.com/blog/microsoftmechanicsblog/secure-containers-from-code-to-runtime-microsoft-defender/4531871",
+      "posted": "2026-06-29T09:19:54.598-07:00",
+      "summary": "...ontains a few high-severity vulnerabilities. This is exactly what happens with supply chain attacks. For that, from Cloud Shell, I’ll run an <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> command first to get my credentials.&nbsp; \n -Now I c...",
+      "source": "TechCommunity Search"
+    },
     {
       "title": "Best practices for Infrastructure as Code CI/CD on Azure",
       "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/best-practices-for-infrastructure-as-code-ci-cd-on-azure/4529941",

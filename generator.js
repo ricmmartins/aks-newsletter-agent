@@ -34,7 +34,19 @@ class NewsletterGenerator {
     summary = summary.replace(/\s*\n\s*/g, " ").trim();
     // Remove HTML remnants from TechCommunity scraping
     summary = summary.replace(/<[^>]+>/g, "").trim();
-    // Remove summaries that are near-identical to the title (but keep short opinionated commentary)
+    // Remove &nbsp; HTML entities
+    summary = summary.replace(/&nbsp;/g, " ").trim();
+
+    // Detect metadata-like descriptions BEFORE other filters strip them
+    let isMetadata = item.summaryIsMetadata || false;
+    if (summary && /^learn (how to|about|the)\s/i.test(summary)) {
+      isMetadata = true;
+    }
+    if (summary && /^in this (article|tutorial|guide)/i.test(summary)) {
+      isMetadata = true;
+    }
+
+    // Remove summaries that are near-identical to the title
     if (summary) {
       const lowerSummary = summary.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
       const lowerTitle = title.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
@@ -45,6 +57,14 @@ class NewsletterGenerator {
       if (/^(is now (generally )?available|is now in (public )?preview)\.?$/i.test(summary)) {
         summary = "";
       }
+    }
+
+    // Mark items that need the polisher to write/rewrite descriptions
+    if (isMetadata) {
+      summary = summary ? `[NEEDS DESCRIPTION] ${summary}` : "[NEEDS DESCRIPTION]";
+    } else if (!summary && url) {
+      // No summary at all — flag it explicitly for the polisher
+      summary = "[NEEDS DESCRIPTION]";
     }
 
     let line = url ? `* **[${title}](${url})**` : `* **${title}**`;
@@ -351,7 +371,16 @@ class NewsletterGenerator {
       this.generateClosing(),
     ];
 
-    return sections.join("\n");
+    const content = sections.join("\n");
+
+    // Append a polisher hint with counts (stripped during polish)
+    const needsDescCount = (content.match(/\[NEEDS DESCRIPTION\]/g) || []).length;
+    if (needsDescCount > 0) {
+      const hint = `\n<!-- POLISHER NOTE: ${needsDescCount} items are marked [NEEDS DESCRIPTION]. Every one of these MUST be replaced with 1-3 sentences of opinionated, engineering-focused description. Do NOT leave any [NEEDS DESCRIPTION] markers in the final output. -->\n`;
+      return content + hint;
+    }
+
+    return content;
   }
 
   save(content) {

@@ -294,6 +294,11 @@ class ContentCollector {
       /^fixes?\s+markdown/i,
       /^update\s+\S+\.md$/i,
       /^minor\s+edit/i,
+      /^.+\s*\(#\d+\)$/,          // Raw PR-style commits like "topic: change (#1234)"
+      /^include\s+.+\s+images?/i,  // "Include flame graph images" type noise
+      /^updating to resolve/i,     // "updating to resolve errors"
+      /^minor changes/i,
+      /^toc\s+(added|update|change)/i,
     ];
 
     // Group commits by article file to deduplicate
@@ -351,11 +356,19 @@ class ContentCollector {
       const pageMeta = await this._fetchDocPageTitle(entry.articleFile);
       if (pageMeta?.title) {
         entry.title = pageMeta.title;
-        // Use the page's frontmatter description (much more informative than commit messages)
-        entry.summary = pageMeta.description || this._cleanCommitMessage(entry.commitMessage);
+        // Store the frontmatter description as context for the polisher,
+        // but flag it as metadata so the polisher knows to rewrite it
+        if (pageMeta.description) {
+          entry.summary = pageMeta.description;
+          entry.summaryIsMetadata = true;
+        } else {
+          entry.summary = this._cleanCommitMessage(entry.commitMessage);
+        }
       } else {
         entry.title = entry.commitMessage;
       }
+      // Preserve commit message as context for the polisher to understand what changed
+      entry.commitContext = this._cleanCommitMessage(entry.commitMessage);
       delete entry.commitMessage;
       delete entry.articleFile;
     }
