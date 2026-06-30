@@ -15,6 +15,18 @@ class NewsletterGenerator {
     this.collectedDir = collectedDir;
     this.outputDir = outputDir;
     this.data = null;
+    this.campaign = `${year}-${String(month).padStart(2, "0")}`;
+  }
+
+  /**
+   * Append UTM tracking parameters to a URL for newsletter analytics.
+   */
+  _addUtm(url) {
+    if (!url) return url;
+    // Skip GitHub URLs (releases, commits, roadmap) and YouTube — UTM not useful there
+    if (/github\.com|youtube\.com|youtu\.be/i.test(url)) return url;
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}utm_source=aksnewsletter&utm_medium=website&utm_campaign=${this.campaign}`;
   }
 
   loadCollectedData() {
@@ -67,7 +79,7 @@ class NewsletterGenerator {
       summary = "[NEEDS DESCRIPTION]";
     }
 
-    let line = url ? `* **[${title}](${url})**` : `* **${title}**`;
+    let line = url ? `* **[${title}](${this._addUtm(url)})**` : `* **${title}**`;
     if (summary) line += `: ${summary}`;
     return line;
   }
