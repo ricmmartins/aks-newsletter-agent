@@ -302,9 +302,11 @@ Return ONLY the polished section content in Markdown. No commentary.`;
   }
 
   async _callModel(messages, model) {
-    console.log(`🤖 Calling ${model} via GitHub Models API...`);
+    const endpoint = this.useOpenAI ? OPENAI_ENDPOINT : GITHUB_MODELS_ENDPOINT;
+    const backendName = this.useOpenAI ? "OpenAI API" : "GitHub Models API";
+    console.log(`🤖 Calling ${model} via ${backendName}...`);
 
-    const response = await fetch(GITHUB_MODELS_ENDPOINT, {
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -320,7 +322,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
 
     if (!response.ok) {
       const errorBody = await response.text();
-      throw new Error(`GitHub Models API error (${response.status}): ${errorBody}`);
+      throw new Error(`${backendName} error (${response.status}): ${errorBody}`);
     }
 
     const result = await response.json();

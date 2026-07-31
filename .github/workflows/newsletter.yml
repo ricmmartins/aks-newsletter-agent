@@ -106,8 +106,14 @@ jobs:
             -d '{"model":"gpt-4o","messages":[{"role":"user","content":"say hi"}],"max_tokens":5}' \
             https://api.openai.com/v1/chat/completions)
           echo "OpenAI API response code: $HTTP_CODE"
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "::error::OpenAI API returned $HTTP_CODE. Check that OPENAI_API_KEY secret is valid."
+          if [ "$HTTP_CODE" = "401" ]; then
+            echo "::error::OpenAI API returned 401 (unauthorized). Check that OPENAI_API_KEY secret is valid."
+            exit 1
+          elif [ "$HTTP_CODE" = "429" ]; then
+            echo "::error::OpenAI API returned 429 (rate limit / no credits). Add billing at https://platform.openai.com/settings/organization/billing"
+            exit 1
+          elif [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::OpenAI API returned $HTTP_CODE."
             exit 1
           fi
         env:
