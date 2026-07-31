@@ -8,33 +8,104 @@ Automated agent for generating the monthly **AKS Newsletter** — a technical, e
 🌐 **Live site:** [aksnewsletter.com](https://aksnewsletter.com/)
 📡 **RSS feed:** [feed.xml](https://aksnewsletter.com/feed.xml)
 
-## Quick Start
+---
+
+## 🚀 How to Generate a Newsletter (Step by Step)
+
+### Prerequisites
 
 ```bash
-# Install dependencies
-npm install
+npm install                     # Install dependencies (first time only)
+export GITHUB_TOKEN="ghp_..."   # Required for API access + AI polish
+```
 
-# Full run: collect data + generate + AI polish for a specific month
-node run.js 2026 2
+### Option A: Fully Automated (GitHub Actions)
 
-# Collect data only
-node run.js 2026 2 --collect-only
+1. Go to **Actions** → **"AKS Newsletter – Monthly Collection"**
+2. Click **"Run workflow"**
+3. Enter `year` (e.g., `2026`) and `month` (e.g., `7`)
+4. Click **"Run workflow"** → waits ~5 min → creates a **Pull Request** with the draft
+5. Review the PR, edit if needed, merge → site auto-deploys
 
-# Generate + polish from previously collected data
-node run.js 2026 2 --generate-only
+> 💡 This also runs automatically on the **last Friday of each month**.
 
-# Polish an existing draft (requires GITHUB_TOKEN)
-node run.js 2026 2 --polish-only
+### Option B: Local (Recommended for Re-runs/Debugging)
 
-# Generate without AI polish (raw draft only)
-node run.js 2026 2 --no-polish
+#### Step 1 — Collect data from all sources
 
-# Build the static website
+```bash
+node run.js 2026 7 --collect-only
+```
+
+Output: `collected/2026-07.json` — raw data from 14+ sources.  
+✅ Check: file should be > 50KB with content in all sections.
+
+#### Step 2 — Generate the raw Markdown draft
+
+```bash
+node run.js 2026 7 --generate-only --no-polish
+```
+
+Output: `newsletters/2026/2026-07.md` — structured draft with `[NEEDS DESCRIPTION]` markers.  
+✅ Check: open the file; items should have proper titles (not commit messages).
+
+#### Step 3 — AI Polish (rewrites descriptions, removes noise)
+
+```bash
+node run.js 2026 7 --polish-only
+```
+
+Output: overwrites `newsletters/2026/2026-07.md` with polished version.  
+✅ Check: no `[NEEDS DESCRIPTION]` markers remain. If the quality gate fails, the process exits with an error listing the problematic items.
+
+#### Step 4 — Build the website
+
+```bash
 npm run build:site
+```
 
-# Validate links in all newsletters
+Output: `docs/` folder with HTML, RSS, sitemap.  
+✅ Check: open `docs/2026/2026-07.html` in a browser.
+
+#### Step 5 — Validate links
+
+```bash
 npm run validate
 ```
+
+✅ Check: no broken links reported.
+
+### One-liner (Full Pipeline)
+
+```bash
+node run.js 2026 7
+```
+
+Runs steps 1→2→3 in sequence. Fails fast if the quality gate detects issues.
+
+### Common Re-run Scenarios
+
+| Scenario | Command |
+|----------|---------|
+| Collection was good but polish failed | `node run.js 2026 7 --polish-only` |
+| Want to re-collect (data was stale) | `node run.js 2026 7 --collect-only` then `--generate-only` then `--polish-only` |
+| Skip AI polish (edit manually) | `node run.js 2026 7 --no-polish` |
+| Re-build site after manual edits | `npm run build:site` |
+
+---
+
+## Quality Gate
+
+The polisher enforces a **hard quality gate** that blocks publication if:
+
+- ❌ Any `[NEEDS DESCRIPTION]` markers remain after retries
+- ⚠️ Items have generic one-liner descriptions ("Is now available in public preview")
+- ⚠️ Items have copy-pasted metadata ("Learn how to...", "Learn about...")
+- ⚠️ URLs from the original draft were dropped
+
+If the gate fails, `process.exit(1)` — the script stops and prints exactly which items need attention. Fix them manually in the `.md` file or re-run `--polish-only`.
+
+---
 
 ## Features
 
