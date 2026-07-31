@@ -97,6 +97,22 @@ jobs:
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --generate-only --no-polish
 
+      - name: Test GitHub Models API access
+        if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"model":"gpt-4o","messages":[{"role":"user","content":"say hi"}],"max_tokens":5}' \
+            https://models.inference.ai.azure.com/chat/completions)
+          echo "Models API response code: $HTTP_CODE"
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::GitHub Models API returned $HTTP_CODE. Check that MODELS_TOKEN is a valid PAT with Models access."
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.MODELS_TOKEN }}
+
       - name: Run AKS Newsletter Agent (AI polish)
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --polish-only
