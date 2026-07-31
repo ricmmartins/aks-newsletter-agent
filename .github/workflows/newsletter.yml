@@ -12,6 +12,10 @@ on:
       month:
         description: 'Target month (1-12)'
         required: false
+      force:
+        description: 'Force regeneration even if newsletter already exists'
+        type: boolean
+        default: false
 
 jobs:
   collect-and-generate:
@@ -70,8 +74,14 @@ jobs:
           MONTH_PAD=$(printf '%02d' ${{ steps.target.outputs.month }})
           NEWSLETTER_FILE="newsletters/${{ steps.target.outputs.year }}/${{ steps.target.outputs.year }}-${MONTH_PAD}.md"
           if [ -f "$NEWSLETTER_FILE" ]; then
-            echo "::notice::Newsletter already exists at $NEWSLETTER_FILE — skipping generation to avoid overwriting a polished edition."
-            echo "exists=true" >> $GITHUB_OUTPUT
+            if [ "${{ inputs.force }}" = "true" ]; then
+              echo "::warning::Newsletter exists at $NEWSLETTER_FILE but force=true — will regenerate."
+              rm "$NEWSLETTER_FILE"
+              echo "exists=false" >> $GITHUB_OUTPUT
+            else
+              echo "::notice::Newsletter already exists at $NEWSLETTER_FILE — skipping generation to avoid overwriting a polished edition. Use force=true to regenerate."
+              echo "exists=true" >> $GITHUB_OUTPUT
+            fi
           else
             echo "No existing newsletter found, proceeding with generation."
             echo "exists=false" >> $GITHUB_OUTPUT
@@ -91,7 +101,7 @@ jobs:
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --polish-only
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MODELS_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Quality gate – check content completeness
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'

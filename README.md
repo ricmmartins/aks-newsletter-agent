@@ -292,6 +292,7 @@ Edit `config.js` to:
 | Variable | Purpose |
 |----------|---------|
 | `GITHUB_TOKEN` | Avoid GitHub API rate limits during collection |
+| `MODELS_TOKEN` | **Required for AI polish** — a GitHub PAT with Models API access. The default `GITHUB_TOKEN` from Actions does NOT work with GitHub Models. Create a [Fine-grained PAT](https://github.com/settings/tokens?type=beta) or [Classic PAT](https://github.com/settings/tokens) and add it as a repo secret named `MODELS_TOKEN`. |
 | `SLACK_WEBHOOK_URL` | Slack notification webhook (Actions secret) |
 | `TEAMS_WEBHOOK_URL` | Teams notification webhook (Actions secret) |
 
