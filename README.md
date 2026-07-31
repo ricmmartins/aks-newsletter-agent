@@ -287,14 +287,15 @@ Edit `config.js` to:
 - Change section headers or order (`SECTION_HEADERS`)
 - Adjust AKS-related filtering keywords (`AKS_KEYWORDS`)
 
-### Environment Variables
+### Environment Variables / Secrets
 
-| Variable | Purpose |
-|----------|---------|
-| `GITHUB_TOKEN` | Avoid GitHub API rate limits during collection |
-| `MODELS_TOKEN` | **Required for AI polish** — a GitHub PAT with Models API access. The default `GITHUB_TOKEN` from Actions does NOT work with GitHub Models. Create a [Fine-grained PAT](https://github.com/settings/tokens?type=beta) or [Classic PAT](https://github.com/settings/tokens) and add it as a repo secret named `MODELS_TOKEN`. |
-| `SLACK_WEBHOOK_URL` | Slack notification webhook (Actions secret) |
-| `TEAMS_WEBHOOK_URL` | Teams notification webhook (Actions secret) |
+| Secret | Purpose |
+|--------|---------|
+| `GITHUB_TOKEN` | Auto-provided by GitHub Actions. Used for GitHub API calls during collection. |
+| `OPENAI_API_KEY` | **Required for AI polish.** Get from [platform.openai.com](https://platform.openai.com/api-keys). Add billing (~$0.30/run). |
+| `BING_SEARCH_KEY` | **Recommended for blog collection.** Creates a Bing Search resource in Azure portal (free tier: 1000 calls/month). Dramatically improves TechCommunity blog coverage. |
+| `SLACK_WEBHOOK_URL` | *(Optional)* Slack notification webhook |
+| `TEAMS_WEBHOOK_URL` | *(Optional)* Teams notification webhook |
 
 ## Reference Edition
 
