@@ -3,7 +3,7 @@
     "year": 2026,
     "month": 7,
     "monthName": "July",
-    "collectedAt": "2026-07-31T22:59:49.805Z",
+    "collectedAt": "2026-07-31T23:16:26.385Z",
     "windowStart": "2026-07-01T00:00:00.000Z",
     "windowEnd": "2026-07-31T23:59:59.000Z"
   },
@@ -260,7 +260,239 @@
     }
   ],
   "techcommunity": [],
-  "techcommunity_search": [],
+  "techcommunity_search": [
+    {
+      "title": "From reactive firefighting to proactive operations: custom skills for Azure SRE Agent",
+      "url": "https://techcommunity.microsoft.com/blog/startupsatmicrosoftblog/ct-p/4542961",
+      "posted": "2026-07-31T14:18:28.923-07:00",
+      "summary": "...uggested: - SLA/SLO monitoring dashboard - Network topology validator - Migration readiness assessment - Disaster recovery drill runner - Container Apps / <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> health check \n If your team is running Azure SRE A...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Introducing Cost Management and Pricing Toolsets in Azure Resource Manager MCP Server",
+      "url": "https://techcommunity.microsoft.com/blog/finopsblog/ct-p/4530710",
+      "posted": "2026-07-29T22:41:39.498-07:00",
+      "summary": "...hree-node <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> cluster with my negotiated pricing.” \n \n &nbsp; \n  \n Understand Costs \n Once workloads are running, cost visibility becomes the priority. &nbsp;An AI agent can query your cost data to e...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Bring Your Own Orchestrator to Azure Container Apps Jobs",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/ct-p/4541275",
+      "posted": "2026-07-29T10:49:33.267-07:00",
+      "summary": "...eployment    You need a complete Airflow environment  Airflow hosted on ACA  Deploys the Airflow control plane and the ACA Jobs integration    Your workflows are Kubernetes-native and run from <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>  Argo W...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Now Generally Available: Built-in CIS Benchmark Auditing for Linux on Azure",
+      "url": "https://techcommunity.microsoft.com/blog/linuxandopensourceblog/ct-p/4529819",
+      "posted": "2026-07-29T01:04:37.483-07:00",
+      "summary": "...erver  ✓    SUSE Linux Enterprise 12 / 15  v3.2.1 / v2.0.1  L1 + L2 Server  ✓    <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> Optimized Azure Linux 3  v1.0.0  L1 + L2 Server  ✓       \n \n This GA covers the audit (assessment) capability. Looking a...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Building an AI Azure Ops Workbench — Part 2: The War Room — watch AI root-cause a 5xx in 90 seconds",
+      "url": "https://techcommunity.microsoft.com/blog/microsoftmissioncriticalblog/ct-p/4540765",
+      "posted": "2026-07-27T18:11:49.457-07:00",
+      "summary": "...outes, DNS, private endpoints, peering, connectivity    🔑 Identity &amp; Access  RBAC, Entra ID, managed identities, Key Vault, secrets    ⚡ Compute &amp; Apps  VMs, App Service, <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>, Container Apps, F...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Device Code Flow: The Gift That Keeps on Giving — To Attackers",
+      "url": "https://techcommunity.microsoft.com/blog/coreinfrastructureandsecurityblog/ct-p/4540949",
+      "posted": "2026-07-26T17:46:16.365-07:00",
+      "summary": "...ervice, a Function App, an <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> workload using Microsoft Entra Workload ID, or an Azure Arc-enabled server — use the platform identity model wherever possible. There is no serious debate here. \n Managed I... <SPAN class=\"lia-search-match-lithium \">ak</SPAN>yamaza",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Introducing Kubernetes-Native Policy Validation with CEL and VAP in Azure Policy",
+      "url": "https://techcommunity.microsoft.com/blog/azuregovernanceandmanagementblog/ct-p/4534585",
+      "posted": "2026-07-23T12:27:12.168-07:00",
+      "summary": "...ou can create the policy definition via the Azure portal, Azure CLI, or the Azure Policy VS Code extension. \n &nbsp; \n Step 3: Assign the policy to your <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> clusters \n Now you can assign this policy t...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Azure Files, Reimagined: Top-Level Shares with Per-Share Networking, Billing, and Scale",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4535079",
+      "posted": "2026-07-23T00:00:00.024-07:00",
+      "summary": "...elete, and the <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> CSI driver integration are all on the roadmap and called out as the most-requested follow-ups. If you need those features today, the classic file share inside a storage account is s...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Hybrid Logic Apps on RKE2: a self-managed cluster with MetalLB",
+      "url": "https://techcommunity.microsoft.com/blog/integrationsonazureblog/ct-p/4539846",
+      "posted": "2026-07-22T20:50:05.458-07:00",
+      "summary": "...nd those are what this post is really about. \n If you've done Hybrid on <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> or K3s, the shape will look familiar. The official requirements doc covers the general flow. RKE2 is close enough to v...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Empowering the Mission at the Edge with Azure Local",
+      "url": "https://techcommunity.microsoft.com/blog/publicsectorblog/ct-p/4536989",
+      "posted": "2026-07-22T10:05:33.264-07:00",
+      "summary": "...pdates, patching, and feature delivery for end users.&nbsp; \n With Azure Kubernetes Service enabled by Arc (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN> on Arc) available on Azure Local, teams can deploy and operate containerized applications u... Build resilient mission platforms at the tactical edge with Azure Local, <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> on Arc, and adaptive cloud patterns. \n  \n &nbsp;",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Design the Network Before You Deploy: Best Practices for Microsoft Foundry Standard Agents BYOVNet",
+      "url": "https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/ct-p/4537860",
+      "posted": "2026-07-22T09:00:00.014-07:00",
+      "summary": "...icrosoft.ContainerInstance/containerGroups, App Service / Functions with VNet integration → Microsoft.Web/serverFarms, <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> / plain VMs → no delegation. \n Recommended APIM topology — Premium v2, PE for i...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Take command of your Microsoft Foundry AI agents with the Azure Copilot Observability Agent",
+      "url": "https://techcommunity.microsoft.com/blog/azureobservabilityblog/ct-p/4538681",
+      "posted": "2026-07-21T09:28:48.948-07:00",
+      "summary": "...pplications, Azure Kubernetes Service (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN>), and virtual machines (VMs). Autonomous operations, in public preview, can analyze alerts in the background, correlate related alerts, and create Azure Monitor i...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Feeding the GPUs: File Storage for AI and Cloud-Native Workloads on Azure",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4534572",
+      "posted": "2026-07-21T00:00:00.030-07:00",
+      "summary": "...low checkpoints turn that into burned cash. \n AI workloads are not one workload. Data prep, training, fine-tuning, and inferencing each have a different storage profile. \n Cloud-native AI on <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> and A...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Hybrid Logic Apps Deployment on Red Hat OpenShift",
+      "url": "https://techcommunity.microsoft.com/blog/integrationsonazureblog/ct-p/4534828",
+      "posted": "2026-07-08T04:52:09.757-07:00",
+      "summary": "&nbsp; \n What makes OpenShift different? \n If you've done this on K3s or <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>, most of the flow is identical as mentioned in Set up your own infrastructure for Standard logic app workflows - Azure L...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Premium SSD v2 and Instant Access Snapshots: A Better, Faster, Cheaper Disk for Your Azure VMs",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4534571",
+      "posted": "2026-07-20T00:00:00.015-07:00",
+      "summary": "...unning on <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>. \n The architectural shift that Raymond highlighted is independent scaling. With Premium SSD v1, you bought a fixed SKU. If you wanted more IOPS, you had to buy more capacity, even if you d...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Az Update - Week 2 of the return editions",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4538337",
+      "posted": "2026-07-17T11:37:42.577-07:00",
+      "summary": "...ubernetes Service (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN>) \n Update #3 - Generally Available: Expanding Azure Arc SQL Migration with SQL Server on Azure Virtual Machines \n \n As always, I'm approaching these updates from an i...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Hypervelocity Engineering: Accelerating Enterprise AI with Azure AI Landing Zones",
+      "url": "https://techcommunity.microsoft.com/blog/azurearchitectureblog/ct-p/4536192",
+      "posted": "2026-07-17T07:57:27.724-07:00",
+      "summary": "...poke Networking \n Private Endpoints \n Azure Firewall \n Azure API Management \n Azure AI Foundry \n Azure AI Search \n Azure Kubernetes Service (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN>) \n Azure Monitor \n Defender for Cloud \n Infrastructure as C...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "New in Microsoft Marketplace: July 16, 2026",
+      "url": "https://techcommunity.microsoft.com/blog/marketplace-blog/ct-p/4522370",
+      "posted": "2026-07-16T06:00:19.394-07:00",
+      "summary": "...Contact our partners \n 2026 TIMS Mobile Apps \n Access to PDF Converter Tool by SysTools \n AD merchantCENTRAL Shipment DHL \n Adastra Trust Framework for Microsoft Power BI \n agentgateway (OSS) on <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "How Microsoft 365 built a platform engineering layer on AKS to ship faster at global scale",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/ct-p/4537523",
+      "posted": "2026-07-15T22:00:13.440-07:00",
+      "summary": "How Microsoft 365 built a platform engineering layer on <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> to ship faster at global scale ...bsp; \n \n We needed a platform layer that could absorb this complexity before it became a tax on every team.&nbsp; \n Solution: Evolving the operations experience &nbsp; \n Microsoft 365 uses <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> as the f... This Customer Zero story explains how Microsoft 365 built COSMIC, a platform engineering layer on top of Azure Kubernetes Service (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN>), to standardize how cloud services are deployed and operated a...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Check This Out! (CTO!) Guide (July 2026)",
+      "url": "https://techcommunity.microsoft.com/blog/coreinfrastructureandsecurityblog/ct-p/4536608",
+      "posted": "2026-07-13T13:50:04.794-07:00",
+      "summary": "...nd report compliance efficiently across all <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> clusters. \n   \n \n Ginkgo Bioworks and Microsoft Discovery: Bringing agentic AI to biological discovery \n Team Blog: Azure Infrastructure \n Author: N...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Creating Autonomous Teams Agents Using OpenClaw, MCP, and Azure Container Apps",
+      "url": "https://techcommunity.microsoft.com/blog/azuredevcommunityblog/ct-p/4536296",
+      "posted": "2026-07-13T00:39:45.496-07:00",
+      "summary": "...nside a disposable microVM, not on your host. In 2026 there are several credible ways to do this: \n \n Kata Containers on <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>&nbsp;— each pod gets its own lightweight VM boundary and guest kernel. \n H...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Secure Native Access to Azure Kubernetes Service (AKS) Private Clusters with Azure Bastion",
+      "url": "https://techcommunity.microsoft.com/blog/azurenetworksecurityblog/ct-p/4535123",
+      "posted": "2026-07-09T11:07:27.073-07:00",
+      "summary": "Secure Native Access to Azure Kubernetes Service (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN>) Private Clusters with Azure Bastion ...ubernetes Service (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN>), secure access to cluster resources becomes critical. Making the Kubernetes API server private, therefore, significantly reduces the attack surface. However, it also changes how e...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Build and Optimize a Data Lakehouse for Unified Data Intelligence",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4534535",
+      "posted": "2026-07-13T00:00:00.015-07:00",
+      "summary": "...our. The full Microsoft Azure Infrastructure Summit 2026 playlist covers everything from sovereign cloud and <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> networking to backup, storage, and AI-assisted operations. If your job touches Azure, t...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Welcome Back to AZ Update",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4535872",
+      "posted": "2026-07-10T13:20:19.151-07:00",
+      "summary": "...odernizing infrastructure in Azure, Azure Arc, <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>, hybrid environments, or the growing world of AI-powered operations, this newsletter is for you. \n Welcome to the next chapter of AZ Update. \n &nbsp; \n H...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Stop Hand-Building VMs at 2 AM: Automated Image Pipelines with Azure Image Builder and Compute Gallery",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4534213",
+      "posted": "2026-07-10T00:00:00.019-07:00",
+      "summary": "...ives, the <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> sessions, and the rest of the infra track, the full playlist is here: \n Microsoft Azure Infra Summit 2026 playlist \n Cheers! \n Pierre Roman",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Designing for cloud sovereignty with Radius and Dapr",
+      "url": "https://techcommunity.microsoft.com/blog/linuxandopensourceblog/ct-p/4535067",
+      "posted": "2026-07-08T13:43:21.257-07:00",
+      "summary": "...nvironments.&nbsp; \n \n \n Environments&nbsp;bind&nbsp;a set of Recipes against the compute target and credentials for a given deployment context (local Kubernetes, <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>, <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> enabled by Azure Arc, or o...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Deployment Stacks: Treating Your Azure Deployments Like Real Resources",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4534212",
+      "posted": "2026-07-09T00:00:00.024-07:00",
+      "summary": "...here it came from. The full Microsoft Azure Infrastructure Summit 2026 playlist covers everything from Azure Local and Azure Files to <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> networking, SRE agents, and the keynote with Jeremy Winter. W...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Lock Down AKS End to End with Application Gateway for Containers and Managed Cilium L7",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4534205",
+      "posted": "2026-07-08T00:00:00.017-07:00",
+      "summary": "Lock Down <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> End to End with Application Gateway for Containers and Managed Cilium L7 Hello Folks! \n If your <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> cluster looks like most production clusters I have walked through, one of two things is true. Either nobody writes any network policies and every pod can talk to every o... <SPAN class=\"lia-search-match-lithium \">aks</SPAN> azure containers MAIS 2026 Pierre Roman security",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Golden Paths Are a Product. Treat Them Like One.",
+      "url": "https://techcommunity.microsoft.com/blog/azurearchitectureblog/ct-p/4533707",
+      "posted": "2026-07-07T11:26:04.517-07:00",
+      "summary": "...elay, or complexity. \n Two transformation threads that make this real \n To keep this practical, this article refers back to two transformation threads throughout the discussion. \n The first was an <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Modern Ingress for AKS: Introducing Application Gateway for Containers (AGC)",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4534200",
+      "posted": "2026-07-07T00:00:00.030-07:00",
+      "summary": "Modern Ingress for <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>: Introducing Application Gateway for Containers (AGC) Hello Folks! \n This Microsoft Azure Infra Summit 2026 sessions one is for everyone running production workloads on <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>. Jack Stromberg from the Application Gateway product team walked us through t...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Automatically Route Azure Service Health Alerts to the Right Service Owners Using Agentic Logic Apps",
+      "url": "https://techcommunity.microsoft.com/blog/integrationsonazureblog/ct-p/4531853",
+      "posted": "2026-07-05T14:55:20.855-07:00",
+      "summary": "As organizations adopt more Azure services, operational ownership naturally becomes distributed across multiple teams. The platform team may own Azure Kubernetes Service (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN>), the database team m...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Find anomalies in Prometheus and OpenTelemetry metrics with Dynamic Thresholds (Preview)",
+      "url": "https://techcommunity.microsoft.com/blog/azureobservabilityblog/ct-p/4533069",
+      "posted": "2026-07-02T06:10:54.392-07:00",
+      "summary": "...ndependent baseline for each resource or dimension combination. \n Example 1 — Spot CPU anomalies in <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> workloads \n Scenario: Monitor container CPU utilization across pods or deployments in <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> with a q...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Introducing kars - an Agent Reference Stack for Kubernetes",
+      "url": "https://techcommunity.microsoft.com/blog/linuxandopensourceblog/ct-p/4529800",
+      "posted": "2026-07-01T08:35:28.425-07:00",
+      "summary": "...nd the Agentic AI Foundation.&nbsp;kars is a K8s-native runtime that composes these primitives into a single, deployable stack you can drop into <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>. \n One set of Kubernetes policies governs every a...",
+      "source": "TechCommunity Search"
+    }
+  ],
   "youtube": [
     {
       "title": "Next-Gen Kubernetes Networking with Jack Ma: AKS Me Anything: Azure Kubernetes Service",
