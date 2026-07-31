@@ -19,15 +19,26 @@ npm install                     # Install dependencies (first time only)
 export GITHUB_TOKEN="ghp_..."   # Required for API access + AI polish
 ```
 
-### Option A: Fully Automated (GitHub Actions)
+### Option A: Via GitHub Portal (Recommended)
 
-1. Go to **Actions** → **"AKS Newsletter – Monthly Collection"**
-2. Click **"Run workflow"**
-3. Enter `year` (e.g., `2026`) and `month` (e.g., `7`)
-4. Click **"Run workflow"** → waits ~5 min → creates a **Pull Request** with the draft
-5. Review the PR, edit if needed, merge → site auto-deploys
+No local setup needed — runs entirely in the browser.
 
-> 💡 This also runs automatically on the **last Friday of each month**.
+1. Open the repo: [github.com/ricmmartins/aks-newsletter-agent](https://github.com/ricmmartins/aks-newsletter-agent)
+2. Click the **"Actions"** tab at the top
+3. In the left sidebar, click **"AKS Newsletter – Monthly Collection"**
+4. Click the blue **"Run workflow"** button (top right of the workflow list)
+5. Fill in:
+   - **Branch:** `main`
+   - **Year:** e.g., `2026`
+   - **Month:** e.g., `7`
+6. Click the green **"Run workflow"** button
+7. Wait ~5 minutes — the workflow collects data, generates the draft, and AI-polishes it
+8. When done, a **Pull Request** is automatically created with the newsletter draft
+9. Review the PR → edit if needed → **Merge** → site auto-deploys to [aksnewsletter.com](https://aksnewsletter.com)
+
+> 💡 This also runs **automatically** on the last Friday of each month — no manual trigger needed.
+> 
+> ⚠️ If the workflow fails at the "AI Polish" step, check the logs — usually it means the quality gate detected items that GPT-4o couldn't rewrite. You can merge the PR as-is and manually fix those items, or re-run the workflow.
 
 ### Option B: Local (Recommended for Re-runs/Debugging)
 
