@@ -941,11 +941,7 @@ class ContentCollector {
 
   async collectBingSearch() {
     const bingKey = process.env.BING_SEARCH_KEY || "";
-    if (!bingKey) {
-      console.log("📡 Bing Search: skipped (no BING_SEARCH_KEY)");
-      return;
-    }
-    console.log("📡 Collecting via Bing Web Search API...");
+    console.log("📡 Collecting via Bing Web Search...");
 
     const queries = [
       `"AKS" site:techcommunity.microsoft.com`,
@@ -960,46 +956,67 @@ class ContentCollector {
 
     for (const q of queries) {
       try {
-        const params = new URLSearchParams({
-          q,
-          count: "50",
-          freshness: "Month",
-          sortBy: "Date",
-          responseFilter: "Webpages",
-          mkt: "en-US",
-        });
-        const resp = await this._safeFetch(
-          `https://api.bing.microsoft.com/v7.0/search?${params}`,
-          { headers: { "Ocp-Apim-Subscription-Key": bingKey } }
-        );
-        if (!resp) continue;
+        let pages = [];
 
-        const data = await resp.json();
-        const pages = data.webPages?.value || [];
+        if (bingKey) {
+          // Strategy 1: Bing Search API (if key is available)
+          const params = new URLSearchParams({
+            q, count: "50", freshness: "Month", sortBy: "Date",
+            responseFilter: "Webpages", mkt: "en-US",
+          });
+          const resp = await this._safeFetch(
+            `https://api.bing.microsoft.com/v7.0/search?${params}`,
+            { headers: { "Ocp-Apim-Subscription-Key": bingKey } }
+          );
+          if (resp) {
+            const data = await resp.json();
+            pages = (data.webPages?.value || []).map(p => ({
+              title: p.name || "", url: p.url || "",
+              snippet: p.snippet || "", date: p.dateLastCrawled || "",
+            }));
+          }
+        } else {
+          // Strategy 2: Scrape Bing HTML results (no API key needed)
+          const searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(q + " " + this.year)}&filters=ex1%3a"ez5_${this.windowStart.toISOString().slice(0,10)}_${this.windowEnd.toISOString().slice(0,10)}"&count=50`;
+          const resp = await this._safeFetch(searchUrl, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml",
+              "Accept-Language": "en-US,en;q=0.9",
+            },
+          });
+          if (resp) {
+            const html = await resp.text();
+            const $ = cheerio.load(html);
+            $("li.b_algo").each((_, el) => {
+              const $el = $(el);
+              const a = $el.find("h2 a").first();
+              const title = a.text().trim();
+              const url = a.attr("href") || "";
+              const snippet = $el.find(".b_caption p, .b_lineclamp2").text().trim();
+              if (title && url) pages.push({ title, url, snippet, date: "" });
+            });
+          }
+        }
+
         console.log(`    "${q.slice(0, 40)}..." → ${pages.length} results`);
 
         for (const p of pages) {
           const url = p.url || "";
           if (seen.has(url)) continue;
-          // Skip non-article pages
           if (url.includes("/category/") || url.includes("/tag/") || url.includes("/search")) continue;
           if (!url.includes("/blog/") && !url.includes("/ba-p/") && !url.includes("azure.microsoft.com/blog")) continue;
 
-          const title = (p.name || "").replace(/ \| Microsoft (Community Hub|Azure Blog)$/i, "").trim();
+          const title = (p.title || "").replace(/ \| Microsoft (Community Hub|Azure Blog)$/i, "").trim();
           if (!title || !this._matchesAKS(title + " " + (p.snippet || ""))) continue;
 
           seen.add(url);
-          const posted = p.dateLastCrawled || p.datePublished || "";
-
-          // Only add if within our collection window
-          if (posted && !this._isWithinWindow(posted)) continue;
+          if (p.date && !this._isWithinWindow(p.date)) continue;
 
           this.collected.techcommunity_search.push({
-            title,
-            url,
-            posted,
+            title, url, posted: p.date,
             summary: (p.snippet || "").slice(0, 300),
-            source: "Bing Search",
+            source: bingKey ? "Bing API" : "Bing Search",
           });
           added++;
         }
