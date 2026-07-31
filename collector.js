@@ -939,6 +939,78 @@ class ContentCollector {
     }
   }
 
+  async collectBingSearch() {
+    const bingKey = process.env.BING_SEARCH_KEY || "";
+    if (!bingKey) {
+      console.log("📡 Bing Search: skipped (no BING_SEARCH_KEY)");
+      return;
+    }
+    console.log("📡 Collecting via Bing Web Search API...");
+
+    const queries = [
+      `"AKS" site:techcommunity.microsoft.com`,
+      `"azure kubernetes service" site:techcommunity.microsoft.com`,
+      `"AKS" site:azure.microsoft.com/blog`,
+    ];
+
+    const seen = new Set(
+      [...this.collected.techcommunity_search, ...this.collected.aks_blog].map(i => i.url)
+    );
+    let added = 0;
+
+    for (const q of queries) {
+      try {
+        const params = new URLSearchParams({
+          q,
+          count: "50",
+          freshness: "Month",
+          sortBy: "Date",
+          responseFilter: "Webpages",
+          mkt: "en-US",
+        });
+        const resp = await this._safeFetch(
+          `https://api.bing.microsoft.com/v7.0/search?${params}`,
+          { headers: { "Ocp-Apim-Subscription-Key": bingKey } }
+        );
+        if (!resp) continue;
+
+        const data = await resp.json();
+        const pages = data.webPages?.value || [];
+        console.log(`    "${q.slice(0, 40)}..." → ${pages.length} results`);
+
+        for (const p of pages) {
+          const url = p.url || "";
+          if (seen.has(url)) continue;
+          // Skip non-article pages
+          if (url.includes("/category/") || url.includes("/tag/") || url.includes("/search")) continue;
+          if (!url.includes("/blog/") && !url.includes("/ba-p/") && !url.includes("azure.microsoft.com/blog")) continue;
+
+          const title = (p.name || "").replace(/ \| Microsoft (Community Hub|Azure Blog)$/i, "").trim();
+          if (!title || !this._matchesAKS(title + " " + (p.snippet || ""))) continue;
+
+          seen.add(url);
+          const posted = p.dateLastCrawled || p.datePublished || "";
+
+          // Only add if within our collection window
+          if (posted && !this._isWithinWindow(posted)) continue;
+
+          this.collected.techcommunity_search.push({
+            title,
+            url,
+            posted,
+            summary: (p.snippet || "").slice(0, 300),
+            source: "Bing Search",
+          });
+          added++;
+        }
+      } catch (err) {
+        console.log(`    ⚠ Bing search failed for "${q.slice(0, 30)}...": ${err.message}`);
+      }
+    }
+
+    console.log(`  ✓ Bing Search added ${added} new posts`);
+  }
+
   async collectAll() {
     console.log(`\n${"=".repeat(60)}`);
     console.log(
@@ -950,6 +1022,7 @@ class ContentCollector {
     await this.collectGitHubReleases();
     await this.collectAKSDocCommits();
     await this.collectAzureUpdates();
+    await this.collectBingSearch();
     await this.collectTechCommunity();
     await this.collectTechCommunitySearch();
     await this.collectYouTube();
