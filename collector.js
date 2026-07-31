@@ -705,12 +705,21 @@ class ContentCollector {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       );
 
-      // Capture bearer token AND GraphQL response data
+      // Capture bearer token, persisted query hash, AND GraphQL response data
       let bearerToken = "";
+      let capturedHash = "";
       let capturedResults = null;
       page.on("request", (req) => {
         if (req.url().includes("graphql") && req.url().includes("opname=MessageSearch")) {
           bearerToken = req.headers()["authorization"] || "";
+          // Try to capture the persisted query hash from the request body
+          try {
+            const postData = req.postData();
+            if (postData) {
+              const parsed = JSON.parse(postData);
+              capturedHash = parsed?.extensions?.persistedQuery?.sha256Hash || "";
+            }
+          } catch {}
         }
       });
       page.on("response", async (resp) => {
@@ -757,47 +766,74 @@ class ContentCollector {
       const dateGte = this.windowStart.toISOString();
       const dateLte = this.windowEnd.toISOString();
 
-      // Strategy 1: Use bearer token to make our own GraphQL call with exact window dates (most reliable)
+      // Use capturedResults from the initial page load first (Strategy 0)
+      if (capturedResults?.length) {
+        console.log(`  ✓ Captured ${capturedResults.length} results from initial page load`);
+        for (const item of capturedResults) {
+          const inWindow = item.posted ? this._isWithinWindow(item.posted) : true;
+          if (inWindow && (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url) || this._matchesAKSStrict(item.snippet))) {
+            this.collected.techcommunity_search.push({
+              title: item.title, url: item.url, posted: item.posted,
+              summary: item.snippet || "",
+              source: "TechCommunity Search",
+            });
+          }
+        }
+      }
+
+      // Strategy 1: Use bearer token to make GraphQL calls from Node.js (more reliable than page.evaluate)
       // Run multiple searches to catch posts that use different terminology
+      const queryHash = capturedHash || "d6f4a952ca4e2ccea2b104ec949092601be072e638c72b0313bc089bb977ce9d";
       const searchTerms = ["aks", "azure kubernetes service", "kubernetes azure"];
       if (bearerToken) {
-        console.log("  ✓ Using bearer token with exact date range");
+        console.log(`  ✓ Using bearer token with exact date range (hash: ${queryHash.slice(0, 8)}...)`);
         const allResults = [];
         for (const term of searchTerms) {
           console.log(`    Searching for "${term}"...`);
-          const termResults = await page.evaluate(
-            async (token, dateFrom, dateTo, searchTerm) => {
-              const body = {
-                operationName: "MessageSearch",
-                variables: {
-                  forAutoSuggest: false, useFullPageInfo: true,
-                  truncateBodyLength: 200, useUnreadCount: false, first: 50,
-                  constraints: {
-                    conversationStyle: { eq: "BLOG" },
-                    conversationLastPostingActivityTime: { gte: dateFrom, lte: dateTo },
-                  },
-                  sorts: { topicPublishDate: { direction: "DESC" } },
-                  searchTerm,
+          try {
+            const body = {
+              operationName: "MessageSearch",
+              variables: {
+                forAutoSuggest: false, useFullPageInfo: true,
+                truncateBodyLength: 200, useUnreadCount: false, first: 50,
+                constraints: {
+                  conversationStyle: { eq: "BLOG" },
+                  conversationLastPostingActivityTime: { gte: dateGte, lte: dateLte },
                 },
+                sorts: { topicPublishDate: { direction: "DESC" } },
+                searchTerm: term,
+              },
               extensions: {
                 persistedQuery: {
                   version: 1,
-                  sha256Hash: "d6f4a952ca4e2ccea2b104ec949092601be072e638c72b0313bc089bb977ce9d",
+                  sha256Hash: queryHash,
                 },
               },
             };
             const resp = await fetch(
-              "/t5/s/api/2.1/graphql?opname=MessageSearch",
+              "https://techcommunity.microsoft.com/t5/s/api/2.1/graphql?opname=MessageSearch",
               {
                 method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: token },
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: bearerToken,
+                  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                },
                 body: JSON.stringify(body),
               }
             );
+            if (!resp.ok) {
+              console.log(`    ⚠ GraphQL returned HTTP ${resp.status} for "${term}"`);
+              continue;
+            }
             const data = await resp.json();
             const results = data.data?.messageSearch?.results;
-            if (!results) return [];
-            return (results.edges || []).map((e) => {
+            if (!results || !results.edges?.length) {
+              console.log(`    ⚠ No results from GraphQL for "${term}" (edges: ${results?.edges?.length || 0})`);
+              continue;
+            }
+            console.log(`    ✓ Got ${results.edges.length} results for "${term}"`);
+            for (const e of results.edges) {
               const msg = e.node.message;
               const boardId = (msg.board?.displayId || "").toLowerCase();
               const snippetText = (e.node.snippet || [])
@@ -808,21 +844,20 @@ class ContentCollector {
               } else {
                 url = `https://techcommunity.microsoft.com/blog/${boardId}/ct-p/${msg.uid}`;
               }
-              return {
+              allResults.push({
                 title: msg.subject || "",
                 url,
                 posted: msg.postTime || "",
                 snippet: snippetText,
-              };
-            });
-          },
-          bearerToken, dateGte, dateLte, term
-          );
-          allResults.push(...termResults);
+              });
+            }
+          } catch (err) {
+            console.log(`    ⚠ GraphQL search failed for "${term}": ${err.message}`);
+          }
         }
 
-        // Deduplicate by URL
-        const seenUrls = new Set();
+        // Deduplicate by URL (including items already added from capturedResults)
+        const seenUrls = new Set(this.collected.techcommunity_search.map(i => i.url));
         for (const item of allResults) {
           if (seenUrls.has(item.url)) continue;
           seenUrls.add(item.url);
@@ -836,22 +871,8 @@ class ContentCollector {
           }
         }
       }
-      // Strategy 2: Use captured GraphQL response data, filtered by window dates
-      else if (capturedResults?.length) {
-        console.log("  ✓ Captured GraphQL response, filtering by date window");
-        for (const item of capturedResults) {
-          const inWindow = item.posted ? this._isWithinWindow(item.posted) : false;
-          if (inWindow && (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url) || this._matchesAKSStrict(item.snippet))) {
-            this.collected.techcommunity_search.push({
-              title: item.title, url: item.url, posted: item.posted,
-              summary: item.snippet || "",
-              source: "TechCommunity Search",
-            });
-          }
-        }
-      }
-      // Strategy 3: Enhanced DOM scraping fallback
-      else {
+      // Strategy 2: DOM scraping fallback (no bearer token)
+      if (!bearerToken) {
         console.log("  ⚠ Auth token not captured, falling back to DOM scraping");
         // Scroll to load more results
         await page.evaluate(async () => {

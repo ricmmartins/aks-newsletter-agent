@@ -3,15 +3,15 @@
     "year": 2026,
     "month": 7,
     "monthName": "July",
-    "collectedAt": "2026-07-31T14:10:41.607Z",
-    "windowStart": "2026-07-01T00:00:00Z",
-    "windowEnd": "2026-07-31T23:59:59Z"
+    "collectedAt": "2026-07-31T22:59:49.805Z",
+    "windowStart": "2026-07-01T00:00:00.000Z",
+    "windowEnd": "2026-07-31T23:59:59.000Z"
   },
   "aks_blog": [
     {
       "title": "Stream Model Weights to NVIDIA GPU (vLLM) from Azure Blob Storage using the RunAI Model Streamer",
       "url": "https://blog.aks.azure.com/2026/07/13/runai-streamer-vllm",
-      "date": "2026-07-13T00:00:00Z",
+      "date": "2026-07-13T00:00:00.000Z",
       "summary": "If you serve large language models on AKS, you eventually run into the same wall: every time an inference replica scales up, after a node failure, during a rollout, or when your autoscaler races to meet a traffic spike, the new pod has to load tens of gigabytes of model weights before it can serve a single request. That load time is your cold-start tax, and it lands at the worst possible moment: exactly when you need capacity now. This post shows how to cut it by streaming weights straight from Azure Blob Storage into GPU memory with the RunAI Model Streamer, and walks the full setup end to end on AKS.",
       "source": "AKS Engineering Blog"
     }
@@ -98,6 +98,13 @@
     }
   ],
   "aks_docs_commits": [
+    {
+      "url": "https://learn.microsoft.com/azure/aks/gpu-profiling",
+      "date": "2026-07-31T13:18:58Z",
+      "source": "AKS Docs",
+      "title": "inspektor-gadget: Add PR feedback",
+      "commitContext": "Inspektor-gadget: Add PR feedback"
+    },
     {
       "url": "https://learn.microsoft.com/azure/aks/upgrade-aks-control-plane",
       "date": "2026-07-31T04:01:51Z",
@@ -258,28 +265,28 @@
     {
       "title": "Next-Gen Kubernetes Networking with Jack Ma: AKS Me Anything: Azure Kubernetes Service",
       "url": "https://www.youtube.com/watch?v=Rg21m1YTdBA",
-      "date": "2026-07-17T12:30:02-04:00",
+      "date": "2026-07-17T16:30:02+00:00",
       "summary": "Discover next-gen Kubernetes application networking with Azure Kubernetes Application Network (AKS AppNet) and how it simplifies application connectivity, traffic management, and service-to-service communication for Kubernetes workloads.  Built...",
       "source": "AKS Community YouTube"
     },
     {
       "title": "AKS Application Network : Azure Kubernetes Service",
       "url": "https://www.youtube.com/watch?v=8Qqwdur3fBM",
-      "date": "2026-07-17T09:00:39-04:00",
+      "date": "2026-07-17T13:00:39+00:00",
       "summary": "Azure Kubernetes Application Networking (AppNet) provides a fully managed, ambient-based service network for AKS, enabling secure, policy-driven service-to-service communication without sidecars.",
       "source": "AKS Community YouTube"
     },
     {
       "title": "AKS Community Call - US & Europe (June 2026) - Azure Kubernetes Service",
       "url": "https://www.youtube.com/watch?v=3GQkcyVZhEY",
-      "date": "2026-07-14T18:17:57-04:00",
+      "date": "2026-07-14T22:17:57+00:00",
       "summary": "Welcome to the AKS Community Calls!  These sessions foster direct interaction between our product teams and the AKS community.",
       "source": "AKS Community YouTube"
     },
     {
       "title": "Assess your .NET and Java Webapps for modernization to App Service or AKS with Azure Migrate",
       "url": "https://www.youtube.com/watch?v=bQfhnZucBck",
-      "date": "2026-07-15T12:00:28-04:00",
+      "date": "2026-07-15T16:00:28+00:00",
       "summary": "Assess your . NET and Java Webapps for modernization to App Service or AKS with Azure Migrate.",
       "source": "Microsoft Azure YouTube"
     }
