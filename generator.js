@@ -65,8 +65,12 @@ class NewsletterGenerator {
       if (lowerTitle.includes(lowerSummary) || lowerSummary.includes(lowerTitle)) {
         summary = "";
       }
-      // Remove generic non-descriptions
-      if (/^(is now (generally )?available|is now in (public )?preview)\.?$/i.test(summary)) {
+      // Remove generic non-descriptions (one-liners that say nothing useful)
+      if (/^(is now (generally )?available|is now in (public )?preview|is now (available|supported|enabled))\.?$/i.test(summary)) {
+        summary = "";
+      }
+      // Catch slightly longer but still generic descriptions
+      if (/^is now (available|supported|enabled|set to)/i.test(summary) && summary.length < 80) {
         summary = "";
       }
     }
@@ -79,7 +83,7 @@ class NewsletterGenerator {
       summary = "[NEEDS DESCRIPTION]";
     }
 
-    let line = url ? `* **[${title}](${this._addUtm(url)})**` : `* **${title}**`;
+    let line = url ? `* **[${title}](${url})**` : `* **${title}**`;
     if (summary) line += `: ${summary}`;
     return line;
   }
