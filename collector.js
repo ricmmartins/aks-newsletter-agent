@@ -758,22 +758,27 @@ class ContentCollector {
       const dateLte = this.windowEnd.toISOString();
 
       // Strategy 1: Use bearer token to make our own GraphQL call with exact window dates (most reliable)
+      // Run multiple searches to catch posts that use different terminology
+      const searchTerms = ["aks", "azure kubernetes service", "kubernetes azure"];
       if (bearerToken) {
         console.log("  ✓ Using bearer token with exact date range");
-        const allResults = await page.evaluate(
-          async (token, dateFrom, dateTo) => {
-            const body = {
-              operationName: "MessageSearch",
-              variables: {
-                forAutoSuggest: false, useFullPageInfo: true,
-                truncateBodyLength: 200, useUnreadCount: false, first: 50,
-                constraints: {
-                  conversationStyle: { eq: "BLOG" },
-                  conversationLastPostingActivityTime: { gte: dateFrom, lte: dateTo },
+        const allResults = [];
+        for (const term of searchTerms) {
+          console.log(`    Searching for "${term}"...`);
+          const termResults = await page.evaluate(
+            async (token, dateFrom, dateTo, searchTerm) => {
+              const body = {
+                operationName: "MessageSearch",
+                variables: {
+                  forAutoSuggest: false, useFullPageInfo: true,
+                  truncateBodyLength: 200, useUnreadCount: false, first: 50,
+                  constraints: {
+                    conversationStyle: { eq: "BLOG" },
+                    conversationLastPostingActivityTime: { gte: dateFrom, lte: dateTo },
+                  },
+                  sorts: { topicPublishDate: { direction: "DESC" } },
+                  searchTerm,
                 },
-                sorts: { topicPublishDate: { direction: "DESC" } },
-                searchTerm: "aks",
-              },
               extensions: {
                 persistedQuery: {
                   version: 1,
@@ -797,7 +802,6 @@ class ContentCollector {
               const boardId = (msg.board?.displayId || "").toLowerCase();
               const snippetText = (e.node.snippet || [])
                 .map((s) => (s.content || []).join(" ")).join(" ");
-              // Prefer canonical viewHref from API; fall back to UID-based URL
               let url = "";
               if (msg.viewHref) {
                 url = msg.viewHref.startsWith("http") ? msg.viewHref : `https://techcommunity.microsoft.com${msg.viewHref}`;
@@ -812,11 +816,16 @@ class ContentCollector {
               };
             });
           },
-          bearerToken, dateGte, dateLte
-        );
+          bearerToken, dateGte, dateLte, term
+          );
+          allResults.push(...termResults);
+        }
 
+        // Deduplicate by URL
+        const seenUrls = new Set();
         for (const item of allResults) {
-          // Filter by actual post date (GraphQL date filter uses activity time, not publish time)
+          if (seenUrls.has(item.url)) continue;
+          seenUrls.add(item.url);
           if (item.posted && !this._isWithinWindow(item.posted)) continue;
           if (this._matchesAKSStrict(item.title) || this._matchesAKSStrict(item.url) || this._matchesAKSStrict(item.snippet)) {
             this.collected.techcommunity_search.push({
