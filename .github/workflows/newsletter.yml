@@ -101,7 +101,7 @@ jobs:
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --polish-only
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MODELS_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Quality gate – check content completeness
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
