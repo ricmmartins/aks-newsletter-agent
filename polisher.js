@@ -1,12 +1,17 @@
 /**
  * AKS Newsletter Agent – AI Polisher
- * Takes a raw generated draft and polishes it using GitHub Models API (GPT-4o).
+ * Takes a raw generated draft and polishes it using OpenAI API (GPT-4o).
  * Produces an editorial-quality newsletter matching the reference edition style.
+ * 
+ * Supports two backends (auto-detected from env vars):
+ *   - OPENAI_API_KEY → OpenAI API (api.openai.com)
+ *   - GITHUB_TOKEN   → GitHub Models API (deprecated July 2026, kept as fallback)
  */
 
 const fs = require("fs");
 const path = require("path");
 
+const OPENAI_ENDPOINT = "https://api.openai.com/v1/chat/completions";
 const GITHUB_MODELS_ENDPOINT = "https://models.inference.ai.azure.com/chat/completions";
 const PRIMARY_MODEL = "gpt-4o";
 const FALLBACK_MODEL = "gpt-4o-mini";
@@ -19,7 +24,13 @@ class NewsletterPolisher {
     this.year = year;
     this.month = month;
     this.monthPad = String(month).padStart(2, "0");
-    this.token = options.token || process.env.GITHUB_TOKEN || "";
+    
+    // Auto-detect backend: prefer OpenAI API, fall back to GitHub Models
+    this.openaiKey = options.openaiKey || process.env.OPENAI_API_KEY || "";
+    this.githubToken = options.token || process.env.GITHUB_TOKEN || "";
+    this.token = this.openaiKey || this.githubToken;
+    this.useOpenAI = !!this.openaiKey;
+    
     this.model = options.model || PRIMARY_MODEL;
     this.draftPath = options.draftPath || path.join("newsletters", String(year), `${year}-${this.monthPad}.md`);
     this.collectedPath = options.collectedPath || path.join("collected", `${year}-${this.monthPad}.json`);
@@ -29,7 +40,8 @@ class NewsletterPolisher {
 
   canPolish() {
     if (!this.token) {
-      console.warn("⚠️  No GITHUB_TOKEN found — skipping AI polish. Set GITHUB_TOKEN to enable.");
+      console.warn("⚠️  No OPENAI_API_KEY or GITHUB_TOKEN found — skipping AI polish.");
+      console.warn("   Set OPENAI_API_KEY (recommended) or GITHUB_TOKEN to enable.");
       return false;
     }
     if (!fs.existsSync(this.draftPath)) {
