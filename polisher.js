@@ -10,8 +10,9 @@ const path = require("path");
 const GITHUB_MODELS_ENDPOINT = "https://models.inference.ai.azure.com/chat/completions";
 const PRIMARY_MODEL = "gpt-4o";
 const FALLBACK_MODEL = "gpt-4o-mini";
-const MAX_TOKENS = 8192;
+const MAX_TOKENS = 16384;
 const MAX_POLISH_ATTEMPTS = 2;
+const MAX_SECTION_RETRIES = 2;
 
 class NewsletterPolisher {
   constructor(year, month, options = {}) {
@@ -109,11 +110,16 @@ ${summary}`;
   _enforceUtm(content) {
     const campaign = `${this.year}-${this.monthPad}`;
     return content.replace(/\]\((https?:\/\/[^)]+)\)/g, (match, url) => {
-      // Skip GitHub, YouTube, and links that already have UTM
+      // Skip GitHub, YouTube
       if (/github\.com|youtube\.com|youtu\.be/i.test(url)) return match;
-      if (url.includes("utm_source=aksnewsletter")) return match;
-      const sep = url.includes("?") ? "&" : "?";
-      return `](${url}${sep}utm_source=aksnewsletter&utm_medium=website&utm_campaign=${campaign})`;
+      // Strip any pre-existing UTM params to prevent duplicates
+      let cleanUrl = url.replace(/[?&]utm_source=aksnewsletter[^)&]*/g, "")
+        .replace(/[?&]utm_medium=website/g, "")
+        .replace(/[?&]utm_campaign=\d{4}-\d{2}/g, "");
+      // Clean up trailing ? or & left after stripping
+      cleanUrl = cleanUrl.replace(/[?&]$/, "");
+      const sep = cleanUrl.includes("?") ? "&" : "?";
+      return `](${cleanUrl}${sep}utm_source=aksnewsletter&utm_medium=website&utm_campaign=${campaign})`;
     });
   }
 
@@ -341,6 +347,23 @@ Return ONLY the polished section content in Markdown. No commentary.`;
         console.warn(`⚠️  Quality issues in final output:`);
         issues.forEach((issue) => console.warn(`   - ${issue}`));
       }
+
+      // Hard fail: refuse to produce output with [NEEDS DESCRIPTION] markers
+      const remainingMarkers = (polished.match(/\[NEEDS DESCRIPTION\]/g) || []).length;
+      if (remainingMarkers > 0) {
+        console.error(`\n❌ QUALITY GATE FAILED: ${remainingMarkers} items still have [NEEDS DESCRIPTION] markers.`);
+        console.error(`   The polisher could not rewrite all items. These need manual attention:`);
+        const lines = polished.split("\n");
+        for (const line of lines) {
+          if (line.includes("[NEEDS DESCRIPTION]")) {
+            const titleMatch = line.match(/\*\*\[([^\]]+)\]/);
+            console.error(`   • ${titleMatch ? titleMatch[1] : line.trim().substring(0, 80)}`);
+          }
+        }
+        console.error(`\n   Fix: Run again with --polish-only, or edit the draft manually.`);
+        process.exit(1);
+      }
+
       return polished;
     }
 
@@ -378,22 +401,38 @@ Return ONLY the polished section content in Markdown. No commentary.`;
       ];
 
       try {
-        const result = await this._callModel(messages, this.model);
-        const cleaned = this._cleanOutput(result);
+        let result = await this._callModel(messages, this.model);
+        let cleaned = this._cleanOutput(result);
 
-        // Verify the section was actually polished (no leftover markers)
-        if (cleaned.includes("[NEEDS DESCRIPTION]")) {
-          console.warn(`  ⚠️  Section still has [NEEDS DESCRIPTION] markers, retrying...`);
-          const retryMessages = [
-            ...messages,
-            { role: "assistant", content: result },
-            { role: "user", content: "You left [NEEDS DESCRIPTION] markers in the output. Replace ALL of them with actual 1-3 sentence descriptions. Return the complete corrected section." },
-          ];
-          const retry = await this._callModel(retryMessages, this.model);
-          polishedSections.push(this._cleanOutput(retry));
-        } else {
-          polishedSections.push(cleaned);
+        // Retry loop: keep re-polishing until no [NEEDS DESCRIPTION] markers remain
+        let retryCount = 0;
+        let conversationMessages = [...messages, { role: "assistant", content: result }];
+        while (cleaned.includes("[NEEDS DESCRIPTION]") && retryCount < MAX_SECTION_RETRIES) {
+          retryCount++;
+          const remaining = (cleaned.match(/\[NEEDS DESCRIPTION\]/g) || []).length;
+          console.warn(`  ⚠️  Section still has ${remaining} [NEEDS DESCRIPTION] markers, retry ${retryCount}/${MAX_SECTION_RETRIES}...`);
+          conversationMessages.push({
+            role: "user",
+            content: `You left ${remaining} [NEEDS DESCRIPTION] markers in the output. Replace ALL of them with actual 1-3 sentence opinionated descriptions. Do NOT use "Learn how to..." or "Learn about..." patterns. Return the COMPLETE corrected section with no markers remaining.`,
+          });
+          result = await this._callModel(conversationMessages, this.model);
+          cleaned = this._cleanOutput(result);
+          conversationMessages.push({ role: "assistant", content: result });
         }
+
+        // Also catch generic one-liner descriptions that the polisher missed
+        const genericPattern = /:\s*(Is now (available|supported|enabled)|Is now in (public )?preview)[^.]*\.?\s*$/gm;
+        if (genericPattern.test(cleaned) && retryCount < MAX_SECTION_RETRIES) {
+          console.warn(`  ⚠️  Section has generic one-liner descriptions, requesting rewrite...`);
+          conversationMessages.push({
+            role: "user",
+            content: `Some items have generic one-liner descriptions like "Is now available in public preview." These are NOT acceptable. Every item needs 1-3 sentences explaining what the feature does, what pain point it solves, and who benefits. Rewrite ALL generic descriptions. Return the COMPLETE corrected section.`,
+          });
+          result = await this._callModel(conversationMessages, this.model);
+          cleaned = this._cleanOutput(result);
+        }
+
+        polishedSections.push(cleaned);
       } catch (err) {
         console.warn(`  ⚠️  Failed to polish section "${section.name}": ${err.message}`);
         // Try fallback model
@@ -444,6 +483,8 @@ Return ONLY the polished section content in Markdown. No commentary.`;
         if (!afterLink || afterLink === ":" || afterLink === ": ") {
           itemsWithoutDescription++;
         } else if (/^:\s*(Learn (how to|about|the)|In this (article|tutorial))/i.test(afterLink)) {
+          itemsWithMetadata++;
+        } else if (/^:\s*Is now (available|supported|enabled|in (public )?preview)/i.test(afterLink) && afterLink.length < 100) {
           itemsWithMetadata++;
         }
       }

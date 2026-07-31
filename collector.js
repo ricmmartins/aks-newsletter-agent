@@ -365,7 +365,15 @@ class ContentCollector {
           entry.summary = this._cleanCommitMessage(entry.commitMessage);
         }
       } else {
-        entry.title = entry.commitMessage;
+        // No frontmatter title found — use commit message as fallback
+        // but discard entries with low-quality commit message titles
+        const msg = entry.commitMessage || "";
+        if (msg.length < 30 || /^(updat|fix|add|chang|delet|renam|minor|small|includ)/i.test(msg)) {
+          // Skip: commit message is too short or looks like noise
+          entry._discard = true;
+        } else {
+          entry.title = msg;
+        }
       }
       // Preserve commit message as context for the polisher to understand what changed
       entry.commitContext = this._cleanCommitMessage(entry.commitMessage);
@@ -373,7 +381,7 @@ class ContentCollector {
       delete entry.articleFile;
     }
 
-    this.collected.aks_docs_commits = entries;
+    this.collected.aks_docs_commits = entries.filter((e) => !e._discard);
 
     console.log(
       `  ✓ Found ${this.collected.aks_docs_commits.length} doc commits`
