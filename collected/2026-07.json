@@ -1,0 +1,335 @@
+{
+  "metadata": {
+    "year": 2026,
+    "month": 7,
+    "monthName": "July",
+    "collectedAt": "2026-07-31T14:10:41.607Z",
+    "windowStart": "2026-07-01T00:00:00.000Z",
+    "windowEnd": "2026-07-31T23:59:59.000Z"
+  },
+  "aks_blog": [
+    {
+      "title": "Stream Model Weights to NVIDIA GPU (vLLM) from Azure Blob Storage using the RunAI Model Streamer",
+      "url": "https://blog.aks.azure.com/2026/07/13/runai-streamer-vllm",
+      "date": "2026-07-13T00:00:00.000Z",
+      "summary": "If you serve large language models on AKS, you eventually run into the same wall: every time an inference replica scales up, after a node failure, during a rollout, or when your autoscaler races to meet a traffic spike, the new pod has to load tens of gigabytes of model weights before it can serve a single request. That load time is your cold-start tax, and it lands at the worst possible moment: exactly when you need capacity now. This post shows how to cut it by streaming weights straight from Azure Blob Storage into GPU memory with the RunAI Model Streamer, and walks the full setup end to end on AKS.",
+      "source": "AKS Engineering Blog"
+    }
+  ],
+  "azure_updates": [
+    {
+      "title": "Generally Available: Encryption in Transit for Azure Files NFS Shares in Azure Kubernetes Service (AKS)",
+      "url": "https://azure.microsoft.com/en-us/updates/567787/",
+      "date": "2026-07",
+      "summary": "Azure Kubernetes Service (AKS) now generally supports Encryption in Transit (EiT) for Azure Files NFS v4.1 volumes through the Azure File CSI driver.",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Generally Available: Application Routing with Gateway API",
+      "url": "https://azure.microsoft.com/en-us/updates/567944/",
+      "date": "2026-07",
+      "summary": "Managing ingress routing while adopting newer Kubernetes standards can require balancing modernization efforts with existing deployments.",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Node Disruption Policy (preview)",
+      "url": "https://aka.ms/aks/nodedisruptionpolicy",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "Is now available in public preview.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "NAT Gateway V2 (preview)",
+      "url": "https://learn.microsoft.com/azure/aks/nat-gateway#create-an-aks-cluster-with-a-managed-standardv2-nat-gateway-managednatgatewayv2",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "Is now available in public preview using `outboundType: managedNATGateway` with `natGatewayProfile.sku: standardV2` (API version `2026-06-01`).",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Automatic zone placement (preview)",
+      "url": "https://aka.ms/aks/automatic-zonal-placement",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "Is now available in public preview.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Prepared Image Specification (preview)",
+      "url": "https://learn.microsoft.com/azure/aks/prepared-image-specification-overview",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "Is now available in preview.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Full caching mode for Ephemeral OS disks (preview)",
+      "url": "https://learn.microsoft.com/azure/aks/full-cache-ephemeral-os-disk",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "Is now available in public preview.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Artifact Streaming – now generally available",
+      "url": "https://aka.ms/aks/artifact-streaming",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "Is now generally available.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Secure TLS bootstrapping – now generally available",
+      "url": "https://aka.ms/aks/secure-tls-bootstrapping",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "Is now enabled by default in `westcentralus` and `eastasia`.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Secure Boot – now generally available",
+      "url": "https://aka.ms/aks/trusted-launch",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "Is now supported when using GPUs with Azure Linux OS.",
+      "source": "AKS Release Notes"
+    }
+  ],
+  "aks_releases": [
+    {
+      "title": "Release 2026-07-17",
+      "url": "https://github.com/Azure/AKS/releases/tag/2026-07-17",
+      "date": "2026-07-24T18:39:55Z",
+      "body": "## Release Notes - 2026-07-17\r\n\r\n> Monitor the release status by regions at [AKS-Release-Tracker](https://releases.aks.azure.com/). This release is titled `v20260717`.\r\n\r\n### Announcements of upcoming changes and retirements\r\n\r\n* On September 14, 2026, [the preview property enableCustomCATrust will retire](https://github.com/Azure/AKS/issues/5826). After that date, the `enableCustomCATrust=true` node pool level field will no longer enable [Custom Certificate Authority (CA)](https://aka.ms/aks/custom-certificate-authority). To avoid failures during scaling and certificate updates, update the impacted clusters and node pools and remove the preview property (`--disable-custom-ca-trust`).\r\n* AKS no longer supports creating node pools with Windows Server Annual Channel for Containers. Existing WSAnnual node pools are unaffected. For more information, see [Windows Annual Channel retirement](https://aka.ms/aks/windows-annual-channel-retirement).\r\n* AKS no longer supports creating node pools or clusters with Flatcar Container Linux for AKS. Existing node pools are unaffected. For more information, see [Flatcar preview retirement](https://aka.ms/aks/flatcar-preview-retirement).\r\n* Customers using NVadsA10v5 or NCadsA10v4 node pools should verify they are running AKS node image version 202606.08.1 or later to maintain compatibility with updated NVIDIA v18.x host drivers. Clusters running older node images may encounter host/guest GPU driver compatibility issues and move into an unsupported configuration. For upgrade guidance, see the [AKS node image upgrade documentation](https://aka.ms/aks/node-image-upgrade). See [Github issue](https://github.com/Azure/AKS/issues/5875) for more information.\r\n\r\n### Release notes\r\n\r\n#### Kubernetes versions\r\n\r\n* Kubernetes patch versions 1.36.2, 1.35.6, 1.34.9, and 1.33.13 are now available.\r\n* Kubernetes version 1.30 is now deprecated. Upgrade to a [supported Kubernetes version](https://learn.microsoft.com/azure/aks/supported-kubernetes-versions), or opt into [long-term support (LTS)](https://learn.microsoft.com/azure/aks/long-term-support) to continue receiving updates.\r\n* Kubernetes version 1.33 is now available only under [long-term support (LTS)](https://learn.microsoft.com/azure/aks/long-term-support).\r\n\r\n#### Features\r\n\r\n* [Artifact Streaming](https://aka.ms/aks/artifact-streaming) is now generally available. The feature allows you to stream container images from Azure Container Registry (ACR) to Azure Kubernetes Service (AKS). AKS only pulls the necessary layers for initial pod startup, reducing the time it takes to deploy your workloads.\r\n* [Secure TLS bootstrapping](https://aka.ms/aks/secure-tls-bootstrapping) is now enabled by default in `westcentralus` and `eastasia`. See regional updates on [AKS GitHub Issues](https://github.com/Azure/AKS/issues/5694).\r\n* [Secure Boot](https://aka.ms/aks/trusted-launch) is now supported when using GPUs with Azure Linux OS.\r\n* [Trusted Launch (vTPM and Secure Boot)](https://aka.ms/aks/trusted-launch) can now be enabled and disabled on existing Linux node pools.\r\n\r\n#### Preview features\r\n\r\n* [Node Disruption Policy](https://aka.ms/aks/nodedisruptionpolicy) is now available in public preview. Node Disruption Policy lets you control when reimage-triggering operations are allowed so disruptive changes happen during windows you define.\r\n* [NAT Gateway V2](https://learn.microsoft.com/azure/aks/nat-gateway#create-an-aks-cluster-with-a-managed-standardv2-nat-gateway-managednatgatewayv2) is now available in public preview using `outboundType: managedNATGateway` with `natGatewayProfile.sku: standardV2` (API version `2026-06-01`).\r\n* [Automatic zone placement](https://aka.ms/aks/automatic-zonal-placement) is now available in public preview. Automatic zone placement in AKS dynamically selects the best set of [availability zones](https://learn.microsoft.com/azure/reliability/availability-zones-overview) for a node pool. You don't need to specify the zones manually for each region and VM SKU combination.\r\n* [Prepared Image Specification](https://learn.microsoft.com/azure/aks/prepared-image-specification-overview) is now available in preview. With AKS Prepared Image Specification, you can create preconfigured node images that include required container images and customizations ahead of time, enabling new nodes to start in a ready-to-run state.\r\n* [Full caching mode for Ephemeral OS disks](https://learn.microsoft.com/azure/aks/full-cache-ephemeral-os-disk) is now available in public preview. Full caching mode caches the entire operating system locally on the node, so that AKS can continue running even when remote storage is unavailable, significantly improving node resiliency while also delivering faster OS disk performance.\r\n\r\n#### Behavioral changes\r\n\r\n* Starting with Kubernetes 1.37 (expected to be available in October 2026), Windows Server 2025 is the default and recommended OS SKU for new Windows node pools when no OS SKU is specified. For more information, see [Windows best practices](https://aka.ms/aks/windows-best-practices).\r\n* For Node Auto Provisioning enabled clusters, AKS now sets `kubernetes.azure.com/mode: user` on the default NodePool to help prevent pending system workloads from causing user node scale-up.\r\n* Node Auto-Provisioning enabled clusters now use an In-VM spot rebalancing signal, which allows for an improved spot eviction notification and proactive spot replacement. \r\n* AKS now rejects kube-proxy `nftables` mode at request time on clusters running Kubernetes versions older than 1.33, instead of accepting the request and silently falling back to `iptables`.\r\n* AKS now accepts mixed-case `networkPlugin` values for supported network plugin options during cluster creation.\r\n* The `until` field in upgrade override settings can now be set to any future date; AKS no longer rejects values more than 30 days in the future.\r\n* CNI Overlay Dual-Stack on Windows no longer requires a preview feature registration.\r\n\r\n#### Bug fixes\r\n\r\n* Fixed an issue where API Server Authorized IP Ranges using only service tags were not enforced on API Server VNet Integration clusters.\r\n* Fixed Container Insights onboarding through AzureMonitorProfile so re-enabling Container Insights uses AAD auth and blocks unsafe Log Analytics Workspace changes under legacy auth.\r\n* Fixed an issue where clusters with an existing kube-proxy configuration object could not be updated unless `KubeProxyConfigurationPreview` was registered, even when the update did not change kube-proxy configuration.\r\n* Fixed App Routing Istio manifest values so resource requests and limits are populated correctly.\r\n* Fixed Static Egress Gateway VMSS model reconciliation so secondary egress IP configurations are preserved.\r\n* Re-enabled Cilium source IP verification on Cilium v1.17+ to restore dataplane anti-spoofing protection.\r\n* Fixed AKS support for Istio 1.30 mutating webhook configuration updates on Automatic clusters.\r\n* Fixed Node Auto Provisioning issue where load balancer deletion could block node provisioning.\r\n* Fixed Node Auto Provisioning to normalize CSI empty-zone topology value to regional zone \"0\".\r\n\r\n#### Component updates\r\n\r\n* Istio revision `asm-1-30` is now available with the [Istio-based service mesh add-on](https://learn.microsoft.com/azure/aks/istio-about). See [supported Istio revisions](https://learn.microsoft.com/azure/aks/istio-upgrade) for details.\r\n* Istio-based service mesh add-on revisions `asm-1-28`, `asm-1-29`, and `asm-1-30` include security fixes for [ISTIO-SECURITY-2026-005](https://istio.io/latest/news/security/ISTIO-SECURITY-2026-005/). **Action required:** restart your Istio workload pods to trigger re-injection of the newer `istio-proxy` patch version.\r\n* Istio-based service mesh add-on revisions have been updated:\r\n  * `asm-1-27` to [`v1.27.9-6`](https://github.com/istio/istio/releases/tag/1.27.9)\r\n  * `asm-1-28` to [`v1.28.9-2`](https://github.com/istio/istio/releases/tag/1.28.9)\r\n  * `asm-",
+      "source": "AKS GitHub Releases"
+    }
+  ],
+  "aks_docs_commits": [
+    {
+      "url": "https://learn.microsoft.com/azure/aks/upgrade-aks-control-plane",
+      "date": "2026-07-31T04:01:51Z",
+      "source": "AKS Docs",
+      "title": "Upgrade the Azure Kubernetes Service (AKS) Cluster Control Plane",
+      "summary": "Learn how to upgrade the control plane of an Azure Kubernetes Service (AKS) cluster to get the latest Kubernetes version features and security updates.",
+      "summaryIsMetadata": true,
+      "commitContext": "Refresh AKS control plane upgrade guidance"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/best-practices-app-cluster-reliability",
+      "date": "2026-07-31T03:03:31Z",
+      "source": "AKS Docs",
+      "title": "Deployment and Cluster Reliability Best Practices for Azure Kubernetes Service (AKS)",
+      "summary": "Learn the best practices for deployment and cluster reliability for Azure Kubernetes Service (AKS), including guidance for AKS Automatic and AKS Standard cluster modes.",
+      "summaryIsMetadata": true,
+      "commitContext": "Fix cluster autoscaler heading links"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/cluster-autoscaler",
+      "date": "2026-07-31T02:56:24Z",
+      "source": "AKS Docs",
+      "title": "Use the Cluster Autoscaler in Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to use the cluster autoscaler to automatically scale your Azure Kubernetes Service (AKS) workloads to meet application demands.",
+      "summaryIsMetadata": true,
+      "commitContext": "Refresh cluster autoscaler guidance"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/core-aks-concepts",
+      "date": "2026-07-30T23:30:45Z",
+      "source": "AKS Docs",
+      "title": "Azure Kubernetes Service (AKS) Core Concepts",
+      "summary": "Learn about the core concepts of Azure Kubernetes Service (AKS).",
+      "summaryIsMetadata": true,
+      "commitContext": "Repair AKS storage section links"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/concepts-storage",
+      "date": "2026-07-30T23:24:43Z",
+      "source": "AKS Docs",
+      "title": "Concepts - Storage in Azure Kubernetes Service (AKS)",
+      "summary": "Learn about storage in Azure Kubernetes Service (AKS), including volumes, persistent volumes, storage classes, and claims.",
+      "summaryIsMetadata": true,
+      "commitContext": "Refresh AKS storage guidance"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/upgrade-options",
+      "date": "2026-07-28T18:09:56Z",
+      "source": "AKS Docs",
+      "title": "Upgrade Options and Recommendations for Azure Kubernetes Service (AKS) Clusters",
+      "summary": "Learn about upgrade options for Azure Kubernetes Service (AKS) clusters, including scenario-based recommendations and why AKS Automatic is the recommended production-ready default for most workloads.",
+      "summaryIsMetadata": true,
+      "commitContext": "Remove kube-no-trouble from validation tools list"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/identity-bindings",
+      "date": "2026-07-27T21:25:07Z",
+      "source": "AKS Docs",
+      "title": "Set up identity bindings on Azure Kubernetes Service (AKS) (preview)",
+      "summary": "Learn how to enable and configure identity bindings on AKS to map a user-assigned managed identity (UAMI) across multiple clusters while using a single federated identity credential.",
+      "summaryIsMetadata": true,
+      "commitContext": "Fix environment variable name for Key Vault secret"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/how-to-configure-container-network-insights-agent",
+      "date": "2026-07-27T20:24:41Z",
+      "source": "AKS Docs",
+      "title": "updating login commands",
+      "commitContext": "Updating login commands"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/inspektor-gadget-troubleshoot",
+      "date": "2026-07-27T18:51:23Z",
+      "source": "AKS Docs",
+      "title": "Troubleshoot the Inspektor Gadget extension on AKS (preview)",
+      "summary": "Troubleshoot common installation, configuration, and runtime errors with the Inspektor Gadget cluster extension on Azure Kubernetes Service (AKS).",
+      "summaryIsMetadata": true,
+      "commitContext": "Clarify resolution steps for DaemonSet scheduling issue"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/node-auto-provisioning-aksnodeclass",
+      "date": "2026-07-24T17:34:40Z",
+      "source": "AKS Docs",
+      "title": "Configure AKSNodeClass Resources for Node Auto-Provisioning (NAP) in Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to configure Azure-specific settings for AKS node auto-provisioning using AKSNodeClass resources.",
+      "summaryIsMetadata": true,
+      "commitContext": "Revise host-based encryption reference"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/create-volume-azure-files",
+      "date": "2026-07-21T07:50:17Z",
+      "source": "AKS Docs",
+      "title": "Create and Manage Persistent Volumes with Azure Files in Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to create and manage persistent volumes using Azure Files with the Container Storage Interface (CSI) driver in Azure Kubernetes Service (AKS) to provide scalable and reliable storage for your containerized applications.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update status of azure file features"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/private-clusters",
+      "date": "2026-07-21T06:58:20Z",
+      "source": "AKS Docs",
+      "title": "Create a Private Azure Kubernetes Service (AKS) Cluster",
+      "summary": "Learn how to create a private Azure Kubernetes Service (AKS) cluster with enhanced security and network control using Azure CLI or Terraform.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update with API server endpoint info"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/start-stop-cluster",
+      "date": "2026-07-21T06:54:34Z",
+      "source": "AKS Docs",
+      "title": "Stop and start an Azure Kubernetes Service (AKS) cluster",
+      "summary": "Learn how to stop and start an Azure Kubernetes Service (AKS) cluster.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update AKS cluster start/stop documentation"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/concepts-network-cni-overview",
+      "date": "2026-07-21T06:28:21Z",
+      "source": "AKS Docs",
+      "title": "Concepts - CNI Networking in Azure Kubernetes Service (AKS)",
+      "summary": "Learn about CNI networking in AKS, including overlay and flat network models, IP address management (IPAM) options, and how to choose the right networking model for your cluster.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update AKS network configuration requirements"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/ai-toolchain-operator",
+      "date": "2026-07-21T05:11:35Z",
+      "source": "AKS Docs",
+      "title": "Deploy an AI model on Azure Kubernetes Service (AKS) with the AI toolchain operator add-on",
+      "summary": "Learn how to enable the AI toolchain operator add-on on Azure Kubernetes Service (AKS) to simplify OSS AI model management and deployment.",
+      "summaryIsMetadata": true,
+      "commitContext": "Document AKS stop/start limitations with KAITO Workspaces"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/custom-node-configuration",
+      "date": "2026-07-16T22:50:38Z",
+      "source": "AKS Docs",
+      "title": "Customize the Node Configuration for Azure Kubernetes Service (AKS) Node Pools",
+      "summary": "Learn how to customize the configuration on Azure Kubernetes Service (AKS) cluster nodes and node pools.",
+      "summaryIsMetadata": true,
+      "commitContext": "Fix custom node config preview feature flag"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/supported-kubernetes-versions",
+      "date": "2026-07-15T16:37:44Z",
+      "source": "AKS Docs",
+      "title": "Supported Kubernetes Versions in Azure Kubernetes Service (AKS)",
+      "summary": "Learn the Kubernetes version support policy and lifecycle of clusters in Azure Kubernetes Service (AKS).",
+      "summaryIsMetadata": true,
+      "commitContext": "Updated the ms.date field"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/use-premium-v2-disks",
+      "date": "2026-07-15T04:57:53Z",
+      "source": "AKS Docs",
+      "title": "Enable Premium SSD v2 support on Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to enable and configure Premium SSD v2 disks in an Azure Kubernetes Service (AKS) cluster.",
+      "summaryIsMetadata": true,
+      "commitContext": "Clarify Premium SSD v2 performance updates"
+    }
+  ],
+  "techcommunity": [],
+  "techcommunity_search": [],
+  "youtube": [
+    {
+      "title": "Next-Gen Kubernetes Networking with Jack Ma: AKS Me Anything: Azure Kubernetes Service",
+      "url": "https://www.youtube.com/watch?v=Rg21m1YTdBA",
+      "date": "2026-07-17T16:30:02+00:00",
+      "summary": "Discover next-gen Kubernetes application networking with Azure Kubernetes Application Network (AKS AppNet) and how it simplifies application connectivity, traffic management, and service-to-service communication for Kubernetes workloads.  Built...",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "AKS Application Network : Azure Kubernetes Service",
+      "url": "https://www.youtube.com/watch?v=8Qqwdur3fBM",
+      "date": "2026-07-17T13:00:39+00:00",
+      "summary": "Azure Kubernetes Application Networking (AppNet) provides a fully managed, ambient-based service network for AKS, enabling secure, policy-driven service-to-service communication without sidecars.",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "AKS Community Call - US & Europe (June 2026) - Azure Kubernetes Service",
+      "url": "https://www.youtube.com/watch?v=3GQkcyVZhEY",
+      "date": "2026-07-14T22:17:57+00:00",
+      "summary": "Welcome to the AKS Community Calls!  These sessions foster direct interaction between our product teams and the AKS community.",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "Assess your .NET and Java Webapps for modernization to App Service or AKS with Azure Migrate",
+      "url": "https://www.youtube.com/watch?v=bQfhnZucBck",
+      "date": "2026-07-15T16:00:28+00:00",
+      "summary": "Assess your . NET and Java Webapps for modernization to App Service or AKS with Azure Migrate.",
+      "source": "Microsoft Azure YouTube"
+    }
+  ],
+  "roadmap_url": "https://github.com/orgs/Azure/projects/685/views/1",
+  "releases_url": "https://github.com/Azure/AKS/releases/",
+  "behavioral_changes": [
+    {
+      "title": "Windows best practices",
+      "url": "https://aka.ms/aks/windows-best-practices",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "",
+      "source": "AKS Release Notes"
+    }
+  ],
+  "announcements": [
+    {
+      "title": "the preview property enableCustomCATrust will retire",
+      "url": "https://github.com/Azure/AKS/issues/5826",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Windows Annual Channel retirement",
+      "url": "https://aka.ms/aks/windows-annual-channel-retirement",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Flatcar preview retirement",
+      "url": "https://aka.ms/aks/flatcar-preview-retirement",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "AKS node image upgrade documentation",
+      "url": "https://aka.ms/aks/node-image-upgrade",
+      "date": "2026-07-24T18:39:55Z",
+      "summary": "",
+      "source": "AKS Release Notes"
+    }
+  ]
+}
