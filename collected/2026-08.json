@@ -1,0 +1,540 @@
+{
+  "metadata": {
+    "year": 2026,
+    "month": 8,
+    "monthName": "August",
+    "collectedAt": "2026-08-28T14:23:50.348Z",
+    "windowStart": "2026-08-01T00:00:00.000Z",
+    "windowEnd": "2026-08-31T23:59:59.000Z"
+  },
+  "aks_blog": [],
+  "azure_updates": [
+    {
+      "title": "Generally Available: Control plane metrics collection for AKS with Managed Prometheus",
+      "url": "https://azure.microsoft.com/en-us/updates/568830/",
+      "date": "2026-08",
+      "summary": "Control plane metrics collection for Azure Kubernetes Service (AKS), powered by Azure Monitor Managed Service for Prometheus, is now generally available.This capability gives AKS customers native observability into key managed control plane components, including the API server, etcd, kube-scheduler, kube-controller-manager, cluster autoscaler, and node auto-provisioning.",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Generally Available: Connect to AKS clusters using Azure Bastion",
+      "url": "https://azure.microsoft.com/en-us/updates/570030/",
+      "date": "2026-08",
+      "summary": "Azure Bastion integration with Azure Kubernetes Service is\nnow generally available.",
+      "source": "Azure Updates"
+    },
+    {
+      "title": "Prepared Image Specification (PIS) (preview)",
+      "url": "https://aka.ms/aks/prepared-image-spec",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "Is now available in public preview.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Capacity Reservation Group with an existing node pool (preview)",
+      "url": "https://learn.microsoft.com/azure/aks/use-capacity-reservation-groups#associate-an-existing-capacity-reservation-group-with-an-existing-node-pool-preview",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "Learn how to use capacity reservation groups with node pools in Azure Kubernetes Service (AKS) to guarantee allocated capacity for your node pools.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Node Auto Provisioning – now generally available",
+      "url": "https://aka.ms/aks/nap",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "Can now be enabled on clusters with restricted `publicNetworkAccess`, including private API server VNet-integrated clusters using UDR, as long as the existing AKS-wide networking guardrails pass.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Automatic availability zone placement – now generally available",
+      "url": "https://aka.ms/aks/automatic-zonal-placement",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "Is now enabled globally.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Long Term Support (LTS) – now generally available",
+      "url": "https://aka.ms/aks/lts",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "As long as the version skew policy is satisfied.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "AKS Node pool Rollback – now generally available",
+      "url": "https://learn.microsoft.com/azure/aks/roll-back-node-pool-version",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "Is now generally available.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Encryption in Transit – now generally available",
+      "url": "https://learn.microsoft.com/azure/aks/create-volume-azure-files#encryption-in-transit-eit-for-nfs-file-shares",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "And use workload identity to access Azure Files storage are now generally available for the Azure File CSI driver.",
+      "source": "AKS Release Notes"
+    }
+  ],
+  "aks_releases": [
+    {
+      "title": "Release 2026-08-07",
+      "url": "https://github.com/Azure/AKS/releases/tag/2026-08-07",
+      "date": "2026-08-11T22:09:21Z",
+      "body": "## Release Notes - 2026-08-07\r\n\r\n> Monitor the release status by regions at [AKS-Release-Tracker](https://releases.aks.azure.com/). This release is titled `v20260807`.\r\n\r\n### Release notes\r\n\r\n#### Features\r\n\r\n* [Node Auto Provisioning](https://aka.ms/aks/nap) can now be enabled on clusters with restricted `publicNetworkAccess`, including private [API server VNet-integrated clusters](https://aka.ms/aks/api-server-vnet-integration) using UDR, as long as the existing AKS-wide networking guardrails pass.\r\n* [Automatic availability zone placement](https://aka.ms/aks/automatic-zonal-placement) is now enabled globally. Customers can create new VMSS or VirtualMachines node pools with `availabilityZones=[\"auto\"]`, and existing VMSS node pools can be updated to `availabilityZones=[\"auto\"]` after rollout completes.\r\n* AKS now allows control-plane only upgrades to AKS [Long Term Support (LTS)](https://aka.ms/aks/lts) as long as the [version skew policy](https://learn.microsoft.com/azure/aks/supported-kubernetes-versions?tabs=azure-cli#what-is-the-allowed-difference-in-versions-between-the-control-plane-and-node-pools) is satisfied. This allows user to more safely upgrade into LTS by first upgrading the control plane, validating functionality, and then upgrading node pools.\r\n* [AKS Node pool Rollback](https://learn.microsoft.com/azure/aks/roll-back-node-pool-version) is now generally available. AKS node pool version rollback lets you restore a node pool to its previous Kubernetes version and node image after an upgrade issue, minimizing downtime and maintaining business continuity.\r\n* [Encryption in Transit](https://learn.microsoft.com/azure/aks/create-volume-azure-files#encryption-in-transit-eit-for-nfs-file-shares) and [use workload identity to access Azure Files storage](https://learn.microsoft.com/azure/aks/create-volume-azure-files#use-workload-identity-to-access-azure-files-storage) are now generally available for the Azure File CSI driver.\r\n\r\n\r\n#### Preview features\r\n\r\n* [Prepared Image Specification (PIS)](https://aka.ms/aks/prepared-image-spec) is now available in public preview. PIS allows you to create preconfigured node images with your required container images and node customizations already applied, helping to reduce node startup times.\r\n* Customers using preview API version `2026-01-02-preview` or later can associate a [Capacity Reservation Group with an existing node pool](https://learn.microsoft.com/azure/aks/use-capacity-reservation-groups#associate-an-existing-capacity-reservation-group-with-an-existing-node-pool-preview). Zonal node pools perform a rolling cordon, drain, and reboot; non-zero regional pools must still be scaled to zero first. \r\n\r\n#### Behavioral changes\r\n\r\n* For AKS clusters running Kubernetes 1.37 or later, [SSH node access](https://learn.microsoft.com/azure/aks/manage-ssh-node-access) configuration changes now trigger an immediate node reimage. Use [Node Disruption Policy](https://aka.ms/aks/nodedisruptionpolicy) to block the reimage or schedule it during a maintenance window.\r\n* For AKS clusters running Kubernetes 1.37 or later, changes to [IMDS restriction](https://aka.ms/aks/imds-restriction), [network-isolated bootstrap profile](https://aka.ms/aks/networkisolatedclusters), or [cluster outbound type](https://aka.ms/aks/outboundtype) now trigger an immediate node reimage. Use [Node Disruption Policy](https://aka.ms/aks/nodedisruptionpolicy) to control when the reimage is allowed.\r\n* VMSS rolling upgrade concurrency for percentage-based `maxSurge`, `maxUnavailable`, and `maxBlockedNodes` is now calculated from current VMSS capacity and capped to the remaining VMs to upgrade, making partial upgrades match the remaining upgrade work. For more details see the documentation on [rolling upgrade behaviors](https://learn.microsoft.com/azure/aks/upgrade-aks-node-pools-rolling#customize-unavailable-nodes).\r\n* Updating a cluster from service principal authentication to [managed identity](https://aka.ms/aks/managed-identity-update) now triggers node reimages across node pools. Configure [Node Disruption Policy](https://aka.ms/aks/nodedisruptionpolicy) to control when reimages that can disrupt workloads are allowed.\r\n* AKS upgrade validation now rejects node pool upgrades where current pool size plus effective surge would exceed the VMSS 1,000-instance limit, preventing mid-upgrade Azure Compute failures. See ['Configure rolling upgrade settings'](https://learn.microsoft.com/azure/aks/upgrade-aks-node-pools-rolling#configure-rolling-upgrade-settings) for more details.\r\n* [Istio Gateway API](https://learn.microsoft.com/azure/aks/istio-gateway-api) deployments now set `automountServiceAccountToken` to `false`, improving the default security posture and unblocking environments with Azure Policies that require pods to disable service account token auto-mounting.\r\n* AKS now validates [GPU MIG](https://aka.ms/aks/migs) instance profile slice width against VM SKU capacity, preventing unsupported MIG profiles from being accepted on lower-capacity GPU SKUs.\r\n* The [Application Gateway for Containers ALB add-on](https://learn.microsoft.com/azure/application-gateway/for-containers/application-gateway-for-containers-components#application-gateway-for-containers-aks-managed-add-on) is now aligned with AKS minor versions. AKS automatically selects the compatible ALB controller image during cluster upgrades, reducing controller and feature-flag incompatibilities. \r\n* AKS now rejects [Entra ID SSH](https://aka.ms/aks/ssh) configuration on AzureContainerLinux node pools because the extension is incompatible with immutable OS nodes and can make nodes unreachable.\r\n\r\n#### Bug fixes\r\n\r\n* Fixed an [AKS Automatic](https://aka.ms/aks/automatic-networking) issue where App Routing on Kubernetes 1.36+ clusters could incorrectly default to NGINX instead of Istio/Gateway API mode during cluster creation. \r\n\r\n#### Component updates\r\n\r\n* [Node Auto Provisioning](https://aka.ms/aks/nap) has been updated to Karpenter provider Azure [`v1.14.0`](https://github.com/Azure/karpenter-provider-azure/releases#release-v1.14.0), adding support for the `Balanced` consolidation policy to reduce node churn during consolidation. \r\n* Azure Policy add-on components were updated: Gatekeeper was bumped to [`3.23.0`](https://learn.microsoft.com/azure/governance/policy/concepts/policy-for-kubernetes#gatekeeper-3230), and Azure Policy add-on was bumped to [`1.17.0`](https://learn.microsoft.com/azure/governance/policy/concepts/policy-for-kubernetes#1170). \r\n* Azure File CSI Driver has been upgraded to [`v1.34.7`](https://github.com/kubernetes-sigs/azurefile-csi-driver/releases/tag/v1.34.7) on AKS 1.34 and [`v1.35.6`](https://github.com/kubernetes-sigs/azurefile-csi-driver/releases/tag/v1.35.6) on AKS 1.35 and 1.36. \r\n* Azure Blob CSI Driver has been upgraded to [`v1.26.16`](https://github.com/kubernetes-sigs/blob-csi-driver/releases/tag/v1.26.16) on AKS 1.33 and [`v1.27.9`](https://github.com/kubernetes-sigs/blob-csi-driver/releases/tag/v1.27.9) on AKS 1.34 and later. \r\n* Azure Disk CSI Driver has been upgraded to [`v1.33.11`](https://github.com/kubernetes-sigs/azuredisk-csi-driver/releases/tag/v1.33.11) on AKS 1.34 and [`v1.34.5`](https://github.com/kubernetes-sigs/azuredisk-csi-driver/releases/tag/v1.34.5) on AKS 1.35 and 1.36.\r\n* Azure Monitor managed service for Prometheus add-on was updated to the [07-27-2026 release](https://github.com/Azure/prometheus-collector/blob/main/RELEASENOTES.md#release-07-27-2026), including collector image updates and kube-state-metrics `v2.19.1-2`. \r\n* Container Insights has been upgraded to [`3.6.0`](https://github.com/microsoft/Docker-Provider/releases/tag/3.6.0).\r\n* AKS Azure Linux images:\r\n  * v3.0 - [202607.20.0](vhd-notes/AzureLinuxv3/202607.20.0.txt).\r\n  * v3.0 - [202607.29.0](vhd-notes/AzureLinuxv3/202607.29.0.txt).\r\n* AKS Azure Container Linux images:\r\n  * ACLv3 - [202607.20.0](vhd-notes/AzureContainerLinuxv3/202607.20.0.txt).\r\n  * ACLv3 - [20",
+      "source": "AKS GitHub Releases"
+    }
+  ],
+  "aks_docs_commits": [
+    {
+      "url": "https://learn.microsoft.com/azure/aks/deploy-canipull-application-aks",
+      "date": "2026-08-27T20:11:20Z",
+      "source": "AKS Docs",
+      "title": "Deploy CanIPull to an Azure Kubernetes Service (AKS) cluster",
+      "summary": "Learn how to deploy CanIPull to an AKS cluster and test DNS resolution and the initial Azure Container Registry token exchange from a node.",
+      "summaryIsMetadata": true,
+      "commitContext": "Improve CanIPull deployment retrieval"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/virtual-machines-node-pools",
+      "date": "2026-08-27T00:37:24Z",
+      "source": "AKS Docs",
+      "title": "Use Virtual Machines Node Pools in Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to add multiple Virtual Machine types of a similar family to a Virtual Machines node pool in an AKS cluster.",
+      "summaryIsMetadata": true,
+      "commitContext": "Nudge date to get docs bot  to build preview"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/zero-downtime-migration",
+      "date": "2026-08-26T21:28:39Z",
+      "source": "AKS Docs",
+      "title": "Zero-Downtime Migration to Azure Kubernetes Service (AKS)",
+      "summary": "Migrate workloads to Azure Kubernetes Service (AKS) or release application updates in an existing cluster with minimal or zero downtime.",
+      "summaryIsMetadata": true,
+      "commitContext": "Add zero-downtime application releases"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/network-policy-best-practices",
+      "date": "2026-08-26T21:18:02Z",
+      "source": "AKS Docs",
+      "title": "Network security best practices for Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to plan network policies, service exposure, ingress security, and API server access for a production Azure Kubernetes Service (AKS) cluster.",
+      "summaryIsMetadata": true,
+      "commitContext": "Improve network exposure retrieval"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/operator-best-practices-advanced-scheduler",
+      "date": "2026-08-25T22:48:14Z",
+      "source": "AKS Docs",
+      "title": "Best practices for scheduler features in Azure Kubernetes Service (AKS)",
+      "summary": "Learn the cluster operator best practices for using advanced scheduler features such as taints and tolerations, node selectors and affinity, or inter-pod affinity and anti-affinity in Azure Kubernetes Service (AKS).",
+      "summaryIsMetadata": true,
+      "commitContext": "Add dedicated AKS node pool examples"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/create-volume-azure-files",
+      "date": "2026-08-25T22:36:17Z",
+      "source": "AKS Docs",
+      "title": "Create and Manage Persistent Volumes with Azure Files in Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to create and manage persistent volumes using Azure Files with the Container Storage Interface (CSI) driver in Azure Kubernetes Service (AKS) to provide scalable and reliable storage for your containerized applications.",
+      "summaryIsMetadata": true,
+      "commitContext": "Add general-purpose Azure Files CSI example"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/use-cvm",
+      "date": "2026-08-25T07:48:51Z",
+      "source": "AKS Docs",
+      "title": "Use Confidential Virtual Machines (CVMs) in Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to create Confidential Virtual Machine (CVM) node pools with Azure Kubernetes Service (AKS)",
+      "summaryIsMetadata": true,
+      "commitContext": "Fix CVM default OS version for Ubuntu in AKS"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/artifact-streaming",
+      "date": "2026-08-21T17:49:03Z",
+      "source": "AKS Docs",
+      "title": "Reduce Time to Deployment with Artifact Streaming on Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to enable Artifact Streaming on Azure Kubernetes Service (AKS) to reduce time to deployment and idle compute time.",
+      "summaryIsMetadata": true,
+      "commitContext": "Change header to H2 for artifact streaming section"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/best-practices-app-cluster-reliability",
+      "date": "2026-08-20T20:57:37Z",
+      "source": "AKS Docs",
+      "title": "Deployment and Cluster Reliability Best Practices for Azure Kubernetes Service (AKS)",
+      "summary": "Learn the best practices for deployment and cluster reliability for Azure Kubernetes Service (AKS), including guidance for AKS Automatic and AKS Standard cluster modes.",
+      "summaryIsMetadata": true,
+      "commitContext": "Add AKS reliability checklists"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/entra-id-authorization",
+      "date": "2026-08-18T22:24:22Z",
+      "source": "AKS Docs",
+      "title": "Use Microsoft Entra ID Authorization for the Kubernetes API in Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to authorize Kubernetes API access in Azure Kubernetes Service (AKS) using Microsoft Entra ID role assignments and ABAC conditions.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update AKS Entra authorization for AEO"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/use-network-policies",
+      "date": "2026-08-18T22:17:22Z",
+      "source": "AKS Docs",
+      "title": "Secure Pod Traffic with Network Policies in Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to implement network policies in AKS to control and secure pod traffic by restricting communication according to the principle of least privilege.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update AKS network policies for AEO"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/monitor-aks",
+      "date": "2026-08-18T22:04:19Z",
+      "source": "AKS Docs",
+      "title": "Monitor Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to monitor Azure Kubernetes Service (AKS) clusters using built-in monitoring capabilities and integrating with other Azure services for detailed insights into health and performance.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update AKS monitoring overview for AEO"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/managed-identity-overview",
+      "date": "2026-08-18T18:46:57Z",
+      "source": "AKS Docs",
+      "title": "Managed Identities in Azure Kubernetes Service (AKS) Overview",
+      "summary": "This article provides an overview of managed identities in Azure Kubernetes Service (AKS), including system-assigned, user-assigned, and pre-created kubelet managed identities. It also explains how they work, role assignments, and AKS-specific managed identity features.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update AKS managed identities for AEO"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/gpu-profiling",
+      "date": "2026-08-18T07:33:29Z",
+      "source": "AKS Docs",
+      "title": "Set up GPU profiling on Azure Kubernetes Service (AKS) (Preview)",
+      "summary": "Learn how to set up GPU memory profiling with Inspektor Gadget, Pyroscope, Azure Managed Grafana, and Azure Monitor managed service for Prometheus on AKS.",
+      "summaryIsMetadata": true,
+      "commitContext": "Gpu-profiling: Add instructions on how to use Azure Blob Storage as Pyroscope backend"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/control-plane-metrics-monitor",
+      "date": "2026-08-18T03:51:15Z",
+      "source": "AKS Docs",
+      "title": "Monitor AKS Control Plane Metrics",
+      "summary": "Learn how to monitor Azure Kubernetes Service (AKS) control plane metrics by using Azure Monitor.",
+      "summaryIsMetadata": true,
+      "commitContext": "Correct code block formatting in documentation"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/azure-cni-powered-by-cilium",
+      "date": "2026-08-13T23:30:55Z",
+      "source": "AKS Docs",
+      "title": "Configure Azure CNI Powered by Cilium in Azure Kubernetes Service (AKS)",
+      "summary": "Learn how to create an Azure Kubernetes Service (AKS) cluster with Azure CNI Powered by Cilium. This networking configuration is the default for AKS Automatic clusters and available as an option for AKS Standard clusters.",
+      "summaryIsMetadata": true,
+      "commitContext": "Bump cilium versions"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/private-cluster-connect",
+      "date": "2026-08-13T23:16:30Z",
+      "source": "AKS Docs",
+      "title": "Establish network connectivity to a private Azure Kubernetes Service (AKS) cluster",
+      "summary": "Learn about the options for connecting to a private AKS cluster, including using Azure Cloud Shell, Azure Bastion, virtual network peering, and private endpoints.",
+      "summaryIsMetadata": true,
+      "commitContext": "Expand private AKS VM access guidance"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/concepts-scale",
+      "date": "2026-08-13T22:44:27Z",
+      "source": "AKS Docs",
+      "title": "AKS Scaling Overview — HPA, VPA, Cluster Autoscaler, and KEDA",
+      "summary": "Understand the AKS scaling options — Horizontal Pod Autoscaler, Vertical Pod Autoscaler, Cluster Autoscaler, and KEDA — and choose the right method for your workload type.",
+      "summaryIsMetadata": true,
+      "commitContext": "Improve AKS scaling overview retrievability"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/security-controls-policy",
+      "date": "2026-08-12T17:02:46Z",
+      "source": "AKS Docs",
+      "title": "Azure Policy Regulatory Compliance controls for Azure Kubernetes Service (AKS)",
+      "summary": "Lists Azure Policy Regulatory Compliance controls available for Azure Kubernetes Service (AKS). These built-in policy definitions provide common approaches to managing the compliance of your Azure resources.",
+      "summaryIsMetadata": true,
+      "commitContext": "Fix broken policy include path after move to reusable-content"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/manage-ssh-node-access",
+      "date": "2026-08-11T05:25:25Z",
+      "source": "AKS Docs",
+      "title": "Manage SSH access on Azure Kubernetes Service cluster nodes",
+      "summary": "Learn how to configure SSH and manage SSH keys on Azure Kubernetes Service (AKS) cluster nodes.",
+      "summaryIsMetadata": true,
+      "commitContext": "Update limitations for Entra ID SSH access"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/upgrade-aks-node-pools-rolling",
+      "date": "2026-08-11T00:14:59Z",
+      "source": "AKS Docs",
+      "title": "Configure rolling upgrades for Azure Kubernetes Service (AKS) node pools",
+      "summary": "Learn how to configure and customize rolling upgrades for Azure Kubernetes Service (AKS) node pools, including surge settings, drain timeout, and soak time.",
+      "summaryIsMetadata": true,
+      "commitContext": "Clarify max surge settings and remove redundancy"
+    },
+    {
+      "url": "https://learn.microsoft.com/azure/aks/app-routing-gateway-api-dns-tls",
+      "date": "2026-08-07T19:05:02Z",
+      "source": "AKS Docs",
+      "title": "Configure Azure DNS and TLS with the Application Routing Gateway API Implementation",
+      "summary": "Use the Application Routing add-on to automatically manage Azure DNS records and Azure Key Vault TLS certificates for ingress traffic on Azure Kubernetes Service (AKS) with the Kubernetes Gateway API.",
+      "summaryIsMetadata": true,
+      "commitContext": "Refer to the App Routing Gateway API implementation on Istio in the prerequisite bullet"
+    }
+  ],
+  "techcommunity": [],
+  "techcommunity_search": [
+    {
+      "title": "Your on-call rotation has a new member: 10 production incidents, end to end, with Azure SRE Agent",
+      "url": "https://techcommunity.microsoft.com/blog/microsoftmissioncriticalblog/ct-p/4545187",
+      "posted": "2026-08-26T12:02:49.023-07:00",
+      "summary": "...ases\n \n Use case #1 — App Service: HTTP 500 after deployment \n Use case #2 — <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>: pods in CrashLoopBackOff \n Use case #3 — Azure SQL Database: CPU saturation and timeouts \n Use case #4 — Azure Cosmos DB: H...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Stop paying for idle VMs — safely: ringed start/stop waves for your Azure estate",
+      "url": "https://techcommunity.microsoft.com/blog/microsoftmissioncriticalblog/ct-p/4542066",
+      "posted": "2026-08-26T07:49:01.739-07:00",
+      "summary": "...achines only.&nbsp;Not scale sets, not <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> node pools, not App Service plans, not SQL. \n Not a cost tool.&nbsp;It will not price your savings, forecast them or chargeback them. It turns machines off; your e...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Cost Management with Azure Resource Manager MCP",
+      "url": "https://techcommunity.microsoft.com/blog/finopsblog/ct-p/4550182",
+      "posted": "2026-08-25T19:17:28.669-07:00",
+      "summary": "...egotiated rates where available so you can evaluate cost alongside technical requirements before deployment. \n Examples&nbsp; \n \n \"Estimate the monthly cost of deploying a three-node <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> cluster w...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Azure SRE Agent VNet integration is now generally available",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/ct-p/4549774",
+      "posted": "2026-08-25T08:00:00.014-07:00",
+      "summary": "...zure Container Apps, Azure Kubernetes Service (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN>) API servers, and more. Traffic routed through your VNet follows your existing routes, network security group rules, firewall policies, private DNS c...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Simplify AKS observability with Azure Native New Relic Service",
+      "url": "https://techcommunity.microsoft.com/blog/partnernews/ct-p/4547966",
+      "posted": "2026-08-20T09:00:00.030-07:00",
+      "summary": "Simplify <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> observability with Azure Native New Relic Service An Azure&nbsp;Native path to New Relic&nbsp;Intelligent Observability for <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>&nbsp; \n <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> environments are dynamic by design. Applications can span clusters, namespaces, nodes, pods, and c...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Beyond Deployment: What It Really Takes to Run GitHub Actions Runners on AKS",
+      "url": "https://techcommunity.microsoft.com/blog/azureinfrastructureblog/ct-p/4547638",
+      "posted": "2026-08-17T23:44:57.248-07:00",
+      "summary": "Beyond Deployment: What It Really Takes to Run GitHub Actions Runners on <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> A Successful Demo Is Not a Production Platform \n Getting GitHub Actions runners working on Azure Kubernetes Service (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN>) with Actions Runner Controller (ARC) is relatively straightforward. Within a...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Monitoring Azure Service Fabric with Azure Managed Grafana",
+      "url": "https://techcommunity.microsoft.com/blog/azurepaasblog/ct-p/4546439",
+      "posted": "2026-08-13T11:44:37.347-07:00",
+      "summary": "...rom if they have admin permissions. \n    \n Cross-service observability \n  \n Teams already using Grafana for <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>/VMs/SQL can add Service Fabric beside them. \n    \n Reusable dashboards \n  \n Dashboard J...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Container Network Insights Agent (CNIA): Your AI Teammate for AKS Networking Incidents",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4545971",
+      "posted": "2026-08-12T00:00:00.017-07:00",
+      "summary": "Container Network Insights Agent (CNIA): Your AI Teammate for <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> Networking Incidents Hello Folks! \n If you run <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> in production, you already know the script. A pod cannot reach an external service, every dashboard says the cluster is healthy, and somebody is SSHing into a node w... ai <SPAN class=\"lia-search-match-lithium \">aks</SPAN> azure MAIS 2026 Pierre Roman",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Accelerate Inference on AKS with Azure Blob Storage and NVIDIA Dynamo",
+      "url": "https://techcommunity.microsoft.com/blog/azurestorageblog/ct-p/4543408",
+      "posted": "2026-08-11T08:00:00.028-07:00",
+      "summary": "Accelerate Inference on <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> with Azure Blob Storage and NVIDIA Dynamo ...odelExpress deployment recipe. \n For deployments on Azure Kubernetes Service (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN>), storing model weights in Azure Blob Storage and loading them with Dynamo ModelExpress provides three major b...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "How MVPs Use AI - Loop engineering: Building safer AI agent workflows for high-stakes infrastructure",
+      "url": "https://techcommunity.microsoft.com/blog/mvp-blog/ct-p/4545646",
+      "posted": "2026-08-11T08:00:00.036-07:00",
+      "summary": "...hat impossible to skip. I work on multi-tenant platform engineering on Azure: Terraform, <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>, GitHub Actions. When an agent is wrong in application code, a test turns red. When an agent is wrong h...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Operating Azure Backup at Scale: Day-2 Excellence for IaaS, PaaS, and Storage Workloads",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4545638",
+      "posted": "2026-08-11T00:00:00.018-07:00",
+      "summary": "Hello Folks! \n If you have ever inherited a sprawling Azure environment and quietly wondered whether every VM, database, <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> cluster, and storage account in it is actually being backed up the way t...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Zero Ops: Agents Operate, Humans Govern",
+      "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/ct-p/4545151",
+      "posted": "2026-08-07T09:48:45.941-07:00",
+      "summary": "...anages <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> clusters and only cares about the upkeep of that infrastructure? A single agent scoped to those resources makes perfect sense — they have a clear domain, a clear boundary, and a clear job....",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "New in Microsoft Marketplace: Offers published July 6-7, 2026",
+      "url": "https://techcommunity.microsoft.com/blog/marketplace-blog/ct-p/4540416",
+      "posted": "2026-08-06T06:00:00.024-07:00",
+      "summary": "...lassification \n AI Transformation for Enterprises \n AI Value Realization and Agent Build Sprint \n AI Voice Calling Agent \n <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> Health Check by Yuma \n AP Automation Enabler for Microsoft Dynamics 365 B...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Evoluindo a Resposta a Incidentes em AKS com Azure SRE Agent - Parte 1",
+      "url": "https://techcommunity.microsoft.com/blog/azureinfragurus/ct-p/4543906",
+      "posted": "2026-08-04T07:54:32.440-07:00",
+      "summary": "Evoluindo a Resposta a Incidentes em <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> com Azure SRE Agent - Parte 1 Resumo executivo \n Em aplicações executadas no Azure Kubernetes Services (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN>), eventos OOMKilled estão entre as causas recorrentes de reinicialização de contêineres e indisponibilidade i...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Multithreading, GIL e paralelismo no Python",
+      "url": "https://techcommunity.microsoft.com/blog/desenvolvedoresbr/ct-p/4543925",
+      "posted": "2026-08-04T06:21:01.496-07:00",
+      "summary": "<SPAN class=\"lia-search-match-lithium \">aks</SPAN> azure devops performance",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "From Alert to Resolved: Building a Self-Healing Azure Platform with SRE Agent",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4542491",
+      "posted": "2026-08-04T00:00:00.025-07:00",
+      "summary": "...he Rest of the Summit \n If you found this useful, the rest of the Azure Infra Summit 2026 is packed with sessions on identity, <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>, deployment, storage, networking, and resiliency. Grab the full p...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Cloud-Native Multi-Agent: Running Agents Safely on Kubernetes with Kars",
+      "url": "https://techcommunity.microsoft.com/blog/azuredevcommunityblog/ct-p/4543047",
+      "posted": "2026-08-04T00:00:00.036-07:00",
+      "summary": "...gents on different frameworks talk to each other over an&nbsp;end-to-end encrypted mesh. And you drive the whole thing with one CLI, from a local Kubernetes cluster on your laptop to <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>, using the same r...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Check This Out! (CTO!) Guide (August 2026)",
+      "url": "https://techcommunity.microsoft.com/blog/coreinfrastructureandsecurityblog/ct-p/4543597",
+      "posted": "2026-08-03T12:03:30.240-07:00",
+      "summary": "...overnance, audit, and enforcement. This approach enhances compliance tracking and centralized management for <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> clusters running Kubernetes v1.30+, combining native validation logic with Azure P...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Microsoft Defender for Cloud Customer Newsletter",
+      "url": "https://techcommunity.microsoft.com/blog/microsoftdefendercloudblog/ct-p/4543596",
+      "posted": "2026-08-03T11:50:45.106-07:00",
+      "summary": "...enerally Available: Container-level misconfiguration recommendations for Kubernetes, Upgrade <SPAN class=\"lia-search-match-lithium \">AKS</SPAN> version recommendations, VA for runtime-discovered container images on EKS and GKE, Kubernetes notes VA for E...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Announcing Azure Linux on WSL - Beta",
+      "url": "https://techcommunity.microsoft.com/blog/linuxandopensourceblog/ct-p/4542903",
+      "posted": "2026-08-03T08:50:40.504-07:00",
+      "summary": "...nfrastructure \n Azure Kubernetes Service (<SPAN class=\"lia-search-match-lithium \">AKS</SPAN>) \n Containerized workloads \n Edge scenarios \n Azure-hosted services \n \n With WSL support, Azure Linux now reaches another important environment: the developer w...",
+      "source": "TechCommunity Search"
+    },
+    {
+      "title": "Designing Azure Networks That Scale: From Small Deployments to Enterprise-Grade",
+      "url": "https://techcommunity.microsoft.com/blog/itopstalkblog/ct-p/4542489",
+      "posted": "2026-08-03T00:00:00.025-07:00",
+      "summary": "...nfra Summit 2026. If you want to catch the keynotes, the deep dives on storage and <SPAN class=\"lia-search-match-lithium \">AKS</SPAN>, and everything in between, the full playlist is here: \n Microsoft Azure Infra Summit 2026 Playlist \n Big thanks t...",
+      "source": "TechCommunity Search"
+    }
+  ],
+  "youtube": [
+    {
+      "title": "MVP Spotlight: Richard Hooper on AKS Service mesh, Multi-cluster management and Open source",
+      "url": "https://www.youtube.com/watch?v=a2AGre13fkY",
+      "date": "2026-08-24T15:00:17+00:00",
+      "summary": "Join Jorge Arteiro as he talks to Richard Hooper about Azure Kubernetes Service (AKS).  They discuss various topics such as Service Mesh, multi-cluster management & open source projects and community contributions.",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "MVP Spotlight: Tobias Fenster on AKS Windows Containers and AI Runway",
+      "url": "https://www.youtube.com/watch?v=prAIrM-0KZw",
+      "date": "2026-08-21T15:00:17+00:00",
+      "summary": "Join Jorge Arteiro talks to Tobias Fenster about Azure Kubernetes Service (AKS) Windows Containers and AI Runway.",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "AKS Community Calls - August 2026",
+      "url": "https://www.youtube.com/watch?v=X3sG0w8L3iM",
+      "date": "2026-08-20T03:46:00+00:00",
+      "summary": "Agenda - August 2026",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "Troubleshoot Outbound connectivity Issues with Ping He: AKS Troubleshooting Series: Azure Kubernetes",
+      "url": "https://www.youtube.com/watch?v=CWnQ-nNi9Yw",
+      "date": "2026-08-17T15:00:17+00:00",
+      "summary": "In today's episode, we talk to Ping He to understand how we can troubleshoot scaling issues with Azure Kubernetes Service (AKS) clusters.",
+      "source": "AKS Community YouTube"
+    },
+    {
+      "title": "AKS desktop: Deploy, Manage, & Scale Apps on Kubernetes in Minutes",
+      "url": "https://www.youtube.com/watch?v=IHfGwlsMw60",
+      "date": "2026-08-10T17:01:21+00:00",
+      "summary": "Try AKS desktop: http://aka.",
+      "source": "AKS Community YouTube"
+    }
+  ],
+  "roadmap_url": "https://github.com/orgs/Azure/projects/685/views/1",
+  "releases_url": "https://github.com/Azure/AKS/releases/",
+  "behavioral_changes": [
+    {
+      "title": "SSH node access",
+      "url": "https://learn.microsoft.com/azure/aks/manage-ssh-node-access",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "Configuration changes now trigger an immediate node reimage.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "IMDS restriction",
+      "url": "https://aka.ms/aks/imds-restriction",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "Network-isolated bootstrap profile, or cluster outbound type now trigger an immediate node reimage.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "rolling upgrade behaviors",
+      "url": "https://learn.microsoft.com/azure/aks/upgrade-aks-node-pools-rolling#customize-unavailable-nodes",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "managed identity",
+      "url": "https://aka.ms/aks/managed-identity-update",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "Now triggers node reimages across node pools.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "'Configure rolling upgrade settings'",
+      "url": "https://learn.microsoft.com/azure/aks/upgrade-aks-node-pools-rolling#configure-rolling-upgrade-settings",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "For more details.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Istio Gateway API",
+      "url": "https://learn.microsoft.com/azure/aks/istio-gateway-api",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "Deployments now set `automountServiceAccountToken` to `false`, improving the default security posture and unblocking environments with Azure Policies that require pods to disable service account token auto-mounting.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "GPU MIG",
+      "url": "https://aka.ms/aks/migs",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "Instance profile slice width against VM SKU capacity, preventing unsupported MIG profiles from being accepted on lower-capacity GPU SKUs.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Application Gateway for Containers ALB add-on",
+      "url": "https://learn.microsoft.com/azure/application-gateway/for-containers/application-gateway-for-containers-components#application-gateway-for-containers-aks-managed-add-on",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "Is now aligned with AKS minor versions.",
+      "source": "AKS Release Notes"
+    },
+    {
+      "title": "Entra ID SSH",
+      "url": "https://aka.ms/aks/ssh",
+      "date": "2026-08-11T22:09:21Z",
+      "summary": "Configuration on AzureContainerLinux node pools because the extension is incompatible with immutable OS nodes and can make nodes unreachable.",
+      "source": "AKS Release Notes"
+    }
+  ],
+  "announcements": []
+}
