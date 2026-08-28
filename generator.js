@@ -48,6 +48,18 @@ class NewsletterGenerator {
     summary = summary.replace(/<[^>]+>/g, "").trim();
     // Remove &nbsp; HTML entities
     summary = summary.replace(/&nbsp;/g, " ").trim();
+    // Drop truncated short-link fragments from clipped video descriptions.
+    summary = summary.replace(/\s*https?:\/\/aka\.\s*$/i, "").trim();
+
+    // YouTube descriptions are occasionally truncated at the source. Keep the
+    // Watch & Learn entry useful instead of publishing the broken fragment.
+    if (
+      /aks desktop/i.test(title) &&
+      (!summary || summary.length < 20)
+    ) {
+      summary =
+        "This walkthrough shows how AKS desktop simplifies deploying, managing, and scaling Kubernetes applications.";
+    }
 
     // Detect metadata-like descriptions BEFORE other filters strip them
     let isMetadata = item.summaryIsMetadata || false;
@@ -320,47 +332,74 @@ class NewsletterGenerator {
   generateClosing() {
     const lines = [`## ${SECTION_HEADERS.closing_thoughts}\n`];
 
-    // Extract themes from GA and Preview titles
+    // Extract themes from all collected content so the closing follows the
+    // actual edition rather than repeating a fixed editorial paragraph.
     const updates = this.data.azure_updates || [];
-    const allTitles = updates.map((u) => (u.title || "").toLowerCase()).join(" ");
+    const contentItems = [
+      ...updates,
+      ...(this.data.behavioral_changes || []),
+      ...(this.data.aks_docs_commits || []),
+      ...(this.data.aks_blog || []),
+      ...(this.data.techcommunity_search || []),
+      ...(this.data.youtube || []),
+    ];
+    const allContent = contentItems
+      .map((item) => `${item.title || ""} ${item.summary || ""}`)
+      .join(" ")
+      .toLowerCase();
     const themes = [];
     const themeKeywords = [
       { keywords: ["network", "cni", "egress", "ingress", "dns", "routing", "gateway"], label: "Networking capabilities" },
       { keywords: ["monitor", "observab", "metrics", "logs", "telemetry", "otel", "prometheus"], label: "Observability and monitoring" },
-      { keywords: ["security", "identity", "auth", "rbac", "encryption", "mTLS"], label: "Security and identity" },
+      { keywords: ["security", "identity", "auth", "rbac", "encryption", "mtls"], label: "Security and identity" },
       { keywords: ["gpu", "ai", "ml", "kaito", "inference", "llm"], label: "AI and GPU workloads" },
       { keywords: ["scale", "autoscal", "provision", "karpenter", "node pool"], label: "Scaling and node management" },
       { keywords: ["storage", "disk", "volume", "container storage"], label: "Storage" },
       { keywords: ["fleet", "multi-cluster", "cross-cluster"], label: "Multi-cluster and fleet management" },
     ];
     for (const theme of themeKeywords) {
-      if (theme.keywords.some((kw) => allTitles.includes(kw))) {
+      if (theme.keywords.some((kw) => allContent.includes(kw))) {
         themes.push(theme.label);
       }
     }
 
     if (themes.length) {
       lines.push(
-        `${this.monthName} ${this.year} showed continued investment across key areas of the AKS platform:`
+        `${this.monthName} ${this.year} brought ${updates.length} platform announcements alongside updates to operations, documentation, and the AKS community.`
       );
       lines.push("");
-      themes.forEach((t) => lines.push(`- ${t}`));
+      lines.push(`The strongest threads in this edition were ${this._joinList(themes)}.`);
       lines.push("");
-      lines.push(
-        "These updates reflect the platform's ongoing focus on production readiness, operational simplicity, and support for modern cloud-native workloads."
-      );
+      const sectionNames = [
+        ["behavioral_changes", "behavioral changes"],
+        ["aks_docs_commits", "documentation improvements"],
+        ["aks_blog", "community perspectives"],
+        ["youtube", "hands-on videos"],
+      ];
+      const coveredSections = sectionNames
+        .filter(([key]) => this.data[key]?.length)
+        .map(([, label]) => label);
+      if (coveredSections.length) {
+        lines.push(`The supporting coverage spans ${this._joinList(coveredSections)}, giving platform teams both the product changes and the context to act on them.`);
+      }
     } else {
       lines.push(
-        `${this.monthName} ${this.year} brought continued progress across the AKS platform.`
+        `${this.monthName} ${this.year} brought new AKS updates across the areas covered in this edition.`
       );
+      lines.push("");
+      lines.push("The release notes, documentation, and community material provide the practical context for evaluating what matters to each cluster and workload.");
     }
 
     lines.push("");
-    lines.push(
-      "Stay tuned for next month's edition, and feel free to share feedback or suggestions for future coverage."
-    );
+    lines.push(`Use this edition as a starting point for reviewing the changes most relevant to your AKS environments before the next monthly update.`);
     lines.push("");
     return lines.join("\n");
+  }
+
+  _joinList(items) {
+    if (items.length <= 1) return items[0] || "";
+    if (items.length === 2) return `${items[0]} and ${items[1]}`;
+    return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
   }
 
   generate() {
