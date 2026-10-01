@@ -61,12 +61,14 @@ function extractToc(md) {
 }
 
 function addUtmTracking(html, edition, medium = "website") {
-  const params = `utm_source=aksnewsletter&utm_medium=${medium}&utm_campaign=${edition.slug}`;
   return html.replace(
     /href="(https:\/\/learn\.microsoft\.com\/[^"]*?)"/g,
     (match, url) => {
-      const separator = url.includes("?") ? "&" : "?";
-      return `href="${url}${separator}${params}"`;
+      const tracked = new URL(url.replace(/&amp;/g, "&"));
+      tracked.searchParams.set("utm_source", "aksnewsletter");
+      tracked.searchParams.set("utm_medium", medium);
+      tracked.searchParams.set("utm_campaign", edition.slug);
+      return `href="${tracked.toString().replace(/&/g, "&amp;")}"`;
     }
   );
 }
@@ -1097,6 +1099,12 @@ function build() {
   if (editions.length === 0) {
     console.log("  ⚠ No newsletter editions found.");
     return;
+  }
+
+  for (const ed of editions) {
+    if (fs.readFileSync(ed.file, "utf8").includes("[NEEDS DESCRIPTION]")) {
+      throw new Error(`Unpolished newsletter: ${ed.file} contains [NEEDS DESCRIPTION].`);
+    }
   }
 
   fs.rmSync(OUTPUT_DIR, { recursive: true, force: true });
