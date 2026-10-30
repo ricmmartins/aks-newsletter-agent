@@ -116,7 +116,7 @@ jobs:
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --generate-only --no-polish
 
-      - name: Run AKS Newsletter Agent (AI polish)
+      - name: Polish and verify facts against sources twice (blocking)
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --polish-only
         env:
@@ -176,9 +176,9 @@ jobs:
 
             ### Next steps
             1. Review the collected data JSON for completeness
-            2. Use `agent_prompt.md` with an AI assistant to polish the draft
-            3. Replace the draft with the polished version
-            4. Merge when ready to publish
+            2. Review both factual reports and their quoted source evidence in `collected/*.verification.json`
+            3. Resolve any remaining editorial concerns; if text changes, rerun `node run.js YEAR MONTH --verify-only`
+            4. Merge only after human editorial approval
           branch: newsletter/${{ steps.target.outputs.year }}-${{ steps.target.outputs.month }}
           delete-branch: true
 

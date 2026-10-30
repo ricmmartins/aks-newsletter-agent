@@ -7,6 +7,8 @@ on:
       - 'newsletters/**'
       - 'build-site.js'
       - 'site-theme.css'
+      - 'fact-check.js'
+      - 'collected/*.verification.json'
   workflow_dispatch:
 
 permissions:

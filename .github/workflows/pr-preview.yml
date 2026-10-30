@@ -7,6 +7,12 @@ on:
       - 'build-site.js'
       - 'site-theme.css'
       - 'build-site.test.js'
+      - 'fact-check*.js'
+      - 'collector*.js'
+      - 'polisher.js'
+      - 'run*.js'
+      - 'agent_prompt.md'
+      - 'collected/*.json'
 
 jobs:
   preview-build:

@@ -10,6 +10,7 @@ const fs = require("fs");
 const path = require("path");
 const { marked } = require("marked");
 const { Resvg } = require("@resvg/resvg-js");
+const { assertVerified } = require("./fact-check");
 
 const NEWSLETTERS_DIR = path.join(__dirname, "newsletters");
 const OUTPUT_DIR = path.join(__dirname, "docs");
@@ -1146,6 +1147,7 @@ function build() {
   }
 
   for (const ed of editions) {
+    assertVerified(fs.readFileSync(ed.file, "utf8"), ed.slug);
     if (fs.readFileSync(ed.file, "utf8").includes("[NEEDS DESCRIPTION]")) {
       throw new Error(`Unpolished newsletter: ${ed.file} contains [NEEDS DESCRIPTION].`);
     }
