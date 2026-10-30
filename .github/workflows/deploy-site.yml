@@ -6,6 +6,7 @@ on:
     paths:
       - 'newsletters/**'
       - 'build-site.js'
+      - 'site-theme.css'
   workflow_dispatch:
 
 permissions:

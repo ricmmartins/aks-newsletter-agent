@@ -74,39 +74,10 @@ function addUtmTracking(html, edition, medium = "website") {
 }
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-:root {
-  --bg: #ffffff;
-  --surface: #f8fafc;
-  --surface-hover: #f1f5f9;
-  --border: #e2e8f0;
-  --border-hover: #0078d4;
-  --text: #0f172a;
-  --text-secondary: #475569;
-  --text-dim: #94a3b8;
-  --accent: #0078d4;
-  --accent-light: #e8f4fd;
-  --accent-dark: #005a9e;
-  --purple: #6366f1;
-  --radius: 8px;
-}
-[data-theme="dark"] {
-  --bg: #0f1117;
-  --surface: #1a1d27;
-  --surface-hover: #22263a;
-  --border: #2a2e3e;
-  --border-hover: #3b82f6;
-  --text: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-dim: #64748b;
-  --accent: #3b82f6;
-  --accent-light: rgba(59,130,246,0.12);
-  --accent-dark: #93bbfd;
-}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
-  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  font-family:"Segoe UI",Aptos,Calibri,-apple-system,BlinkMacSystemFont,sans-serif;
   line-height:1.75;color:var(--text);background:var(--bg);
   -webkit-font-smoothing:antialiased;
 }
@@ -514,6 +485,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
         </a>
       </div>
       <div class="header-actions">
+        <a class="header-rss" href="${SITE_URL}/feed.xml">RSS</a>
         ${badge ? `<span class="badge">${badge}</span>` : ""}
         <a class="header-subscribe" href="https://buttondown.com/aksnewsletter" target="_blank">Subscribe</a>
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
@@ -526,8 +498,9 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
 
   const heroHtml = headerTitle ? `
   <div class="hero">
+    <div class="eyebrow">${meta.isEdition ? "The monthly briefing" : "Independent curation · Monthly editions"}</div>
     <h1>${headerSubtitle || headerTitle}</h1>
-    ${headerSubtitle ? `<p>Curated documentation updates, feature announcements, community blogs, release highlights, and more.</p>` : ""}
+    ${headerSubtitle ? `<p>${meta.isEdition ? "Product changes, practical guidance, and community perspectives for the people running AKS." : "What changed in AKS. What it means for your clusters. One edition every month."}</p>` : ""}
     ${meta.readingTime ? `<div class="reading-time">📖 ${meta.readingTime} min read</div>` : ""}
     ${meta.showSubscribe ? `
     <form class="subscribe-form" action="https://buttondown.com/api/emails/embed-subscribe/aksnewsletter" method="post" target="_blank">
@@ -556,19 +529,26 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
   <meta name="twitter:image" content="${ogImage}">
   <link rel="alternate" type="application/rss+xml" title="AKS Newsletter RSS" href="${SITE_URL}/feed.xml">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='15.3,3.8 15.3,9.3 10.5,12.0 5.7,9.3 5.7,3.8 10.5,1.0' fill='%237c3aed'/%3E%3Cpolygon points='26.3,3.8 26.3,9.3 21.5,12.0 16.7,9.3 16.7,3.8 21.5,1.0' fill='%238b5cf6'/%3E%3Cpolygon points='9.8,13.3 9.8,18.8 5.0,21.5 0.2,18.8 0.2,13.3 5.0,10.5' fill='%236366f1'/%3E%3Cpolygon points='20.8,13.3 20.8,18.8 16.0,21.5 11.2,18.8 11.2,13.3 16.0,10.5' fill='%230078d4'/%3E%3Cpolygon points='31.8,13.3 31.8,18.8 27.0,21.5 22.2,18.8 22.2,13.3 27.0,10.5' fill='%233b82f6'/%3E%3Cpolygon points='15.3,22.8 15.3,28.3 10.5,31.0 5.7,28.3 5.7,22.8 10.5,20.0' fill='%23818cf8'/%3E%3Cpolygon points='26.3,22.8 26.3,28.3 21.5,31.0 16.7,28.3 16.7,22.8 21.5,20.0' fill='%23a78bfa'/%3E%3C/svg%3E">
-  <style>${CSS}</style>
+  <style>${CSS}\n${fs.readFileSync(path.join(__dirname, "site-theme.css"), "utf8")}</style>
   <script>
-  (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme = param === "dark" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+  try { const saved = localStorage.getItem('theme'); if (!new URLSearchParams(location.search).has('scoutTheme') && saved) document.documentElement.setAttribute('data-theme', saved); }
+  catch (error) { console.warn('Unable to read the saved theme preference.', error); }
   </script>
   <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","vq2knft7a8");</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-T2X72M11H2"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-T2X72M11H2');</script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
   <div class="progress-bar" id="progressBar"></div>
   ${headerHtml}
   ${heroHtml}
-  <div class="container">
+  <main class="container" id="main">
     ${nav ? `<div class="nav">${nav}</div>` : ""}
     ${body}
     <div class="footer">
@@ -580,15 +560,17 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
       </div>
       <div class="footer-copy">Curated monthly updates on Azure Kubernetes Service</div>
     </div>
-  </div>
+  </main>
   <button class="back-top" id="backTop" aria-label="Back to top" title="Back to top">↑</button>
   <script>
   (function(){
     const t=document.getElementById('themeToggle');
     t.addEventListener('click',()=>{
       const isDark=document.documentElement.getAttribute('data-theme')==='dark';
-      if(isDark){document.documentElement.removeAttribute('data-theme');localStorage.setItem('theme','light')}
-      else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('theme','dark')}
+      const theme=isDark?'light':'dark';
+      document.documentElement.setAttribute('data-theme',theme);
+      try { localStorage.setItem('theme',theme); }
+      catch (error) { console.warn('Unable to save the theme preference.', error); }
     });
     const b=document.getElementById('backTop');
     const p=document.getElementById('progressBar');
@@ -600,6 +582,13 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
     b.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
 
     // Active TOC highlighting
+    const toc=document.querySelector('details.toc');
+    const compact=window.matchMedia('(max-width:900px)');
+    if(toc){
+      toc.open=!compact.matches;
+      compact.addEventListener('change',()=>{toc.open=!compact.matches});
+      toc.addEventListener('click',e=>{if(compact.matches&&e.target.closest('a'))toc.open=false});
+    }
     const tocLinks=document.querySelectorAll('.toc-list a[data-section]');
     if(tocLinks.length){
       const sections=[...tocLinks].map(a=>{const el=document.getElementById(a.dataset.section);return{a,el}}).filter(s=>s.el);
@@ -680,15 +669,15 @@ function buildEditionPage(edition, prevEdition, nextEdition) {
   );
 
   const tocHtml = toc.length > 0 ? `
-    <div class="toc">
-      <div class="toc-title">In this edition</div>
+    <details class="toc" open>
+      <summary>In this edition</summary>
       <ul class="toc-list">
         ${toc.map(t => {
           const count = stats[Object.keys(stats).find(k => k.includes(t.name) || t.name.includes(k))] || 0;
           return `<li><a href="#${t.id}" data-section="${t.id}">${t.icon ? t.icon + " " : ""}${t.name}${count > 0 ? `<span class="toc-count">${count}</span>` : ""}</a></li>`;
         }).join("")}
       </ul>
-    </div>` : "";
+    </details>` : "";
 
   const shareHtml = `
     <div class="share-bar">
@@ -735,7 +724,7 @@ function buildEditionPage(edition, prevEdition, nextEdition) {
 
   return htmlTemplate(
     `AKS Newsletter – ${edition.monthName} ${edition.year}`,
-    tocHtml + contentHtml + shareHtml + subscribeCta + prevNextHtml,
+    `<div class="edition-layout">${tocHtml}<article class="edition-content">${contentHtml + shareHtml + subscribeCta + prevNextHtml}</article></div>`,
     nav,
     "AKS Newsletter",
     `${edition.monthName} ${edition.year} Edition`,
@@ -751,6 +740,12 @@ function buildEditionPage(edition, prevEdition, nextEdition) {
 }
 
 function buildIndexPage(editions) {
+  const escapeHtml = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const highlights = (md) => {
+    const intro = [...md.split(/^## /m)[0].matchAll(/^- \*\*([^*]+)\*\*/gm)].map(match => match[1]);
+    const items = [...md.matchAll(/\*\*\[([^\]]+)\]\([^)]+\)\*\*/g)].map(match => match[1]);
+    return [...new Set([...intro, ...items])].slice(0, 3);
+  };
   let editionCards = "";
   for (const ed of editions) {
     const md = fs.readFileSync(ed.file, "utf8");
@@ -760,7 +755,7 @@ function buildIndexPage(editions) {
     const statPills = Object.entries(stats)
       .map(([name, n]) => {
         const icon = Object.entries(SECTION_ICONS).find(([k]) => name.includes(k));
-        return `<span class="stat-pill">${icon ? icon[1] + " " : ""}${n}</span>`;
+        return `<span class="stat-pill" title="${escapeHtml(name)}">${icon ? icon[1] + " " : ""}${n}<span class="sr-only"> ${escapeHtml(name)}</span></span>`;
       }).join("");
 
     const categories = Object.keys(stats).map(s => {
@@ -773,6 +768,7 @@ function buildIndexPage(editions) {
         <div class="ed-info">
           <span class="ed-title">${ed.monthName} ${ed.year}</span>
           <span class="ed-meta"><span class="ed-tag">Edition</span>${count} items · ${rt} min read</span>
+          <span class="ed-summary">${escapeHtml(highlights(md).join(" · ") || "Documentation, release notes, and community perspectives from this month's AKS ecosystem.")}</span>
           ${statPills ? `<div class="section-stats">${statPills}</div>` : ""}
         </div>
         <span class="ed-arrow">→</span>
@@ -819,18 +815,44 @@ function buildIndexPage(editions) {
     return `<button class="filter-pill" data-cat="${cat}">${icon ? icon[1] + " " : ""}${cat}</button>`;
   }).join("");
 
+  const latest = editions[0];
+  const latestMd = latest ? fs.readFileSync(latest.file, "utf8") : "";
+  const latestHref = latest ? `${latest.year}/${latest.slug}.html` : "";
+  const latestLead = latestMd.split(/^## /m)[0].split(/\n\s*\n/)
+    .find(paragraph => /^This month\b/.test(paragraph))?.replace(/\*\*/g, "").replace(/\s*Here are some of the highlights:\s*$/, "")
+    || highlights(latestMd).join(" · ");
+  const latestToc = extractToc(latestMd);
+  const highlightAnchor = (topic) => {
+    const sections = latestMd.split(/^## /m).slice(1);
+    const index = sections.findIndex(section => section.includes(`**[${topic}]`));
+    return latestToc[index]?.id || latestToc[0]?.id || "";
+  };
+  const featured = latest ? `
+    <section class="feature" aria-labelledby="latest-title">
+      <div>
+        <div class="eyebrow">Latest edition · ${countItems(latestMd)} curated items</div>
+        <h2 id="latest-title">${latest.monthName} ${latest.year}</h2>
+        <p>${escapeHtml(latestLead)}</p>
+        <a class="read-edition" href="${latestHref}">Read ${latest.monthName}'s edition <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="feature-topics">
+        <div class="eyebrow">Inside this issue</div>
+        ${highlights(latestMd).map(topic => `<a href="${latestHref}#${highlightAnchor(topic)}">${escapeHtml(topic)} <span aria-hidden="true">↗</span></a>`).join("")}
+      </div>
+    </section>` : "";
   const body = `
+    ${featured}
     <div class="search-wrap">
-      <input type="text" id="q" placeholder="Search all editions…" autocomplete="off" spellcheck="false">
+      <input type="text" id="q" aria-label="Search all editions" placeholder="Search topics across all editions…" autocomplete="off" spellcheck="false">
       <span class="s-icon">⌕</span>
-      <button class="s-clear" id="clr" onclick="clr()">✕</button>
+      <button class="s-clear" id="clr" onclick="clr()" aria-label="Clear search">✕</button>
       <span class="s-kbd" id="kbd">/</span>
     </div>
-    <div class="search-stats" id="stats"></div>
+    <div class="search-stats" id="stats" role="status" aria-live="polite"></div>
     <div class="no-results" id="empty"><span class="nr-icon">⌕</span>No results found. Try a different term.</div>
     <div id="results"></div>
     <div id="list">
-      <h2>Editions</h2>
+      <h2>Explore the archive</h2>
       <div class="filter-bar">
         <button class="filter-pill active" data-cat="all">All</button>
         ${filterPills}
@@ -871,7 +893,7 @@ function buildIndexPage(editions) {
       }).join('');
     }
     q.addEventListener('input',go);
-    document.addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus()}if(e.key==='Escape'){clr()}});
+    document.addEventListener('keydown',e=>{const editing=e.target.matches('input,textarea,[contenteditable="true"]');if(e.key==='/'&&!editing){e.preventDefault();q.focus()}if(e.key==='Escape'&&document.activeElement===q){clr()}});
 
     // Category filter
     document.querySelectorAll('.filter-pill').forEach(btn=>{
@@ -896,7 +918,7 @@ function buildIndexPage(editions) {
     body,
     "",
     "AKS Newsletter",
-    "Monthly curated updates on Azure Kubernetes Service",
+    "Your AKS reading list.",
     "",
     { url: SITE_URL, showSubscribe: true }
   );
