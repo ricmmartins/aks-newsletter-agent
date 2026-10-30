@@ -267,6 +267,8 @@ aks-newsletter-agent/
 ├── polisher.js                  # AI polish via Copilot CLI
 ├── copilot-client.js            # Tool-free CLI invocation and output validation
 ├── build-site.js                # Static site generator (HTML, RSS, sitemap)
+├── site-theme.css               # Responsive home, archive, and edition styling
+├── build-site.test.js            # Generated-page and navigation regression tests
 ├── validate-links.js            # Link checker for newsletter URLs
 ├── run.js                       # CLI entry point
 ├── agent_prompt.md              # AI editorial prompt (reusable)
