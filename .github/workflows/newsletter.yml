@@ -48,12 +48,16 @@ jobs:
         if: steps.check-date.outputs.is_last_friday == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
         if: steps.check-date.outputs.is_last_friday == 'true'
         run: npm install
+
+      - name: Test polisher
+        if: steps.check-date.outputs.is_last_friday == 'true'
+        run: npm test
 
       - name: Determine target month
         if: steps.check-date.outputs.is_last_friday == 'true'
@@ -87,6 +91,20 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Check Copilot authentication configuration
+        if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+        run: |
+          if [ -z "$COPILOT_GITHUB_TOKEN" ]; then
+            echo "::error::Set the COPILOT_GITHUB_TOKEN repository secret with a Copilot-authorized user token. The built-in GITHUB_TOKEN does not provide Copilot access in this personal repository. Alternatively, run the agent locally after copilot login."
+            exit 1
+          fi
+
+      - name: Install Copilot CLI
+        if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
+        run: npm install --global @github/copilot@1.0.105
+
       - name: Run AKS Newsletter Agent (collect)
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --collect-only
@@ -98,34 +116,11 @@ jobs:
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --generate-only --no-polish
 
-      - name: Test OpenAI API access
-        if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
-        run: |
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "Authorization: Bearer $OPENAI_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{"model":"gpt-4o","messages":[{"role":"user","content":"say hi"}],"max_tokens":5}' \
-            https://api.openai.com/v1/chat/completions)
-          echo "OpenAI API response code: $HTTP_CODE"
-          if [ "$HTTP_CODE" = "401" ]; then
-            echo "::error::OpenAI API returned 401 (unauthorized). Check that OPENAI_API_KEY secret is valid."
-            exit 1
-          elif [ "$HTTP_CODE" = "429" ]; then
-            echo "::error::OpenAI API returned 429 (rate limit / no credits). Add billing at https://platform.openai.com/settings/organization/billing"
-            exit 1
-          elif [ "$HTTP_CODE" != "200" ]; then
-            echo "::error::OpenAI API returned $HTTP_CODE."
-            exit 1
-          fi
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-
       - name: Run AKS Newsletter Agent (AI polish)
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --polish-only
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
 
       - name: Quality gate – check content completeness
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
