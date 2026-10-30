@@ -16,7 +16,9 @@ Automated agent for generating the monthly **AKS Newsletter** — a technical, e
 
 ```bash
 npm install                     # Install dependencies (first time only)
-export GITHUB_TOKEN="ghp_..."   # Required for API access + AI polish
+npm install -g @github/copilot@1.0.105
+copilot login                   # Sign in with a Copilot-enabled account
+export GITHUB_TOKEN="..."       # GitHub API access for collection, not Copilot auth
 ```
 
 ### Option A: Via GitHub Portal (Recommended)
@@ -38,7 +40,7 @@ No local setup needed — runs entirely in the browser.
 
 > 💡 This also runs **automatically** on the last Friday of each month — no manual trigger needed.
 > 
-> ⚠️ If the workflow fails at the "AI Polish" step, check the logs — usually it means the quality gate detected items that GPT-4o couldn't rewrite. You can merge the PR as-is and manually fix those items, or re-run the workflow.
+> Configure the `COPILOT_GITHUB_TOKEN` repository secret before running in Actions (see below). Local Copilot sign-in is not transferred to the runner. If polish or quality validation fails, fix the error and retry; do not publish an unpolished draft.
 
 ### Option B: Local (Recommended for Re-runs/Debugging)
 
@@ -194,13 +196,14 @@ Assembles collected data into a structured Markdown newsletter:
 Output: `newsletters/<YYYY>/<YYYY-MM>.md` (raw draft)
 
 ### Phase 2.5: AI Polish (`polisher.js`)
-Takes the raw draft and polishes it using GitHub Models API (GPT-4o):
+Takes the raw draft and polishes it using authenticated Copilot CLI:
 
 - Rewrites descriptions to be opinionated and engineering-focused
 - Removes noise items (TOC changes, typo fixes)
 - Matches tone and quality of the reference edition
-- Uses `GITHUB_TOKEN` for authentication (free in GitHub Actions)
-- Falls back gracefully if AI is unavailable
+- Uses local Copilot login or an explicit `COPILOT_GITHUB_TOKEN`
+- Uses your Copilot access and usage allowance; no OpenAI API calls or paid-provider fallback
+- Fails explicitly on authentication, CLI, or quality errors without replacing the draft
 
 Output: Overwrites `newsletters/<YYYY>/<YYYY-MM>.md` with polished version
 
@@ -213,11 +216,16 @@ Converts newsletter Markdown files into a styled static HTML site:
 - Deployed automatically to GitHub Pages via `deploy-site.yml`
 
 ### AI-Assisted Final Editing
-The AI polish step is now **automated** via `polisher.js` using GitHub Models API. It runs automatically after draft generation (both locally and in GitHub Actions). The polisher:
+The AI polish step runs via `polisher.js` using Copilot CLI, locally or in an authenticated GitHub Actions runner. The polisher:
 
-1. Reads the raw draft + collected data + `agent_prompt.md` + reference edition
-2. Sends to GPT-4o via GitHub Models API (authenticated with `GITHUB_TOKEN`)
-3. Produces a polished newsletter matching the reference quality
+1. Splits the draft into sections and attaches relevant collected context
+2. Sends editorial instructions and section content through stdin to Copilot, with tools disabled
+3. Validates descriptions and source-link preservation before saving
+
+The CLI uses its configured/default model unless `COPILOT_MODEL` is set. Changing
+providers does not guarantee equivalent editorial quality: review the draft against
+the source material before merging. Copilot usage is subject to your account's
+allowance, billing, and organization policies.
 
 To skip AI polish: use `--no-polish` flag. To polish manually later: use `--polish-only`.
 
@@ -256,7 +264,8 @@ aks-newsletter-agent/
 ├── config.js                    # Source URLs, section headers, AKS keywords
 ├── collector.js                 # Data collection from 14+ sources
 ├── generator.js                 # Markdown newsletter assembly (raw draft)
-├── polisher.js                  # AI polish via GitHub Models API (GPT-4o)
+├── polisher.js                  # AI polish via Copilot CLI
+├── copilot-client.js            # Tool-free CLI invocation and output validation
 ├── build-site.js                # Static site generator (HTML, RSS, sitemap)
 ├── validate-links.js            # Link checker for newsletter URLs
 ├── run.js                       # CLI entry point
@@ -292,10 +301,21 @@ Edit `config.js` to:
 | Secret | Purpose |
 |--------|---------|
 | `GITHUB_TOKEN` | Auto-provided by GitHub Actions. Used for GitHub API calls during collection. |
-| `OPENAI_API_KEY` | **Required for AI polish.** Get from [platform.openai.com](https://platform.openai.com/api-keys). Add billing (~$0.30/run). |
+| `COPILOT_GITHUB_TOKEN` | Required for polish in this personal repository's Actions workflow. Use a fine-grained user token with **Copilot Requests** permission and an account authorized for Copilot CLI. Organization policies may restrict access. Never paste tokens into source code or chat. |
+| `COPILOT_MODEL` | *(Optional, local)* Copilot model selection; omitted by default to respect CLI configuration and policies. |
+| `COPILOT_CLI_PATH` | *(Optional, local)* Absolute path to a Copilot CLI executable if it is not on PATH. |
 | `BING_SEARCH_KEY` | **Recommended for blog collection.** Creates a Bing Search resource in Azure portal (free tier: 1000 calls/month). Dramatically improves TechCommunity blog coverage. |
 | `SLACK_WEBHOOK_URL` | *(Optional)* Slack notification webhook |
 | `TEAMS_WEBHOOK_URL` | *(Optional)* Teams notification webhook |
+
+The built-in Actions `GITHUB_TOKEN` remains scoped to collection and PR creation;
+it does not replace a Copilot-authorized user token in this personal repository.
+The polisher does not pass collection tokens or `OPENAI_API_KEY` to Copilot CLI,
+so those variables do not override a local Copilot login.
+Create the secret under **Settings > Secrets and variables > Actions** only if
+your organization permits this use. The old `OPENAI_API_KEY` secret is no longer
+read and can be removed. Do not copy stored CLI OAuth credentials to the runner.
+See [Copilot authentication](https://github.com/github/copilot-sdk/blob/main/docs/auth/authenticate.md).
 
 ## Reference Edition
 

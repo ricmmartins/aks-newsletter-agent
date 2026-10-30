@@ -1,22 +1,15 @@
 /**
  * AKS Newsletter Agent – AI Polisher
- * Takes a raw generated draft and polishes it using OpenAI API (GPT-4o).
+ * Takes a raw generated draft and polishes it using authenticated Copilot CLI.
  * Produces an editorial-quality newsletter matching the reference edition style.
  * 
- * Supports two backends (auto-detected from env vars):
- *   - OPENAI_API_KEY → OpenAI API (api.openai.com)
- *   - GITHUB_TOKEN   → GitHub Models API (deprecated July 2026, kept as fallback)
+ * Uses Copilot access only; never falls back to a paid provider API.
  */
 
 const fs = require("fs");
 const path = require("path");
+const { callCopilot } = require("./copilot-client");
 
-const OPENAI_ENDPOINT = "https://api.openai.com/v1/chat/completions";
-const GITHUB_MODELS_ENDPOINT = "https://models.inference.ai.azure.com/chat/completions";
-const PRIMARY_MODEL = "gpt-4o";
-const FALLBACK_MODEL = "gpt-4o-mini";
-const MAX_TOKENS = 16384;
-const MAX_POLISH_ATTEMPTS = 2;
 const MAX_SECTION_RETRIES = 2;
 
 class NewsletterPolisher {
@@ -25,13 +18,7 @@ class NewsletterPolisher {
     this.month = month;
     this.monthPad = String(month).padStart(2, "0");
     
-    // Auto-detect backend: prefer OpenAI API, fall back to GitHub Models
-    this.openaiKey = options.openaiKey || process.env.OPENAI_API_KEY || "";
-    this.githubToken = options.token || process.env.GITHUB_TOKEN || "";
-    this.token = this.openaiKey || this.githubToken;
-    this.useOpenAI = !!this.openaiKey;
-    
-    this.model = options.model || PRIMARY_MODEL;
+    this.model = options.model || process.env.COPILOT_MODEL || "";
     this.draftPath = options.draftPath || path.join("newsletters", String(year), `${year}-${this.monthPad}.md`);
     this.collectedPath = options.collectedPath || path.join("collected", `${year}-${this.monthPad}.json`);
     this.promptPath = options.promptPath || path.join(__dirname, "agent_prompt.md");
@@ -39,14 +26,8 @@ class NewsletterPolisher {
   }
 
   canPolish() {
-    if (!this.token) {
-      console.warn("⚠️  No OPENAI_API_KEY or GITHUB_TOKEN found — skipping AI polish.");
-      console.warn("   Set OPENAI_API_KEY (recommended) or GITHUB_TOKEN to enable.");
-      return false;
-    }
     if (!fs.existsSync(this.draftPath)) {
-      console.warn(`⚠️  Draft not found at ${this.draftPath} — skipping AI polish.`);
-      return false;
+      throw new Error(`Draft not found at ${this.draftPath}.`);
     }
     return true;
   }
@@ -124,14 +105,11 @@ ${summary}`;
     return content.replace(/\]\((https?:\/\/[^)]+)\)/g, (match, url) => {
       // Skip GitHub, YouTube
       if (/github\.com|youtube\.com|youtu\.be/i.test(url)) return match;
-      // Strip any pre-existing UTM params to prevent duplicates
-      let cleanUrl = url.replace(/[?&]utm_source=aksnewsletter[^)&]*/g, "")
-        .replace(/[?&]utm_medium=website/g, "")
-        .replace(/[?&]utm_campaign=\d{4}-\d{2}/g, "");
-      // Clean up trailing ? or & left after stripping
-      cleanUrl = cleanUrl.replace(/[?&]$/, "");
-      const sep = cleanUrl.includes("?") ? "&" : "?";
-      return `](${cleanUrl}${sep}utm_source=aksnewsletter&utm_medium=website&utm_campaign=${campaign})`;
+      const tracked = new URL(url);
+      tracked.searchParams.set("utm_source", "aksnewsletter");
+      tracked.searchParams.set("utm_medium", "website");
+      tracked.searchParams.set("utm_campaign", campaign);
+      return `](${tracked})`;
     });
   }
 
@@ -302,31 +280,8 @@ Return ONLY the polished section content in Markdown. No commentary.`;
   }
 
   async _callModel(messages, model) {
-    const endpoint = this.useOpenAI ? OPENAI_ENDPOINT : GITHUB_MODELS_ENDPOINT;
-    const backendName = this.useOpenAI ? "OpenAI API" : "GitHub Models API";
-    console.log(`🤖 Calling ${model} via ${backendName}...`);
-
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.token}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        max_tokens: MAX_TOKENS,
-        temperature: 0.3,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`${backendName} error (${response.status}): ${errorBody}`);
-    }
-
-    const result = await response.json();
-    return result.choices[0].message.content;
+    console.log(`🤖 Polishing via Copilot CLI${model ? ` (${model})` : ""}...`);
+    return callCopilot(messages, model);
   }
 
   async polish() {
@@ -358,24 +313,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
       if (issues.length === 0) {
         console.log("✅ Polish passed quality validation.");
       } else {
-        console.warn(`⚠️  Quality issues in final output:`);
-        issues.forEach((issue) => console.warn(`   - ${issue}`));
-      }
-
-      // Hard fail: refuse to produce output with [NEEDS DESCRIPTION] markers
-      const remainingMarkers = (polished.match(/\[NEEDS DESCRIPTION\]/g) || []).length;
-      if (remainingMarkers > 0) {
-        console.error(`\n❌ QUALITY GATE FAILED: ${remainingMarkers} items still have [NEEDS DESCRIPTION] markers.`);
-        console.error(`   The polisher could not rewrite all items. These need manual attention:`);
-        const lines = polished.split("\n");
-        for (const line of lines) {
-          if (line.includes("[NEEDS DESCRIPTION]")) {
-            const titleMatch = line.match(/\*\*\[([^\]]+)\]/);
-            console.error(`   • ${titleMatch ? titleMatch[1] : line.trim().substring(0, 80)}`);
-          }
-        }
-        console.error(`\n   Fix: Run again with --polish-only, or edit the draft manually.`);
-        process.exit(1);
+        throw new Error(`Newsletter quality validation failed:\n${issues.join("\n")}`);
       }
 
       return polished;
@@ -448,23 +386,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
 
         polishedSections.push(cleaned);
       } catch (err) {
-        console.warn(`  ⚠️  Failed to polish section "${section.name}": ${err.message}`);
-        // Try fallback model
-        if (this.model === PRIMARY_MODEL) {
-          try {
-            const messages2 = [
-              { role: "system", content: systemMessage },
-              { role: "user", content: userMessage },
-            ];
-            const result = await this._callModel(messages2, FALLBACK_MODEL);
-            polishedSections.push(this._cleanOutput(result));
-          } catch (err2) {
-            console.error(`  ❌ Fallback also failed: ${err2.message}`);
-            polishedSections.push(section.content);
-          }
-        } else {
-          polishedSections.push(section.content);
-        }
+        throw new Error(`Failed to polish section "${section.name}": ${err.message}`, { cause: err });
       }
     }
 
@@ -525,12 +447,17 @@ Return ONLY the polished section content in Markdown. No commentary.`;
 
     // Check URL preservation: every URL in the original draft should appear in the output
     if (originalDraft) {
+      const withoutTracking = (value) => {
+        const url = new URL(value);
+        for (const key of ["utm_source", "utm_medium", "utm_campaign"]) url.searchParams.delete(key);
+        return url.toString();
+      };
       const urlRegex = /\]\(([^)]+)\)/g;
       const originalUrls = new Set();
       let match;
       while ((match = urlRegex.exec(originalDraft)) !== null) {
         // Strip UTM params for comparison (they're added post-generation)
-        const url = match[1].replace(/[?&]utm_source=aksnewsletter[^)]*/, "");
+        const url = withoutTracking(match[1]);
         if (!staticLinks.some((s) => url.includes(s))) {
           originalUrls.add(url);
         }
@@ -538,7 +465,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
       const outputUrls = new Set();
       const urlRegex2 = /\]\(([^)]+)\)/g;
       while ((match = urlRegex2.exec(content)) !== null) {
-        const url = match[1].replace(/[?&]utm_source=aksnewsletter[^)]*/, "");
+        const url = withoutTracking(match[1]);
         outputUrls.add(url);
       }
       const droppedUrls = [...originalUrls].filter((u) => !outputUrls.has(u));

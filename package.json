@@ -4,6 +4,7 @@
   "description": "Automated agent for generating Ricardo Martins' monthly AKS Newsletter",
   "main": "run.js",
   "scripts": {
+    "test": "node --test",
     "start": "node run.js",
     "collect": "node run.js --collect-only",
     "generate": "node run.js --generate-only --no-polish",

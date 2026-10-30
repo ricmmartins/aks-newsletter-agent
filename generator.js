@@ -25,8 +25,11 @@ class NewsletterGenerator {
     if (!url) return url;
     // Skip GitHub URLs (releases, commits, roadmap) and YouTube — UTM not useful there
     if (/github\.com|youtube\.com|youtu\.be/i.test(url)) return url;
-    const separator = url.includes("?") ? "&" : "?";
-    return `${url}${separator}utm_source=aksnewsletter&utm_medium=website&utm_campaign=${this.campaign}`;
+    const tracked = new URL(url);
+    tracked.searchParams.set("utm_source", "aksnewsletter");
+    tracked.searchParams.set("utm_medium", "website");
+    tracked.searchParams.set("utm_campaign", this.campaign);
+    return tracked.toString();
   }
 
   loadCollectedData() {
