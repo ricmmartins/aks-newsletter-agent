@@ -129,6 +129,8 @@ RULES:
 - **NEVER merge two items into one.** Each entry with a unique URL stays separate.
 - You may shorten the title but the URL in parentheses must remain unchanged.
 - Be technical, not marketing
+- A release-note "Features" heading is NOT proof of general availability. Never infer a new GA transition from existing availability, documentation changes, or a new subfeature.
+- Preserve the scope of each announcement: improvements to NAP do not mean NAP itself just became GA. Only assert a GA transition explicitly supported by the source.
 
 GOOD EXAMPLE:
 * **[Configure rolling upgrades](url)**: Updated with the new Capacity Based Surge option and clearer guidance on drain timeout, soak time, and max-unavailable settings. Critical reading for teams managing large node pools with strict SLA requirements.

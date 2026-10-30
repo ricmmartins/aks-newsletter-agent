@@ -10,6 +10,7 @@ const fs = require("fs");
 const path = require("path");
 const { marked } = require("marked");
 const { Resvg } = require("@resvg/resvg-js");
+const { assertVerified } = require("./fact-check");
 
 const NEWSLETTERS_DIR = path.join(__dirname, "newsletters");
 const OUTPUT_DIR = path.join(__dirname, "docs");
@@ -591,17 +592,39 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
     }
     const tocLinks=document.querySelectorAll('.toc-list a[data-section]');
     if(tocLinks.length){
-      const sections=[...tocLinks].map(a=>{const el=document.getElementById(a.dataset.section);return{a,el}}).filter(s=>s.el);
-      const obs=new IntersectionObserver(entries=>{
-        entries.forEach(e=>{
-          if(e.isIntersecting){
-            tocLinks.forEach(a=>a.classList.remove('active'));
-            const match=sections.find(s=>s.el===e.target);
-            if(match)match.a.classList.add('active');
-          }
+      const sections=[...tocLinks].map(a=>{
+        const anchor=document.getElementById(a.dataset.section);
+        return {a,el:anchor?.closest('h2')||anchor};
+      }).filter(s=>s.el);
+      const activate=link=>{
+        tocLinks.forEach(a=>{
+          const active=a===link;
+          a.classList.toggle('active',active);
+          if(active)a.setAttribute('aria-current','location');
+          else a.removeAttribute('aria-current');
         });
-      },{rootMargin:'-10% 0px -80% 0px'});
-      sections.forEach(s=>obs.observe(s.el));
+      };
+      const updateSection=()=>{
+        let current=sections[0];
+        const boundary=Math.max(32,window.innerHeight*0.1);
+        for(const section of sections){
+          if(section.el.getBoundingClientRect().top<=boundary)current=section;
+          else break;
+        }
+        if(current)activate(current.a);
+      };
+      let scheduled=false;
+      const scheduleUpdate=()=>{
+        if(scheduled)return;
+        scheduled=true;
+        requestAnimationFrame(()=>{scheduled=false;updateSection()});
+      };
+      tocLinks.forEach(a=>a.addEventListener('click',()=>activate(a)));
+      window.addEventListener('scroll',scheduleUpdate,{passive:true});
+      window.addEventListener('resize',scheduleUpdate);
+      window.addEventListener('hashchange',scheduleUpdate);
+      window.addEventListener('load',scheduleUpdate);
+      scheduleUpdate();
     }
   })();
   </script>
@@ -1124,6 +1147,7 @@ function build() {
   }
 
   for (const ed of editions) {
+    assertVerified(fs.readFileSync(ed.file, "utf8"), ed.slug);
     if (fs.readFileSync(ed.file, "utf8").includes("[NEEDS DESCRIPTION]")) {
       throw new Error(`Unpolished newsletter: ${ed.file} contains [NEEDS DESCRIPTION].`);
     }

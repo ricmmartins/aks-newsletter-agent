@@ -67,69 +67,6 @@
       "source": "AKS Release Notes"
     },
     {
-      "title": "Node Auto Provisioning (NAP) – now generally available",
-      "url": "https://learn.microsoft.com/azure/aks/node-auto-provisioning",
-      "date": "2026-10-27T23:42:35Z",
-      "summary": "Now supports the following capabilities:.",
-      "source": "AKS Release Notes"
-    },
-    {
-      "title": "Capacity Reservation Groups – now generally available",
-      "url": "https://learn.microsoft.com/azure/aks/use-capacity-reservation-groups",
-      "date": "2026-10-27T23:42:35Z",
-      "summary": "Learn how to use capacity reservation groups with node pools in Azure Kubernetes Service (AKS) to guarantee allocated capacity for your node pools.",
-      "source": "AKS Release Notes"
-    },
-    {
-      "title": "Pinning the current node image version and specifying Kubernetes versions – now generally available",
-      "url": "https://learn.microsoft.com/azure/aks/node-auto-provisioning-upgrade-image",
-      "date": "2026-10-27T23:42:35Z",
-      "summary": "Learn about node image updates for NAP in AKS, including how it works, recommended maintenance windows, and examples to get started.",
-      "source": "AKS Release Notes"
-    },
-    {
-      "title": "Trusted Launch – now generally available",
-      "url": "https://learn.microsoft.com/azure/aks/node-autoprovision-aksnodeclass#enable-trusted-launch-in-nap-clusters",
-      "date": "2026-10-27T23:42:35Z",
-      "summary": "Through the `AKSNodeClass` CRD.",
-      "source": "AKS Release Notes"
-    },
-    {
-      "title": "Azure Container Linux – now generally available",
-      "url": "https://learn.microsoft.com/azure/aks/node-autoprovision-aksnodeclass#image-family-configuration",
-      "date": "2026-10-27T23:42:35Z",
-      "summary": "As the node OS.",
-      "source": "AKS Release Notes"
-    },
-    {
-      "title": "Managed GPU – now generally available",
-      "url": "https://learn.microsoft.com/azure/aks/aks-managed-gpu-nodes",
-      "date": "2026-10-27T23:42:35Z",
-      "summary": "Enabled with a field in the `AKSNodeClass` CRD.",
-      "source": "AKS Release Notes"
-    },
-    {
-      "title": "Node Auto Provisioning (NAP) – now generally available",
-      "url": "https://learn.microsoft.com/azure/aks/node-autoprovision",
-      "date": "2026-10-27T23:42:35Z",
-      "summary": "Will now have the following changes:.",
-      "source": "AKS Release Notes"
-    },
-    {
-      "title": "document – now generally available",
-      "url": "https://learn.microsoft.com/azure/virtual-machines/sizes/lifecycle/retirements-and-capacity-restrictions",
-      "date": "2026-10-27T23:42:35Z",
-      "summary": "For details.",
-      "source": "AKS Release Notes"
-    },
-    {
-      "title": "Azure Karpenter Provider github issue – now generally available",
-      "url": "https://github.com/Azure/karpenter-provider-azure/issues/2032",
-      "date": "2026-10-27T23:42:35Z",
-      "summary": "For more details.",
-      "source": "AKS Release Notes"
-    },
-    {
       "title": "Ubuntu 26.04 (preview)",
       "url": "https://aka.ms/aks/upgrade-os-version",
       "date": "2026-10-01T17:45:30Z",
@@ -558,6 +495,22 @@
   "roadmap_url": "https://github.com/orgs/Azure/projects/685/views/1",
   "releases_url": "https://github.com/Azure/AKS/releases/",
   "behavioral_changes": [
+    {
+      "title": "Node Auto Provisioning (NAP)",
+      "url": "https://learn.microsoft.com/azure/aks/node-auto-provisioning",
+      "date": "2026-10-27T23:42:35Z",
+      "summary": "Now supports Capacity Reservation Groups, the Capacity Buffers CRD for surplus nodes, OS disk type selection via osDiskType, node image pinning and Kubernetes version selection, Trusted Launch, Azure Container Linux, and managed GPU nodes. This is an enhancement to the existing NAP service, not a GA announcement.",
+      "source": "AKS Release Notes",
+      "sourceUrl": "https://github.com/Azure/AKS/releases/tag/2026-10-25"
+    },
+    {
+      "title": "Node Auto Provisioning (NAP)",
+      "url": "https://learn.microsoft.com/azure/aks/node-autoprovision",
+      "date": "2026-10-27T23:42:35Z",
+      "summary": "Adds instance-level public IP configuration and the AKS-managed aksmanagednap node pool. Avoids VM SKUs within about six months of retirement, updates default OS disk sizing and ephemeral disk eligibility checks, and respects external load balancer exclusions when adding nodes.",
+      "source": "AKS Release Notes",
+      "sourceUrl": "https://github.com/Azure/AKS/releases/tag/2026-10-25"
+    },
     {
       "title": "Istio Gateway API ConfigMap customization",
       "url": "https://learn.microsoft.com/azure/aks/istio-gateway-api#configmap-customizations",

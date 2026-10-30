@@ -59,6 +59,8 @@ If the AKS Engineering Blog has no posts for that month, explicitly state:
 
 3️⃣ **✅ General Availability Announcements**
 - One entry per GA feature.
+- Require an explicit GA announcement for the specific capability. A release-note "Features" heading, a documentation update, or new capabilities within an existing GA product do not establish a new GA transition.
+- Keep nested capability lists and supporting references in their parent context. Never turn a documentation link or GitHub issue into an independent GA announcement.
 - Format: **[Title](URL)**: 1–3 sentences on what the feature does, what pain point it solves, and who benefits.
 - If none, explicitly state: "None this month."
 

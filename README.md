@@ -172,6 +172,7 @@ Fetches and filters content from all sources for the **full calendar month** (1s
 | YouTube | JSON parsing of `ytInitialData` with date filtering |
 
 **Key details:**
+- Release-note `Features` entries require explicit GA wording before entering the GA section. Other enhancements are covered under Behavioral Changes; nested capabilities and reference links stay attached to their parent feature.
 - Docs collector maps GitHub commits to `learn.microsoft.com` article URLs, filters noise (TOC-only changes, merge commits)
 - TechCommunity search uses the internal GraphQL API (`MessageSearch` operation) to capture all results (not just the first 10)
 - YouTube scraper parses the `ytInitialData` JSON embedded in page HTML, pairing video IDs with titles reliably
@@ -179,6 +180,16 @@ Fetches and filters content from all sources for the **full calendar month** (1s
 - `GITHUB_TOKEN` is supported to avoid API rate limits
 
 Output: `collected/<YYYY-MM>.json`
+
+### Factual publication gate
+
+After polishing, the runner fetches the linked sources again and runs two separate Copilot reviews. Each pass checks every text block, including headings, the introduction, and closing, against fetched evidence. It must identify factual claims and quote their supporting sources. The second pass does not see the first pass's answers. Missing sources, uncertain claims, contradictions, malformed reviews, or quotations absent from the source stop the run before the polished content is saved or the monthly PR is created. Edition labels and item counts use a deterministic summary derived from the target metadata and Markdown; that summary cannot establish feature status or announcement dates.
+
+The report at `collected/YYYY-MM.verification.json` contains both reviews, fetched source excerpts, and a hash of the exact reviewed Markdown. Site builds and deployment reject new or modified editions without a matching report. Editing reviewed text invalidates its report. To verify an existing draft without rewriting it, run `node run.js YEAR MONTH --verify-only`. Starting a recheck replaces any prior approval with a pending report; an interrupted or failed check therefore blocks publication, even for archived text. Fetch failures must be investigated, not bypassed.
+
+**Historical editions through October 2026 are not retroactively certified.** Only their exact archived text, pinned by SHA-256 in `fact-check.js`, can be rebuilt without reports. Any change to that text requires verification, as does adding any edition outside the pinned archive. Run `--verify-only` to review archived text explicitly. A report, once present, must match even for a historical edition.
+
+These are two AI reviews grounded in the same fetched sources, not two independent authorities or a guarantee of factual correctness. Source excerpts can be incomplete, and both passes can make the same mistake. Human editorial approval remains necessary, particularly for lifecycle dates, GA/preview scope, and operational recommendations. Reviews use Copilot allowance and increase the number of CLI requests; there is no paid OpenAI fallback.
 
 ### Phase 2: Generation (`generator.js`)
 Assembles collected data into a structured Markdown newsletter:
