@@ -6,6 +6,8 @@ const path = require("node:path");
 const cheerio = require("cheerio");
 const { marked } = require("marked");
 const vm = require("node:vm");
+const { pathToFileURL } = require("node:url");
+const puppeteer = require("puppeteer");
 
 execFileSync(process.execPath, [path.join(__dirname, "build-site.js")], {
   cwd: __dirname,
@@ -86,3 +88,39 @@ test("theme defaults to light regardless of OS while preserving explicit choices
     assert.equal(theme, expected, `search=${search}, saved=${saved}`);
   }
 });
+
+test("edition menu follows section clicks, direct links, and manual scrolling", async () => {
+      const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox"] });
+      try {
+        const page = await browser.newPage();
+        await page.setRequestInterception(true);
+        page.on("request", request => request.url().startsWith("http") ? request.abort() : request.continue());
+        const url = pathToFileURL(path.join(docs, home(".edition-card").first().attr("href"))).href;
+        for (const width of [1440, 390]) {
+          await page.setViewport({ width, height: 900 });
+          await page.goto(url);
+          const ids = await page.$$eval(".toc-list a", links => links.map(link => link.dataset.section));
+          for (const id of ids) {
+            if (width === 390) await page.$eval(".toc", toc => { toc.open = true; });
+            await page.click(`.toc-list a[data-section="${id}"]`);
+            await page.waitForFunction(target => location.hash === "#" + target, {}, id);
+            // Let native smooth scrolling settle before asserting the scroll-derived selection.
+            await new Promise(resolve => setTimeout(resolve, 1200));
+            assert.equal(await page.$eval(".toc-list a.active", link => link.dataset.section), id);
+            assert.equal(await page.$$eval('.toc-list a[aria-current="location"]', links => links.length), 1);
+          }
+          const target = ids[2];
+          await page.goto(url + "#" + target);
+          await page.waitForFunction(id => document.querySelector(".toc-list a.active")?.dataset.section === id, {}, target);
+          await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+          await page.waitForFunction(id => document.querySelector(".toc-list a.active")?.dataset.section === id, {}, ids[0]);
+          await page.evaluate(id => {
+            const heading = document.getElementById(id).closest("h2");
+            window.scrollTo({ top: window.scrollY + heading.getBoundingClientRect().top + 200, behavior: "instant" });
+          }, target);
+          await page.waitForFunction(id => document.querySelector(".toc-list a.active")?.dataset.section === id, {}, target);
+        }
+      } finally {
+        await browser.close();
+      }
+    });
