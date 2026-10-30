@@ -312,6 +312,8 @@ The built-in Actions `GITHUB_TOKEN` remains scoped to collection and PR creation
 it does not replace a Copilot-authorized user token in this personal repository.
 The polisher does not pass collection tokens or `OPENAI_API_KEY` to Copilot CLI,
 so those variables do not override a local Copilot login.
+It rejects `COPILOT_PROVIDER_BASE_URL` / `COPILOT_PROVIDER_API_KEY` overrides
+instead of silently sending editorial requests to a separately billed BYOK provider.
 Create the secret under **Settings > Secrets and variables > Actions** only if
 your organization permits this use. The old `OPENAI_API_KEY` secret is no longer
 read and can be removed. Do not copy stored CLI OAuth credentials to the runner.

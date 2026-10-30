@@ -18,6 +18,9 @@ function parseCopilotOutput(output) {
 }
 
 function callCopilot(messages, model) {
+  if (process.env.COPILOT_PROVIDER_BASE_URL || process.env.COPILOT_PROVIDER_API_KEY) {
+    return Promise.reject(new Error("Remove COPILOT_PROVIDER_BASE_URL and COPILOT_PROVIDER_API_KEY: newsletter polish requires Copilot access, not a separately billed BYOK provider."));
+  }
   const executable = process.env.COPILOT_CLI_PATH ||
     (process.platform === "win32" ? "copilot.exe" : "copilot");
   const args = [

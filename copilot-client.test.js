@@ -67,7 +67,19 @@ test("CLI failures reject without a provider fallback", async (t) => {
     process.nextTick(() => callback(Object.assign(new Error("not installed"), { code: "ENOENT" }), ""));
     return { stdin: new Writable({ write(chunk, encoding, done) { done(); } }) };
   });
+
   await assert.rejects(callCopilot([{ role: "user", content: "test" }]), /Copilot CLI failed \(ENOENT\)/);
+});
+
+test("rejects BYOK configuration before starting a provider request", async (t) => {
+  const previous = process.env.COPILOT_PROVIDER_BASE_URL;
+  t.after(() => {
+    if (previous === undefined) delete process.env.COPILOT_PROVIDER_BASE_URL;
+    else process.env.COPILOT_PROVIDER_BASE_URL = previous;
+  });
+  process.env.COPILOT_PROVIDER_BASE_URL = "https://example.com/paid-provider";
+  t.mock.method(childProcess, "execFile", () => assert.fail("BYOK must not start a child process"));
+  await assert.rejects(callCopilot([{ role: "user", content: "test" }]), /not a separately billed BYOK provider/);
 });
 
 test("quality errors and CLI failures preserve the original draft", async (t) => {
