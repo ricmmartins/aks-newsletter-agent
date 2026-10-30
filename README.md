@@ -172,6 +172,7 @@ Fetches and filters content from all sources for the **full calendar month** (1s
 | YouTube | JSON parsing of `ytInitialData` with date filtering |
 
 **Key details:**
+- Release-note `Features` entries require explicit GA wording before entering the GA section. Other enhancements are covered under Behavioral Changes; nested capabilities and reference links stay attached to their parent feature.
 - Docs collector maps GitHub commits to `learn.microsoft.com` article URLs, filters noise (TOC-only changes, merge commits)
 - TechCommunity search uses the internal GraphQL API (`MessageSearch` operation) to capture all results (not just the first 10)
 - YouTube scraper parses the `ytInitialData` JSON embedded in page HTML, pairing video IDs with titles reliably

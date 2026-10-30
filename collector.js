@@ -7,6 +7,7 @@ const fetch = require("node-fetch");
 const cheerio = require("cheerio");
 const fs = require("fs");
 const path = require("path");
+const { marked } = require("marked");
 const { SOURCES, AKS_KEYWORDS, AKS_STRICT_KEYWORDS } = require("./config");
 
 class ContentCollector {
@@ -468,19 +469,28 @@ class ContentCollector {
         });
       }
 
-      // Parse "### Features" section (GA announcements)
-      const gaItems = this._parseReleaseSection(body, /###\s*Features\s*/i);
-      for (const item of gaItems) {
+      // A Features heading does not establish a GA transition for its entries.
+      const featureItems = this._parseReleaseSection(body, /###\s*Features\s*/i);
+      for (const item of featureItems) {
         if (existingUrls.has(item.url)) continue;
         existingUrls.add(item.url);
         const desc = item.description || await this._fetchDocDescription(item.url);
-        this.collected.azure_updates.push({
-          title: `${item.title} – now generally available`,
+        const isGA = /\b(?:is|are)\s+now\s+(?:generally available|GA)\b|\bnow\s+(?:generally available|GA)\b/i.test(item.availabilityEvidence);
+        const update = {
+          title: isGA ? `${item.title} – now generally available` : item.title,
           url: item.url,
           date: release.date,
           summary: desc,
           source: "AKS Release Notes",
-        });
+          sourceUrl: release.url,
+          sourceText: item.sourceText,
+        };
+        if (isGA) {
+          this.collected.azure_updates.push(update);
+        } else {
+          if (!this.collected.behavioral_changes) this.collected.behavioral_changes = [];
+          this.collected.behavioral_changes.push(update);
+        }
       }
 
       // Parse "### Behavioral Changes" section into structured items
@@ -513,36 +523,39 @@ class ContentCollector {
 
   _parseReleaseSection(body, sectionRegex) {
     const items = [];
-    const sectionMatch = body.split(sectionRegex)[1];
-    if (!sectionMatch) return items;
+    const tokens = marked.lexer(body);
+    const start = tokens.findIndex(token => token.type === "heading" && sectionRegex.test(`### ${token.text}`));
+    if (start < 0) return items;
+    const sectionTokens = [];
+    for (const token of tokens.slice(start + 1)) {
+      if (token.type === "heading" && token.depth <= tokens[start].depth) break;
+      sectionTokens.push(token);
+    }
 
-    // Take content until the next ### heading
-    const sectionContent = sectionMatch.split(/###\s/)[0];
-
-    // Parse each bullet point and extract the first markdown link + remaining text as description
-    const bullets = sectionContent.split(/\n\s*\*\s+/).filter(Boolean);
+    // Keep nested capabilities and reference links attached to their parent feature.
+    const bullets = sectionTokens.filter(token => token.type === "list").flatMap(token => token.items);
     const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/;
     for (const bullet of bullets) {
-      const match = bullet.match(linkRegex);
+      const primaryText = bullet.tokens.find(token => token.type === "text" || token.type === "paragraph")?.text || "";
+      const match = primaryText.match(linkRegex);
       if (!match) continue;
       const title = match[1].trim();
       const url = match[2].trim();
       // Skip generic link text ("here", "this", "link", etc.)
       if (/^(here|this|link|more|details|see)$/i.test(title)) continue;
       // Extract the description text after the first link
-      const afterLink = bullet.substring(match.index + match[0].length).trim();
-      // Clean up: remove leading punctuation, trim, take first sentence
+      const afterLink = bullet.text.substring(match.index + match[0].length).trim();
       let description = afterLink
         .replace(/^\s*[–\-:,]\s*/, "")
         .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // convert remaining links to plain text
-        .replace(/\s*\n\s*/g, " ") // flatten newlines
-        .split(/\.\s/)[0]; // first sentence
+        .replace(/\n\s*[*+-]\s+/g, " ")
+        .replace(/\s*\n\s*/g, " ");
       if (description && !description.endsWith(".")) description += ".";
       // Capitalize first letter
       if (description) description = description.charAt(0).toUpperCase() + description.slice(1);
       if (description.length < 10) description = "";
       if (url.includes("releases.aks.azure.com")) continue;
-      items.push({ title, url, description });
+      items.push({ title, url, description, availabilityEvidence: primaryText, sourceText: bullet.text });
     }
     return items;
   }
