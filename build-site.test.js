@@ -58,6 +58,8 @@ test("home retains accessible search, filters, RSS, and embedded theme styling",
   assert.equal(home('#stats[role="status"]').length, 1);
   assert.equal(home('link[type="application/rss+xml"]').length, 1);
   assert.ok(fs.existsSync(path.join(docs, "feed.xml")));
-  assert.match(home("style").text(), /--cp-bg: #f7f4ef/);
+  assert.match(home("style").text(), /--cp-brand: #9f62eb/);
+  assert.match(home("style").text(), /--cp-bg-elevated: #f8f5fe/);
+  assert.match(home("style").text(), /--cp-brand: #b082f0/);
   assert.match(home("script").first().text(), /scoutTheme/);
 });

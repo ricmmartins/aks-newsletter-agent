@@ -1,54 +1,56 @@
 :root {
   color-scheme: light;
-  --cp-bg: #f7f4ef;
-  --cp-bg-elevated: #fcfbf8;
+  --cp-bg: #ffffff;
+  --cp-bg-elevated: #f8f5fe;
   --cp-surface: #ffffff;
-  --cp-surface-soft: #f5f5f5;
-  --cp-border: #dedede;
+  --cp-surface-soft: #f8f8f8;
+  --cp-border: #dddddd;
   --cp-border-strong: #919191;
-  --cp-text: #242424;
-  --cp-text-muted: #5c5c5c;
-  --cp-text-soft: #6f6f6f;
-  --cp-accent: #b11f4b;
-  --cp-accent-hover: #9a1a41;
-  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-text: #111111;
+  --cp-text-muted: #525860;
+  --cp-text-soft: #62566f;
+  --cp-brand: #9f62eb;
+  --cp-accent: #8637e3;
+  --cp-accent-hover: #6f2bc7;
+  --cp-accent-soft: rgba(159, 98, 235, 0.08);
   --cp-accent-fg: #ffffff;
   --cp-success: #16a34a;
   --cp-danger: #dc2626;
   --cp-warning: #f59e0b;
-  --cp-link: #0078d4;
+  --cp-link: #8637e3;
   --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
   --cp-overlay: rgba(255, 255, 255, 0.8);
   --cp-panel: rgba(255, 255, 255, 0.86);
   --cp-panel-strong: rgba(255, 255, 255, 0.96);
   --cp-sheen: rgba(255, 255, 255, 0.55);
-  --cp-highlight: rgba(177, 31, 75, 0.12);
+  --cp-highlight: rgba(159, 98, 235, 0.12);
 }
 html[data-theme="dark"] {
   color-scheme: dark;
-  --cp-bg: #3d3b3a;
-  --cp-bg-elevated: #343231;
-  --cp-surface: #292929;
-  --cp-surface-soft: #2e2e2e;
-  --cp-border: #474747;
-  --cp-border-strong: #5f5f5f;
-  --cp-text: #dedede;
-  --cp-text-muted: #919191;
-  --cp-text-soft: #b0b0b0;
-  --cp-accent: #fd8ea1;
-  --cp-accent-hover: #fb7b91;
-  --cp-accent-soft: rgba(253, 142, 161, 0.14);
-  --cp-accent-fg: #1a1a1a;
+  --cp-bg: #1b1b1d;
+  --cp-bg-elevated: #2a1b3d;
+  --cp-surface: #2e2e30;
+  --cp-surface-soft: #363438;
+  --cp-border: #48434f;
+  --cp-border-strong: #77707f;
+  --cp-text: #eeeeee;
+  --cp-text-muted: #c4bdce;
+  --cp-text-soft: #bbb0c8;
+  --cp-brand: #b082f0;
+  --cp-accent: #b082f0;
+  --cp-accent-hover: #c8a8f6;
+  --cp-accent-soft: rgba(176, 130, 240, 0.14);
+  --cp-accent-fg: #1b1b1d;
   --cp-success: #4ade80;
   --cp-danger: #f87171;
   --cp-warning: #fbbf24;
-  --cp-link: #4da6ff;
+  --cp-link: #b082f0;
   --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
-  --cp-overlay: rgba(41, 41, 41, 0.88);
-  --cp-panel: rgba(41, 41, 41, 0.72);
-  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-overlay: rgba(46, 46, 48, 0.88);
+  --cp-panel: rgba(46, 46, 48, 0.72);
+  --cp-panel-strong: rgba(46, 46, 48, 0.96);
   --cp-sheen: rgba(255, 255, 255, 0.04);
-  --cp-highlight: rgba(253, 142, 161, 0.12);
+  --cp-highlight: rgba(176, 130, 240, 0.12);
 }
 :root, html[data-theme="dark"] {
   --bg: var(--cp-bg); --surface: var(--cp-surface);
@@ -62,6 +64,7 @@ body { font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFon
 code, pre { font-family: Consolas, "Courier New", Courier, monospace; }
 :focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 4px; }
 .header { background: var(--cp-bg-elevated); }
+.progress-bar { background: var(--cp-brand); }
 .header-inner, .hero, .container { max-width: 1160px; }
 .header-inner { padding: 20px 0; }
 .header-brand { font-size: 1.125rem; }
