@@ -533,8 +533,7 @@ function htmlTemplate(title, body, nav = "", headerTitle = "", headerSubtitle = 
   <script>
   (() => {
     const param = new URLSearchParams(window.location.search).get("scoutTheme");
-    const theme =
-      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const theme = param === "dark" ? "dark" : "light";
     document.documentElement.setAttribute("data-theme", theme);
   })();
   try { const saved = localStorage.getItem('theme'); if (!new URLSearchParams(location.search).has('scoutTheme') && saved) document.documentElement.setAttribute('data-theme', saved); }

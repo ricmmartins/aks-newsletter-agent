@@ -5,6 +5,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const cheerio = require("cheerio");
 const { marked } = require("marked");
+const vm = require("node:vm");
 
 execFileSync(process.execPath, [path.join(__dirname, "build-site.js")], {
   cwd: __dirname,
@@ -62,4 +63,26 @@ test("home retains accessible search, filters, RSS, and embedded theme styling",
   assert.match(home("style").text(), /--cp-bg-elevated: #f8f5fe/);
   assert.match(home("style").text(), /--cp-brand: #b082f0/);
   assert.match(home("script").first().text(), /scoutTheme/);
+});
+
+test("theme defaults to light regardless of OS while preserving explicit choices", () => {
+  const script = home("script").first().text();
+  for (const [search, saved, expected] of [
+    ["", null, "light"],
+    ["", "dark", "dark"],
+    ["", "light", "light"],
+    ["?scoutTheme=dark", null, "dark"],
+    ["?scoutTheme=light", "dark", "light"],
+  ]) {
+    let theme;
+    vm.runInNewContext(script, {
+      URLSearchParams,
+      window: { location: { search }, matchMedia: () => ({ matches: true }) },
+      location: { search },
+      localStorage: { getItem: () => saved },
+      document: { documentElement: { setAttribute: (_, value) => { theme = value; } } },
+      console,
+    });
+    assert.equal(theme, expected, `search=${search}, saved=${saved}`);
+  }
 });
