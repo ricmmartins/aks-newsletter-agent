@@ -104,8 +104,22 @@ test("edition menu follows section clicks, direct links, and manual scrolling", 
             if (width === 390) await page.$eval(".toc", toc => { toc.open = true; });
             await page.click(`.toc-list a[data-section="${id}"]`);
             await page.waitForFunction(target => location.hash === "#" + target, {}, id);
-            // Let native smooth scrolling settle before asserting the scroll-derived selection.
-            await new Promise(resolve => setTimeout(resolve, 1200));
+            await page.waitForFunction(target => {
+              const heading = document.getElementById(target).closest("h2");
+              const bounds = heading.getBoundingClientRect();
+              return bounds.top <= Math.max(32, innerHeight * 0.1) && bounds.bottom >= 0;
+            }, { timeout: 10000 }, id);
+            await page.evaluate(() => new Promise(resolve => {
+              let previous = scrollY;
+              let stableFrames = 0;
+              const waitForScroll = () => {
+                stableFrames = Math.abs(scrollY - previous) < 1 ? stableFrames + 1 : 0;
+                previous = scrollY;
+                if (stableFrames >= 8) resolve();
+                else requestAnimationFrame(waitForScroll);
+              };
+              requestAnimationFrame(waitForScroll);
+            }));
             assert.equal(await page.$eval(".toc-list a.active", link => link.dataset.section), id);
             assert.equal(await page.$$eval('.toc-list a[aria-current="location"]', links => links.length), 1);
           }
