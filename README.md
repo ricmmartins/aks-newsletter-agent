@@ -174,7 +174,7 @@ Fetches and filters content from all sources for the **full calendar month** (1s
 **Key details:**
 - Release-note `Features` entries require explicit GA wording before entering the GA section. Other enhancements are covered under Behavioral Changes; nested capabilities and reference links stay attached to their parent feature.
 - Azure Update links are checked against the official Microsoft Release Communications RSS record, which supplies the announcement title, lifecycle status, publication date, and description.
-- Blog discovery scrapes Bing's public results page. The Bing Search APIs retired on August 11, 2025, so `BING_SEARCH_KEY` is no longer used.
+- Blog discovery uses Tavily Search with exact publication-date filtering when `TAVILY_API_KEY` is configured. Without the key or if Tavily is unavailable, the collector falls back to Bing HTML search. Search results are candidates; factual verification still checks their original sources.
 - Docs collector maps GitHub commits to `learn.microsoft.com` article URLs, filters noise (TOC-only changes, merge commits)
 - TechCommunity search uses the internal GraphQL API (`MessageSearch` operation) to capture all results (not just the first 10)
 - YouTube scraper parses the `ytInitialData` JSON embedded in page HTML, pairing video IDs with titles reliably
@@ -321,6 +321,7 @@ Edit `config.js` to:
 | `COPILOT_GITHUB_TOKEN` | Required for polish in this personal repository's Actions workflow. Use a fine-grained user token with **Copilot Requests** permission and an account authorized for Copilot CLI. Organization policies may restrict access. Never paste tokens into source code or chat. |
 | `COPILOT_MODEL` | *(Optional, local)* Copilot model selection; omitted by default to respect CLI configuration and policies. |
 | `COPILOT_CLI_PATH` | *(Optional, local)* Absolute path to a Copilot CLI executable if it is not on PATH. |
+| `TAVILY_API_KEY` | *(Optional)* Enables Tavily search for article discovery. GitHub Actions reads it from the `TAVILY_API_KEY` repository secret. Tavily's free plan includes 1,000 credits per month; a basic search uses one credit. Without it, collection uses Bing HTML search. |
 | `SLACK_WEBHOOK_URL` | *(Optional)* Slack notification webhook |
 | `TEAMS_WEBHOOK_URL` | *(Optional)* Teams notification webhook |
 

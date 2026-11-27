@@ -62,14 +62,62 @@ ${heading} Behavioral changes
   }
 });
 
-test("Bing result-page discovery ignores a configured retired API key", async () => {
-  const originalKey = process.env.BING_SEARCH_KEY;
-  process.env.BING_SEARCH_KEY = "retired-key";
+test("Tavily search uses the exact month window, source domains, and published dates", async () => {
+  const originalKey = process.env.TAVILY_API_KEY;
+  process.env.TAVILY_API_KEY = "test-key";
   try {
     const collector = new ContentCollector(2026, 11);
     const requests = [];
     collector._safeFetch = async (url, options) => {
       requests.push({ url, options });
+      return { json: async () => ({ results: [
+        {
+          title: "AKS networking update",
+          url: "https://techcommunity.microsoft.com/blog/aksblog/123",
+          content: "Azure Kubernetes Service AKS networking changes.",
+          published_date: "2026-11-18",
+        },
+        {
+          title: "AKS update outside month",
+          url: "https://techcommunity.microsoft.com/blog/aksblog/december",
+          content: "Azure Kubernetes Service AKS networking changes.",
+          published_date: "2026-12-01",
+        },
+        {
+          title: "AKS result on another domain",
+          url: "https://example.com/blog/aks",
+          content: "Azure Kubernetes Service AKS networking changes.",
+          published_date: "2026-11-18",
+        },
+      ] }) };
+    };
+
+    await collector.collectTavilySearch();
+    assert.equal(requests.length, 3);
+    assert.ok(requests.every(({ url }) => url === "https://api.tavily.com/search"));
+    const payload = JSON.parse(requests[0].options.body);
+    assert.equal(payload.api_key, "test-key");
+    assert.equal(payload.start_date, "2026-10-31");
+    assert.equal(payload.end_date, "2026-12-01");
+    assert.equal(payload.filter_by_published_date, true);
+    assert.deepEqual(payload.include_domains, ["techcommunity.microsoft.com"]);
+    assert.equal(collector.collected.techcommunity_search.length, 1);
+    assert.equal(collector.collected.techcommunity_search[0].source, "Tavily Search");
+    assert.equal(collector.collected.techcommunity_search[0].posted, "2026-11-18");
+  } finally {
+    if (originalKey === undefined) delete process.env.TAVILY_API_KEY;
+    else process.env.TAVILY_API_KEY = originalKey;
+  }
+});
+
+test("web search falls back to Bing HTML when Tavily is not configured", async () => {
+  const originalKey = process.env.TAVILY_API_KEY;
+  delete process.env.TAVILY_API_KEY;
+  try {
+    const collector = new ContentCollector(2026, 11);
+    const requests = [];
+    collector._safeFetch = async url => {
+      requests.push(url);
       return {
         text: async () => `<ul><li class="b_algo">
           <h2><a href="https://techcommunity.microsoft.com/blog/aksblog/123">AKS networking update</a></h2>
@@ -78,14 +126,41 @@ test("Bing result-page discovery ignores a configured retired API key", async ()
       };
     };
 
-    await collector.collectBingSearch();
+    await collector.collectTavilySearch();
     assert.equal(requests.length, 3);
-    assert.ok(requests.every(({ url }) => url.startsWith("https://www.bing.com/search?")));
-    assert.ok(requests.every(({ options }) => !options.headers["Ocp-Apim-Subscription-Key"]));
+    assert.ok(requests.every(url => url.startsWith("https://www.bing.com/search?")));
     assert.equal(collector.collected.techcommunity_search.length, 1);
     assert.equal(collector.collected.techcommunity_search[0].source, "Bing Search");
   } finally {
-    if (originalKey === undefined) delete process.env.BING_SEARCH_KEY;
-    else process.env.BING_SEARCH_KEY = originalKey;
+    if (originalKey !== undefined) process.env.TAVILY_API_KEY = originalKey;
+  }
+});
+
+test("web search falls back to Bing HTML when Tavily is unavailable", async () => {
+  const originalKey = process.env.TAVILY_API_KEY;
+  process.env.TAVILY_API_KEY = "test-key";
+  try {
+    const collector = new ContentCollector(2026, 11);
+    const requests = [];
+    collector._safeFetch = async (url) => {
+      requests.push(url);
+      if (url === "https://api.tavily.com/search") return null;
+      return {
+        text: async () => `<ul><li class="b_algo">
+          <h2><a href="https://techcommunity.microsoft.com/blog/aksblog/123">AKS networking update</a></h2>
+          <div class="b_caption"><p>Azure Kubernetes Service AKS networking changes.</p></div>
+        </li></ul>`,
+      };
+    };
+
+    await collector.collectTavilySearch();
+    assert.equal(requests.length, 6);
+    assert.equal(requests.filter(url => url === "https://api.tavily.com/search").length, 3);
+    assert.equal(requests.filter(url => url.startsWith("https://www.bing.com/search?")).length, 3);
+    assert.equal(collector.collected.techcommunity_search.length, 1);
+    assert.equal(collector.collected.techcommunity_search[0].source, "Bing Search");
+  } finally {
+    if (originalKey === undefined) delete process.env.TAVILY_API_KEY;
+    else process.env.TAVILY_API_KEY = originalKey;
   }
 });
