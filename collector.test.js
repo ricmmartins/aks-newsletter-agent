@@ -62,6 +62,30 @@ ${heading} Behavioral changes
   }
 });
 
+test("GA announcement summaries do not publish pre-release limitations as current facts", async () => {
+  const collector = new ContentCollector(2026, 11);
+  collector._safeFetch = async () => ({
+    json: async () => ({ value: [{
+      id: 581130,
+      title: "[Launched] Generally Available: Confidential VMs with Intel TDX support on AKS",
+      generalAvailabilityDate: "2026-11-17",
+      description: "Customers standardized on Intel TDX can't run those workloads on AKS node pools today, because images only support AMD SEV-SNP. AKS now adds Intel TDX support.",
+    }] }),
+  });
+
+  await collector.collectAzureUpdates();
+  const update = collector.collected.azure_updates[0];
+  assert.equal(update.summary, "");
+  assert.equal(update.suppressGeneratedDescription, true);
+
+  const generator = new NewsletterGenerator(2026, 11);
+  generator.data = collector.collected;
+  const section = generator.generateGAAnnouncements();
+  assert.match(section, /Generally Available: Confidential VMs with Intel TDX support on AKS/);
+  assert.doesNotMatch(section, /can't run|only support AMD/);
+  assert.doesNotMatch(section, /\[NEEDS DESCRIPTION\]/);
+});
+
 test("Tavily search uses the exact month window, source domains, and published dates", async () => {
   const originalKey = process.env.TAVILY_API_KEY;
   process.env.TAVILY_API_KEY = "test-key";
