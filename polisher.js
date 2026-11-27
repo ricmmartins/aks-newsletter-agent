@@ -61,19 +61,19 @@ ${reference || "Reference edition not available. Follow the instructions above s
     let userMessage = `Polish this raw draft newsletter into a final, publication-ready edition.
 
 ## RULES REMINDER
-- Every item MUST have a 1-3 sentence opinionated, engineering-focused description
-- Items marked with [NEEDS DESCRIPTION] have only their Learn page metadata — you MUST rewrite these completely with opinionated, architectural context
-- Items with NO description after the link MUST get one added — no exceptions
+- Add descriptions only when the collected source context supports the claims
+- Items marked with [NEEDS DESCRIPTION] may be rewritten only from supported source facts; do not add inferred architectural or security claims
+- Keep lifecycle announcements title-only when the collected data marks them as not supporting a generated description
 - Remove noise items (TOC-only changes, typo fixes, "minor changes")
 - Never copy/paste meta descriptions from Learn pages (phrases starting with "Learn how to...", "Learn about...", "In this article...")
-- Explain "what changed" and "why it matters"
+- Explain "what changed" and "why it matters" only when the source provides those details
 - Match the tone and structure of the reference edition exactly
 - Keep ALL legitimate links — do not drop real content
 - Remove &nbsp; HTML entities and clean up formatting
 - Remove the [NEEDS DESCRIPTION] markers from the final output
 
 ## QUALITY GATE (NON-NEGOTIABLE)
-Before finalizing, verify that EVERY bullet point entry has at minimum 1 sentence of description after the link. An entry like \`* **[Title](url)**\` with NOTHING after it is a DEFECT. Fix it.
+Before finalizing, verify that every factual description is supported by its source context. A title-only lifecycle announcement is valid when the collected data says its source does not support a generated description.
 
 ## RAW DRAFT TO POLISH
 
@@ -85,7 +85,7 @@ ${draft}`;
       const summary = this._summarizeCollected(collectedData);
       userMessage += `
 
-## COLLECTED DATA CONTEXT (use for enriching descriptions)
+## COLLECTED DATA CONTEXT (use only facts supported by the source material)
 
 ${summary}`;
     }
@@ -118,9 +118,11 @@ ${summary}`;
     return `You are an editorial agent for Ricardo Martins' monthly AKS Newsletter.
 
 RULES:
-- Every item MUST have a 1-3 sentence opinionated, engineering-focused description
-- Items marked [NEEDS DESCRIPTION] need you to write a NEW description — do NOT copy metadata
-- Explain "what changed" and "why it matters" to platform engineers
+- Add a 1-3 sentence engineering-focused description only when the supplied source context supports it
+- Items marked [NEEDS DESCRIPTION] may be rewritten only from supported source facts; do NOT infer architecture, security properties, benefits, or limitations
+- If a lifecycle announcement is marked as title/status only, preserve it without a description
+- Do not add factual claims from general knowledge or assumptions. When evidence is incomplete, keep the supported title and status without elaboration
+- Explain "what changed" and "why it matters" only when the source establishes those details
 - Never use "Learn how to...", "Learn about...", "In this article..." patterns
 - Use patterns like: "This documentation was refreshed with...", "Updated to cover...", "Refreshed with current guidance on..."
 - Remove noise items (TOC-only changes, typo fixes, trivial edits)
@@ -132,8 +134,8 @@ RULES:
 - A release-note "Features" heading is NOT proof of general availability. Never infer a new GA transition from existing availability, documentation changes, or a new subfeature.
 - Preserve the scope of each announcement: improvements to NAP do not mean NAP itself just became GA. Only assert a GA transition explicitly supported by the source.
 
-GOOD EXAMPLE:
-* **[Configure rolling upgrades](url)**: Updated with the new Capacity Based Surge option and clearer guidance on drain timeout, soak time, and max-unavailable settings. Critical reading for teams managing large node pools with strict SLA requirements.
+GOOD EXAMPLE (use these details only when they appear in the supplied source context):
+* **[Configure rolling upgrades](url)**: The documentation now covers Capacity Based Surge, drain timeout, soak time, and max-unavailable settings.
 
 BAD EXAMPLE (metadata — NEVER do this):
 * **[Configure rolling upgrades](url)**: Learn how to configure and customize rolling upgrades for AKS node pools.
@@ -168,13 +170,13 @@ Return ONLY the polished section content in Markdown. No commentary.`;
         const updates = (collectedData?.azure_updates || []).filter((u) =>
           (u.title || "").toLowerCase().includes("generally available") || (u.title || "").toLowerCase().split(/\s+/).includes("ga")
         );
-        return updates.map((u) => `- ${u.title}: ${u.summary || ""}`).join("\n");
+        return updates.map((u) => `- ${u.title}: ${u.suppressGeneratedDescription ? "[TITLE/STATUS ONLY; do not infer further details]" : u.summary || ""}`).join("\n");
       },
       "Preview Feature": () => {
         const updates = (collectedData?.azure_updates || []).filter((u) =>
           (u.title || "").toLowerCase().includes("preview")
         );
-        return updates.map((u) => `- ${u.title}: ${u.summary || ""}`).join("\n");
+        return updates.map((u) => `- ${u.title}: ${u.suppressGeneratedDescription ? "[TITLE/STATUS ONLY; do not infer further details]" : u.summary || ""}`).join("\n");
       },
       "Behavioral Changes": () => {
         const items = [...(collectedData?.behavioral_changes || []), ...(collectedData?.announcements || [])];
@@ -214,7 +216,10 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     if (data.azure_updates?.length) {
       sections.push("### Azure Updates");
       for (const item of data.azure_updates) {
-        sections.push(`- ${item.title}: ${item.summary || "(no summary)"} | URL: ${item.url || ""}`);
+        const summary = item.suppressGeneratedDescription
+          ? "[TITLE/STATUS ONLY; do not infer further details]"
+          : item.summary || "(no summary)";
+        sections.push(`- ${item.title}: ${summary} | URL: ${item.url || ""}`);
       }
     }
 
@@ -236,8 +241,8 @@ Return ONLY the polished section content in Markdown. No commentary.`;
 
     // Docs commits — include commit context and metadata flag for better AI rewriting
     if (data.aks_docs_commits?.length) {
-      sections.push("\n### Documentation Updates (USE THIS CONTEXT TO WRITE OPINIONATED DESCRIPTIONS)");
-      sections.push("NOTE: 'summary' below is the raw Learn page metadata — do NOT copy it. Use it only as context to understand the topic, then write your own opinionated description explaining what changed and why it matters.");
+      sections.push("\n### Documentation Updates");
+      sections.push("NOTE: 'summary' below is raw Learn page metadata — do NOT copy it. Use the supplied context only for supported facts. Do not infer changes or benefits that are not established by the source.");
       for (const item of data.aks_docs_commits.slice(0, 50)) {
         const metaFlag = item.summaryIsMetadata ? " [METADATA - REWRITE]" : "";
         const commitCtx = item.commitContext ? ` | Commit: ${item.commitContext}` : "";
@@ -281,6 +286,18 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     return sections.join("\n");
   }
 
+  _normalizeTrackedUrl(value) {
+    const url = new URL(value);
+    for (const key of ["utm_source", "utm_medium", "utm_campaign"]) url.searchParams.delete(key);
+    return url.toString();
+  }
+
+  _titleOnlyAnnouncementUrls(collectedData) {
+    return new Set((collectedData?.azure_updates || [])
+      .filter((item) => item.suppressGeneratedDescription && item.url)
+      .map((item) => this._normalizeTrackedUrl(item.url)));
+  }
+
   async _callModel(messages, model) {
     console.log(`🤖 Polishing via Copilot CLI${model ? ` (${model})` : ""}...`);
     return callCopilot(messages, model);
@@ -311,7 +328,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
       polished = this._enforceUtm(polished);
 
       // Final validation — pass original draft to check URL preservation
-      const issues = this._validateOutput(polished, draft);
+      const issues = this._validateOutput(polished, draft, collectedData);
       if (issues.length === 0) {
         console.log("✅ Polish passed quality validation.");
       } else {
@@ -329,12 +346,18 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     const sections = this._splitIntoSections(draft, collectedData);
     const systemMessage = this._buildSectionSystemMessage();
     const polishedSections = [];
+    const titleOnlyUrls = this._titleOnlyAnnouncementUrls(collectedData);
 
     for (const section of sections) {
       // Skip sections that don't have items needing polish
-      const hasItems = section.content.includes("* **[");
+      const bareEntries = section.content.split("\n").filter((line) =>
+        /^\*\s+\*\*\[[^\]]+\]\((https?:\/\/[^)]+)\)\*\*\s*$/.test(line)
+      );
       const needsPolish = section.content.includes("[NEEDS DESCRIPTION]") ||
-        (hasItems && /\* \*\*\[[^\]]+\]\([^)]+\)\*\*\s*$/m.test(section.content));
+        bareEntries.some((line) => {
+          const url = line.match(/\]\((https?:\/\/[^)]+)\)/)?.[1];
+          return url && !titleOnlyUrls.has(this._normalizeTrackedUrl(url));
+        });
 
       if (!needsPolish) {
         // Pass through sections that are already good (intro, closing, separators)
@@ -344,9 +367,16 @@ Return ONLY the polished section content in Markdown. No commentary.`;
 
       console.log(`  📝 Polishing: ${section.name.substring(0, 50)}...`);
 
-      let userMessage = `Polish this newsletter section. Every item MUST have a description.\n\n## SECTION TO POLISH\n\n${section.content}`;
+      let userMessage = `Polish this newsletter section. Use only claims supported by the supplied source context. If the evidence is incomplete, keep the item title-only rather than inferring details.\n\n## SECTION TO POLISH\n\n${section.content}`;
+      const titleOnlyEntries = bareEntries.filter((line) => {
+        const url = line.match(/\]\((https?:\/\/[^)]+)\)/)?.[1];
+        return url && titleOnlyUrls.has(this._normalizeTrackedUrl(url));
+      });
+      if (titleOnlyEntries.length) {
+        userMessage += `\n\n## TITLE/STATUS-ONLY ITEMS\nPreserve these entries exactly as title-only. Their source context does not support an expanded description:\n${titleOnlyEntries.join("\n")}`;
+      }
       if (section.context) {
-        userMessage += `\n\n## CONTEXT (use to write better descriptions — do NOT copy verbatim)\n\n${section.context}`;
+        userMessage += `\n\n## SOURCE CONTEXT (use only facts supported here; do NOT copy metadata verbatim)\n\n${section.context}`;
       }
 
       const messages = [
@@ -367,7 +397,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
           console.warn(`  ⚠️  Section still has ${remaining} [NEEDS DESCRIPTION] markers, retry ${retryCount}/${MAX_SECTION_RETRIES}...`);
           conversationMessages.push({
             role: "user",
-            content: `You left ${remaining} [NEEDS DESCRIPTION] markers in the output. Replace ALL of them with actual 1-3 sentence opinionated descriptions. Do NOT use "Learn how to..." or "Learn about..." patterns. Return the COMPLETE corrected section with no markers remaining.`,
+            content: `You left ${remaining} [NEEDS DESCRIPTION] markers in the output. Replace them only with descriptions supported by the supplied source context. If the source does not provide enough detail, retain the title and status without a description. Do NOT use "Learn how to..." or "Learn about..." patterns. Return the COMPLETE corrected section with no markers remaining.`,
           });
           result = await this._callModel(conversationMessages, this.model);
           cleaned = this._cleanOutput(result);
@@ -380,7 +410,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
           console.warn(`  ⚠️  Section has generic one-liner descriptions, requesting rewrite...`);
           conversationMessages.push({
             role: "user",
-            content: `Some items have generic one-liner descriptions like "Is now available in public preview." These are NOT acceptable. Every item needs 1-3 sentences explaining what the feature does, what pain point it solves, and who benefits. Rewrite ALL generic descriptions. Return the COMPLETE corrected section.`,
+            content: `Some items have generic one-liner descriptions like "Is now available in public preview." Replace them only when the source context supports a more specific description. Do not infer what the feature does, its benefits, or who benefits. Return the COMPLETE corrected section.`,
           });
           result = await this._callModel(conversationMessages, this.model);
           cleaned = this._cleanOutput(result);
@@ -395,11 +425,13 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     return polishedSections.join("\n\n---\n\n");
   }
 
-  _validateOutput(content, originalDraft) {
+  _validateOutput(content, originalDraft, collectedData) {
     const issues = [];
     const lines = content.split("\n");
+    const titleOnlyUrls = this._titleOnlyAnnouncementUrls(collectedData);
 
     let itemsWithoutDescription = 0;
+    let titleOnlyItemsWithDescription = 0;
     let itemsWithMetadata = 0;
     let totalItems = 0;
 
@@ -416,8 +448,13 @@ Return ONLY the polished section content in Markdown. No commentary.`;
         if (staticLinks.some((s) => url.includes(s))) continue;
 
         totalItems++;
+        const titleOnly = titleOnlyUrls.has(this._normalizeTrackedUrl(url));
         // Check if there's a description after the link
         const afterLink = line.replace(/^\*\s+\*\*\[[^\]]+\]\([^)]+\)\*\*/, "").trim();
+        if (titleOnly) {
+          if (afterLink && afterLink !== ":" && afterLink !== ": ") titleOnlyItemsWithDescription++;
+          continue;
+        }
         if (!afterLink || afterLink === ":" || afterLink === ": ") {
           itemsWithoutDescription++;
         } else if (/^:\s*(Learn (how to|about|the)|In this (article|tutorial))/i.test(afterLink)) {
@@ -440,6 +477,9 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     if (itemsWithoutDescription > 0) {
       issues.push(`${itemsWithoutDescription}/${totalItems} items have no description`);
     }
+    if (titleOnlyItemsWithDescription > 0) {
+      issues.push(`${titleOnlyItemsWithDescription} title/status-only announcements have unsupported descriptions`);
+    }
     if (itemsWithMetadata > 0) {
       issues.push(`${itemsWithMetadata}/${totalItems} items still have raw metadata descriptions (starting with "Learn how to...")`);
     }
@@ -449,17 +489,12 @@ Return ONLY the polished section content in Markdown. No commentary.`;
 
     // Check URL preservation: every URL in the original draft should appear in the output
     if (originalDraft) {
-      const withoutTracking = (value) => {
-        const url = new URL(value);
-        for (const key of ["utm_source", "utm_medium", "utm_campaign"]) url.searchParams.delete(key);
-        return url.toString();
-      };
       const urlRegex = /\]\(([^)]+)\)/g;
       const originalUrls = new Set();
       let match;
       while ((match = urlRegex.exec(originalDraft)) !== null) {
         // Strip UTM params for comparison (they're added post-generation)
-        const url = withoutTracking(match[1]);
+        const url = this._normalizeTrackedUrl(match[1]);
         if (!staticLinks.some((s) => url.includes(s))) {
           originalUrls.add(url);
         }
@@ -467,7 +502,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
       const outputUrls = new Set();
       const urlRegex2 = /\]\(([^)]+)\)/g;
       while ((match = urlRegex2.exec(content)) !== null) {
-        const url = withoutTracking(match[1]);
+        const url = this._normalizeTrackedUrl(match[1]);
         outputUrls.add(url);
       }
       const droppedUrls = [...originalUrls].filter((u) => !outputUrls.has(u));
@@ -485,8 +520,8 @@ Return ONLY the polished section content in Markdown. No commentary.`;
 ${issues.map((i) => `- ${i}`).join("\n")}
 
 REQUIREMENTS:
-1. Every bullet point entry (lines starting with \`* **[Title](url)**\`) MUST have a colon followed by 1-3 sentences of opinionated description.
-2. Descriptions starting with "Learn how to...", "Learn about...", or "In this article..." are METADATA — rewrite them with "what changed" and "why it matters" context.
+1. Add descriptions only when their claims are supported by the supplied source context. Keep title/status-only announcements without descriptions.
+2. Descriptions starting with "Learn how to...", "Learn about...", or "In this article..." are METADATA — rewrite them using only supported source facts.
 3. Remove any [NEEDS DESCRIPTION] markers.
 4. Do NOT drop any items — keep all links.
 

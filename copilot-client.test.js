@@ -116,6 +116,69 @@ test("polishes and saves only validated content", async (t) => {
   assert.equal(fs.readFileSync(draftPath, "utf8"), polished);
 });
 
+test("keeps source-limited lifecycle announcements title-only", async (t) => {
+  const url = "https://azure.microsoft.com/en-us/updates/581130/";
+  const entries = [
+    `* **[Generally Available: Confidential VMs with Intel TDX support on AKS](${url})**`,
+    ...Array.from({ length: 4 }, (_, index) =>
+      `* **[Supported feature ${index + 1}](https://example.com/${index + 1})**: Source-backed description.`
+    ),
+  ];
+  const draft = `## General Availability Announcements\n\n${entries.join("\n\n")}`;
+  const collectedData = {
+    azure_updates: [{
+      title: "Generally Available: Confidential VMs with Intel TDX support on AKS",
+      url,
+      summary: "This stale summary must not reach the polisher.",
+      suppressGeneratedDescription: true,
+    }],
+  };
+  const polisher = new NewsletterPolisher(2026, 11);
+  t.mock.method(polisher, "_callModel", async () => assert.fail("title-only section should not be polished"));
+
+  const polished = await polisher._polishBySection(draft, collectedData);
+  assert.equal(polished, draft);
+  assert.deepEqual(polisher._validateOutput(polished, draft, collectedData), []);
+  assert(!polisher._summarizeCollected(collectedData).includes("stale summary"));
+  assert(!polisher._splitIntoSections(draft, collectedData)[0].context.includes("stale summary"));
+
+  const expanded = draft.replace(`(${url})**`, `(${url})**: Hardware-backed protection extends to Kubernetes workloads.`);
+  assert(polisher._validateOutput(expanded, draft, collectedData)
+    .some((issue) => issue.includes("title/status-only announcements have unsupported descriptions")));
+});
+
+test("protects title/status-only items while polishing other entries in the section", async (t) => {
+  const url = "https://azure.microsoft.com/en-us/updates/581130/";
+  const draft = [
+    "## General Availability Announcements",
+    "",
+    `* **[Generally Available: Confidential VMs with Intel TDX support on AKS](${url})**`,
+    "",
+    "* **[Another feature](https://example.com/feature)**: [NEEDS DESCRIPTION]",
+  ].join("\n");
+  const collectedData = {
+    azure_updates: [{
+      title: "Generally Available: Confidential VMs with Intel TDX support on AKS",
+      url,
+      summary: "",
+      suppressGeneratedDescription: true,
+    }],
+  };
+  const polisher = new NewsletterPolisher(2026, 11);
+  const response = `${draft.replace("[NEEDS DESCRIPTION]", "The source describes the supported change.")}\n`;
+  t.mock.method(polisher, "_callModel", async (messages) => {
+    assert.match(messages[1].content, /TITLE\/STATUS-ONLY ITEMS/);
+    assert.match(messages[1].content, /Preserve these entries exactly as title-only/);
+    return response;
+  });
+
+  const polished = await polisher._polishBySection(draft, collectedData);
+  assert.equal(polished, response);
+  const issues = polisher._validateOutput(polished, draft, collectedData);
+  assert(!issues.some((issue) => issue.includes("unsupported descriptions")));
+  assert(!issues.some((issue) => issue.includes("items have no description")));
+});
+
 test("tracking preserves query parameters and anchors across generation and polish", () => {
   const generator = new NewsletterGenerator(2026, 10);
   const polisher = new NewsletterPolisher(2026, 10);
