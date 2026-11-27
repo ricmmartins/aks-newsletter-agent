@@ -110,6 +110,7 @@ jobs:
         run: node run.js ${{ steps.target.outputs.year }} ${{ steps.target.outputs.month }} --collect-only
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
 
       - name: Run AKS Newsletter Agent (generate draft)
         if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'

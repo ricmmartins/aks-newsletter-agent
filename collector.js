@@ -952,53 +952,96 @@ class ContentCollector {
     }
   }
 
-  async collectBingSearch() {
-    const bingKey = process.env.BING_SEARCH_KEY || "";
-    console.log("📡 Collecting via Bing Search...");
-    if (bingKey) {
-      console.log("  ⚠ BING_SEARCH_KEY is ignored: Bing Search APIs retired on August 11, 2025. Using HTML results instead.");
-    }
+  async collectTavilySearch() {
+    const apiKey = process.env.TAVILY_API_KEY || "";
+    console.log("📡 Collecting web search results...");
+    if (!apiKey) console.log("  ⚠ TAVILY_API_KEY is not set. Falling back to Bing HTML search.");
 
     const queries = [
-      `"AKS" site:techcommunity.microsoft.com`,
-      `"azure kubernetes service" site:techcommunity.microsoft.com`,
-      `"AKS" site:azure.microsoft.com/blog`,
+      { term: '"AKS"', domain: "techcommunity.microsoft.com" },
+      { term: '"azure kubernetes service"', domain: "techcommunity.microsoft.com" },
+      { term: '"AKS"', domain: "azure.microsoft.com" },
     ];
 
     const seen = new Set(
       [...this.collected.techcommunity_search, ...this.collected.aks_blog].map(i => i.url)
     );
     let added = 0;
+    const startDate = new Date(Date.UTC(this.year, this.month - 1, 0)).toISOString().slice(0, 10);
+    const endDate = new Date(Date.UTC(this.year, this.month, 1)).toISOString().slice(0, 10);
 
-    for (const q of queries) {
+    for (const { term, domain } of queries) {
       try {
-        let pages = [];
-        const searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(q + " " + this.year)}&filters=ex1%3a"ez5_${this.windowStart.toISOString().slice(0,10)}_${this.windowEnd.toISOString().slice(0,10)}"&count=50`;
-        const resp = await this._safeFetch(searchUrl, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml",
-            "Accept-Language": "en-US,en;q=0.9",
-          },
-        });
-        if (resp) {
-          const html = await resp.text();
-          const $ = cheerio.load(html);
-          $("li.b_algo").each((_, el) => {
-            const $el = $(el);
-            const a = $el.find("h2 a").first();
-            const title = a.text().trim();
-            const url = a.attr("href") || "";
-            const snippet = $el.find(".b_caption p, .b_lineclamp2").text().trim();
-            if (title && url) pages.push({ title, url, snippet, date: "" });
+        let pages;
+        let source;
+        if (apiKey) {
+          const response = await this._safeFetch("https://api.tavily.com/search", {
+            method: "POST",
+            headers: { Accept: "application/json", "Content-Type": "application/json" },
+            body: JSON.stringify({
+              api_key: apiKey,
+              query: `${term} ${this.year}`,
+              search_depth: "basic",
+              topic: "general",
+              max_results: 20,
+              chunks_per_source: 1,
+              start_date: startDate,
+              end_date: endDate,
+              include_published_date: true,
+              filter_by_published_date: true,
+              include_domains: [domain],
+            }),
           });
+          if (response) {
+            const data = await response.json();
+            if (!data || !Array.isArray(data.results)) throw new Error("Tavily response is missing its results array.");
+            pages = data.results.map(result => ({
+              title: result.title || "",
+              url: result.url || "",
+              snippet: result.content || "",
+              date: result.published_date || "",
+            }));
+            source = "Tavily Search";
+          } else {
+            console.log("  ⚠ Tavily request failed. Falling back to Bing HTML search for this query.");
+          }
         }
 
-        console.log(`    "${q.slice(0, 40)}..." → ${pages.length} results`);
+        if (!pages) {
+          const searchQuery = `${term} site:${domain} ${this.year}`;
+          const searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(searchQuery)}&filters=ex1%3a"ez5_${this.windowStart.toISOString().slice(0,10)}_${this.windowEnd.toISOString().slice(0,10)}"&count=50`;
+          const response = await this._safeFetch(searchUrl, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml",
+              "Accept-Language": "en-US,en;q=0.9",
+            },
+          });
+          pages = [];
+          source = "Bing Search";
+          if (response) {
+            const html = await response.text();
+            const $ = cheerio.load(html);
+            $("li.b_algo").each((_, el) => {
+              const $el = $(el);
+              const a = $el.find("h2 a").first();
+              const title = a.text().trim();
+              const url = a.attr("href") || "";
+              const snippet = $el.find(".b_caption p, .b_lineclamp2").text().trim();
+              if (title && url) pages.push({ title, url, snippet, date: "" });
+            });
+          }
+        }
+
+        console.log(`    "${term} ${domain}" → ${pages.length} results`);
 
         for (const p of pages) {
           const url = p.url || "";
           if (seen.has(url)) continue;
+          let parsedUrl;
+          try { parsedUrl = new URL(url); }
+          catch { continue; }
+          if (parsedUrl.protocol !== "https:" || parsedUrl.hostname !== domain) continue;
           if (url.includes("/category/") || url.includes("/tag/") || url.includes("/search")) continue;
           if (!url.includes("/blog/") && !url.includes("/ba-p/") && !url.includes("azure.microsoft.com/blog")) continue;
 
@@ -1006,21 +1049,21 @@ class ContentCollector {
           if (!title || !this._matchesAKS(title + " " + (p.snippet || ""))) continue;
 
           seen.add(url);
-          if (p.date && !this._isWithinWindow(p.date)) continue;
+          if (source === "Tavily Search" ? !this._isWithinWindow(p.date) : p.date && !this._isWithinWindow(p.date)) continue;
 
           this.collected.techcommunity_search.push({
             title, url, posted: p.date,
             summary: (p.snippet || "").slice(0, 300),
-            source: "Bing Search",
+            source,
           });
           added++;
         }
       } catch (err) {
-        console.log(`    ⚠ Bing search failed for "${q.slice(0, 30)}...": ${err.message}`);
+        console.log(`    ⚠ Web search failed for "${term} ${domain}": ${err.message}`);
       }
     }
 
-    console.log(`  ✓ Bing Search added ${added} new posts`);
+    console.log(`  ✓ Web search added ${added} new posts`);
   }
 
   async collectAll() {
@@ -1034,7 +1077,7 @@ class ContentCollector {
     await this.collectGitHubReleases();
     await this.collectAKSDocCommits();
     await this.collectAzureUpdates();
-    await this.collectBingSearch();
+    await this.collectTavilySearch();
     await this.collectTechCommunity();
     await this.collectTechCommunitySearch();
     await this.collectYouTube();
