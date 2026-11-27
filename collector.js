@@ -425,12 +425,17 @@ class ContentCollector {
             : previewDate.startsWith(monthStr)
               ? previewDate
               : item.privatePreviewAvailabilityDate || "";
+          const description = (item.description || "").replace(/<[^>]+>/g, "").trim();
+          const summary = description.split(/\.\s/)[0] + (description ? "." : "");
+          const lifecycleAnnouncement = /\b(generally available|public preview|in preview)\b/i.test(item.title || "");
+          const describesPriorLimitation = /\b(?:can't|cannot|couldn't|could not|unable to)\b.*\b(?:today|currently|yet)\b/i.test(summary);
 
           this.collected.azure_updates.push({
             title: (item.title || "").trim(),
             url: `https://azure.microsoft.com/en-us/updates/${item.id}/`,
             date: dateStr,
-            summary: (item.description || "").replace(/<[^>]+>/g, "").trim().split(/\.\s/)[0] + ".",
+            summary: lifecycleAnnouncement && describesPriorLimitation ? "" : summary,
+            suppressGeneratedDescription: lifecycleAnnouncement && describesPriorLimitation,
             source: "Azure Updates",
           });
         }

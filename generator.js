@@ -93,7 +93,7 @@ class NewsletterGenerator {
     // Mark items that need the polisher to write/rewrite descriptions
     if (isMetadata) {
       summary = summary ? `[NEEDS DESCRIPTION] ${summary}` : "[NEEDS DESCRIPTION]";
-    } else if (!summary && url) {
+    } else if (!summary && url && !item.suppressGeneratedDescription) {
       // No summary at all — flag it explicitly for the polisher
       summary = "[NEEDS DESCRIPTION]";
     }
