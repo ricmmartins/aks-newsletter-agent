@@ -216,3 +216,59 @@ test("evidence redirects enforce the allowlist on each hop", async () => {
   }), /Unsupported evidence URL/);
   assert.equal(calls, 1);
 });
+
+test("Azure Update links resolve to official RSS evidence with lifecycle and publication metadata", async () => {
+  const requested = [];
+  const rss = `<?xml version="1.0"?>
+    <rss><channel><item>
+      <title>AKS feature is generally available</title>
+      <link>https://azure.microsoft.com/en-us/updates/581130/</link>
+      <guid>581130</guid>
+      <category>Launched</category>
+      <category>Azure Kubernetes Service</category>
+      <pubDate>Tue, 03 Nov 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[The feature is now generally available for Azure Kubernetes Service customers.]]></description>
+    </item></channel></rss>`;
+  const evidence = await fetchSource("https://azure.microsoft.com/en-us/updates/581130/", {
+    fetch: async requestedUrl => {
+      requested.push(requestedUrl);
+      return {
+        ok: true, status: 200, headers: { get: () => "application/rss+xml" },
+        text: async () => rss,
+      };
+    },
+  });
+  assert.deepEqual(requested, ["https://www.microsoft.com/releasecommunications/api/v2/azure/rss/581130"]);
+  assert.equal(evidence.url, requested[0]);
+  assert.match(evidence.text, /Title: AKS feature is generally available/);
+  assert.match(evidence.text, /Status: Launched/);
+  assert.match(evidence.text, /Published: Tue, 03 Nov 2026/);
+  assert.match(evidence.text, /Description: The feature is now generally available/);
+  await assert.rejects(fetchSource("https://azure.microsoft.com/en-us/updates/"), /no numeric update ID/);
+  await assert.rejects(fetchSource("https://azure.microsoft.com/en-us/updates/581130/", {
+    fetch: async () => ({
+      ok: true, status: 200, headers: { get: () => "text/html" }, text: async () => "A generic updates page.".repeat(20),
+    }),
+  }), /unexpected content type/);
+});
+
+test("factual review retains both the cited Azure Update URL and the RSS evidence URL", async () => {
+  const requestedUrl = "https://azure.microsoft.com/en-us/updates/581130/";
+  const feedUrl = "https://www.microsoft.com/releasecommunications/api/v2/azure/rss/581130";
+  const evidenceText = "Title: [Launched] Generally Available: AKS feature";
+  const newsletter = `* **[AKS feature](${requestedUrl})**: The feature is generally available.`;
+  const report = await verifyNewsletter(newsletter, collected, {
+    fetchEvidence: async url => ({ url: feedUrl, text: evidenceText, fetchedAt: "2026-11-30T00:00:00Z" }),
+    callCopilot: async messages => {
+      const payload = JSON.parse(messages[1].content);
+      assert.equal(payload.sources[0].requestedUrl, requestedUrl);
+      assert.equal(payload.sources[0].url, feedUrl);
+      return JSON.stringify(payload.units.map(unit => ({
+        id: unit.id, verdict: "supported", reason: "The linked official announcement states GA.",
+        claims: [{ claim: "AKS feature is GA.", sourceId: "s1", quote: evidenceText }],
+      })));
+    },
+  });
+  assert.equal(report.sources[0].requestedUrl, requestedUrl);
+  assert.equal(report.sources[0].url, feedUrl);
+});

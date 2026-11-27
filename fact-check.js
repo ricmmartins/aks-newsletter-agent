@@ -43,11 +43,19 @@ const TRANSIENT_NETWORK_CODES = new Set([
   "ENETUNREACH", "EHOSTUNREACH", "EPIPE", "ERR_STREAM_PREMATURE_CLOSE",
 ]);
 
+function azureUpdateFeedUrl(value) {
+  const parsed = new URL(value);
+  if (parsed.hostname !== "azure.microsoft.com" || !/\/updates(?:\/|$)/i.test(parsed.pathname)) return value;
+  const id = parsed.pathname.match(/\/updates\/(\d+)(?:\/|$)/i)?.[1] || parsed.searchParams.get("id");
+  if (!id || !/^\d+$/.test(id)) throw new Error(`Azure Update link has no numeric update ID: ${value}`);
+  return `https://www.microsoft.com/releasecommunications/api/v2/azure/rss/${id}`;
+}
+
 async function fetchEvidence(value, options = {}) {
   const request = options.fetch || fetch;
   const sleep = options.sleep || (ms => new Promise(resolve => setTimeout(resolve, ms)));
   const timeoutMs = options.timeoutMs ?? 20000;
-  let url = sourceUrl(value);
+  let url = sourceUrl(azureUpdateFeedUrl(sourceUrl(value)));
   for (let redirects = 0; redirects <= 4; redirects++) {
     let response;
     let body;
@@ -56,7 +64,7 @@ async function fetchEvidence(value, options = {}) {
       try {
         response = await request(url, {
           redirect: "manual", size: 2 * 1024 * 1024, signal,
-          headers: { "User-Agent": "AKSNewsletter-FactCheck/1.0", Accept: "text/html,application/json,text/plain" },
+          headers: { "User-Agent": "AKSNewsletter-FactCheck/1.0", Accept: "application/rss+xml,application/xml,text/html,application/json,text/plain" },
         });
         if (response.status === 429 || response.status >= 500) {
           response.body?.destroy();
@@ -89,7 +97,30 @@ async function fetchEvidence(value, options = {}) {
     }
     const type = response.headers.get("content-type") || "";
     let text = body;
-    if (type.includes("html")) {
+    const azureUpdateId = url.match(/\/releasecommunications\/api\/v2\/azure\/rss\/(\d+)$/i)?.[1];
+    if (azureUpdateId && !type.includes("xml") && !type.includes("rss")) {
+      throw new Error(`Official Azure Updates feed returned an unexpected content type: ${url} (${type || "unknown"})`);
+    }
+    if (type.includes("xml") || type.includes("rss")) {
+      const $ = cheerio.load(body, { xmlMode: true });
+      const item = $("item").first();
+      const id = item.find("guid").first().text().trim();
+      const title = item.find("title").first().text().trim();
+      const categories = item.find("category").map((_, category) => $(category).text().trim()).get();
+      const published = item.find("pubDate").first().text().trim();
+      const description = item.find("description").first().text().trim();
+      if (!id || (azureUpdateId && id !== azureUpdateId) || !title || !categories.length || !published || !description) {
+        throw new Error(`Official Azure Updates feed is missing required evidence fields: ${url}`);
+      }
+      text = [
+        `Official Azure Update: ${id}`,
+        `Title: ${title}`,
+        `Status: ${categories[0]}`,
+        `Published: ${published}`,
+        `Categories: ${categories.join(", ")}`,
+        `Description: ${description}`,
+      ].join("\n");
+    } else if (type.includes("html")) {
       const $ = cheerio.load(body);
       $("script,style,nav,header,footer,noscript").remove();
       text = ($("main").length ? $("main") : $("body")).text();

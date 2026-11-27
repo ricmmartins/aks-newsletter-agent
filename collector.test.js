@@ -61,3 +61,31 @@ ${heading} Behavioral changes
     assert.ok(!collector.collected.azure_updates.some(item => item.title.includes("Existing service")));
   }
 });
+
+test("Bing result-page discovery ignores a configured retired API key", async () => {
+  const originalKey = process.env.BING_SEARCH_KEY;
+  process.env.BING_SEARCH_KEY = "retired-key";
+  try {
+    const collector = new ContentCollector(2026, 11);
+    const requests = [];
+    collector._safeFetch = async (url, options) => {
+      requests.push({ url, options });
+      return {
+        text: async () => `<ul><li class="b_algo">
+          <h2><a href="https://techcommunity.microsoft.com/blog/aksblog/123">AKS networking update</a></h2>
+          <div class="b_caption"><p>Azure Kubernetes Service AKS networking changes.</p></div>
+        </li></ul>`,
+      };
+    };
+
+    await collector.collectBingSearch();
+    assert.equal(requests.length, 3);
+    assert.ok(requests.every(({ url }) => url.startsWith("https://www.bing.com/search?")));
+    assert.ok(requests.every(({ options }) => !options.headers["Ocp-Apim-Subscription-Key"]));
+    assert.equal(collector.collected.techcommunity_search.length, 1);
+    assert.equal(collector.collected.techcommunity_search[0].source, "Bing Search");
+  } finally {
+    if (originalKey === undefined) delete process.env.BING_SEARCH_KEY;
+    else process.env.BING_SEARCH_KEY = originalKey;
+  }
+});
