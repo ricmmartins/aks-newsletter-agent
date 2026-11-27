@@ -163,7 +163,7 @@ Fetches and filters content from all sources for the **full calendar month** (1s
 | Source | Method |
 |--------|--------|
 | AKS Engineering Blog | RSS/HTML scraping |
-| Azure Updates (AKS) | HTML scraping with date filtering |
+| Azure Updates (AKS) | Microsoft Release Communications API |
 | AKS GitHub Releases | GitHub API |
 | AKS Docs Changes | GitHub API → mapped to [learn.microsoft.com](https://learn.microsoft.com) URLs |
 | AKS Public Roadmap | GitHub Projects API |
@@ -173,6 +173,8 @@ Fetches and filters content from all sources for the **full calendar month** (1s
 
 **Key details:**
 - Release-note `Features` entries require explicit GA wording before entering the GA section. Other enhancements are covered under Behavioral Changes; nested capabilities and reference links stay attached to their parent feature.
+- Azure Update links are checked against the official Microsoft Release Communications RSS record, which supplies the announcement title, lifecycle status, publication date, and description.
+- Blog discovery scrapes Bing's public results page. The Bing Search APIs retired on August 11, 2025, so `BING_SEARCH_KEY` is no longer used.
 - Docs collector maps GitHub commits to `learn.microsoft.com` article URLs, filters noise (TOC-only changes, merge commits)
 - TechCommunity search uses the internal GraphQL API (`MessageSearch` operation) to capture all results (not just the first 10)
 - YouTube scraper parses the `ytInitialData` JSON embedded in page HTML, pairing video IDs with titles reliably
@@ -319,7 +321,6 @@ Edit `config.js` to:
 | `COPILOT_GITHUB_TOKEN` | Required for polish in this personal repository's Actions workflow. Use a fine-grained user token with **Copilot Requests** permission and an account authorized for Copilot CLI. Organization policies may restrict access. Never paste tokens into source code or chat. |
 | `COPILOT_MODEL` | *(Optional, local)* Copilot model selection; omitted by default to respect CLI configuration and policies. |
 | `COPILOT_CLI_PATH` | *(Optional, local)* Absolute path to a Copilot CLI executable if it is not on PATH. |
-| `BING_SEARCH_KEY` | **Recommended for blog collection.** Creates a Bing Search resource in Azure portal (free tier: 1000 calls/month). Dramatically improves TechCommunity blog coverage. |
 | `SLACK_WEBHOOK_URL` | *(Optional)* Slack notification webhook |
 | `TEAMS_WEBHOOK_URL` | *(Optional)* Teams notification webhook |
 

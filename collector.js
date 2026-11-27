@@ -954,7 +954,10 @@ class ContentCollector {
 
   async collectBingSearch() {
     const bingKey = process.env.BING_SEARCH_KEY || "";
-    console.log("📡 Collecting via Bing Web Search...");
+    console.log("📡 Collecting via Bing Search...");
+    if (bingKey) {
+      console.log("  ⚠ BING_SEARCH_KEY is ignored: Bing Search APIs retired on August 11, 2025. Using HTML results instead.");
+    }
 
     const queries = [
       `"AKS" site:techcommunity.microsoft.com`,
@@ -970,46 +973,25 @@ class ContentCollector {
     for (const q of queries) {
       try {
         let pages = [];
-
-        if (bingKey) {
-          // Strategy 1: Bing Search API (if key is available)
-          const params = new URLSearchParams({
-            q, count: "50", freshness: "Month", sortBy: "Date",
-            responseFilter: "Webpages", mkt: "en-US",
+        const searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(q + " " + this.year)}&filters=ex1%3a"ez5_${this.windowStart.toISOString().slice(0,10)}_${this.windowEnd.toISOString().slice(0,10)}"&count=50`;
+        const resp = await this._safeFetch(searchUrl, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml",
+            "Accept-Language": "en-US,en;q=0.9",
+          },
+        });
+        if (resp) {
+          const html = await resp.text();
+          const $ = cheerio.load(html);
+          $("li.b_algo").each((_, el) => {
+            const $el = $(el);
+            const a = $el.find("h2 a").first();
+            const title = a.text().trim();
+            const url = a.attr("href") || "";
+            const snippet = $el.find(".b_caption p, .b_lineclamp2").text().trim();
+            if (title && url) pages.push({ title, url, snippet, date: "" });
           });
-          const resp = await this._safeFetch(
-            `https://api.bing.microsoft.com/v7.0/search?${params}`,
-            { headers: { "Ocp-Apim-Subscription-Key": bingKey } }
-          );
-          if (resp) {
-            const data = await resp.json();
-            pages = (data.webPages?.value || []).map(p => ({
-              title: p.name || "", url: p.url || "",
-              snippet: p.snippet || "", date: p.dateLastCrawled || "",
-            }));
-          }
-        } else {
-          // Strategy 2: Scrape Bing HTML results (no API key needed)
-          const searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(q + " " + this.year)}&filters=ex1%3a"ez5_${this.windowStart.toISOString().slice(0,10)}_${this.windowEnd.toISOString().slice(0,10)}"&count=50`;
-          const resp = await this._safeFetch(searchUrl, {
-            headers: {
-              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-              "Accept": "text/html,application/xhtml+xml",
-              "Accept-Language": "en-US,en;q=0.9",
-            },
-          });
-          if (resp) {
-            const html = await resp.text();
-            const $ = cheerio.load(html);
-            $("li.b_algo").each((_, el) => {
-              const $el = $(el);
-              const a = $el.find("h2 a").first();
-              const title = a.text().trim();
-              const url = a.attr("href") || "";
-              const snippet = $el.find(".b_caption p, .b_lineclamp2").text().trim();
-              if (title && url) pages.push({ title, url, snippet, date: "" });
-            });
-          }
         }
 
         console.log(`    "${q.slice(0, 40)}..." → ${pages.length} results`);
@@ -1029,7 +1011,7 @@ class ContentCollector {
           this.collected.techcommunity_search.push({
             title, url, posted: p.date,
             summary: (p.snippet || "").slice(0, 300),
-            source: bingKey ? "Bing API" : "Bing Search",
+            source: "Bing Search",
           });
           added++;
         }
