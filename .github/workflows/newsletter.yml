@@ -147,12 +147,13 @@ jobs:
           fi
 
       - name: Upload collected data
-        if: steps.check-date.outputs.is_last_friday == 'true' && steps.check-existing.outputs.exists != 'true'
+        if: always() && steps.check-date.outputs.is_last_friday == 'true' && steps.target.outputs.year != '' && steps.check-existing.outputs.exists == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: newsletter-${{ steps.target.outputs.year }}-${{ steps.target.outputs.month }}
           path: |
             collected/*.json
+            collected/*.candidate.md
             newsletters/**/*.md
           retention-days: 90
 

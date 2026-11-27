@@ -36,6 +36,14 @@ async function verifyAndSaveReport(polisher, content, verify = verifyNewsletter)
   return report;
 }
 
+async function saveVerifiedPolish(polisher, content, verify = verifyNewsletter) {
+  const candidatePath = path.join(path.dirname(polisher.collectedPath), `${polisher.year}-${polisher.monthPad}.candidate.md`);
+  fs.writeFileSync(candidatePath, content, "utf8");
+  await verifyAndSaveReport(polisher, content, verify);
+  polisher.save(content);
+  fs.unlinkSync(candidatePath);
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const collectOnly = args.includes("--collect-only");
@@ -91,8 +99,7 @@ async function main() {
 
     if (polished) {
       console.log("\n🔎 Running two separate source-grounded factual reviews...");
-      await verifyAndSaveReport(polisher, polished);
-      polisher.save(polished);
+      await saveVerifiedPolish(polisher, polished);
       console.log(`\n✅ Newsletter polished and saved.`);
     } else {
       console.log(`\n⚠️  AI polish skipped or failed. Raw draft preserved.`);
@@ -111,4 +118,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { verifyAndSaveReport };
+module.exports = { verifyAndSaveReport, saveVerifiedPolish };
