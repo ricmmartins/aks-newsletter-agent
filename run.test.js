@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { NewsletterPolisher } = require("./polisher");
-const { verifyAndSaveReport } = require("./run");
+const { verifyAndSaveReport, saveVerifiedPolish } = require("./run");
 const { assertVerified } = require("./fact-check");
 
 function fixture(t) {
@@ -48,4 +48,26 @@ test("verify-only saves a successful report without changing text and rejects mi
     assert.fail("Should not call the model for another edition's metadata.");
   }), /does not match/);
   assert.equal(JSON.parse(fs.readFileSync(reportPath, "utf8")).status, "pending");
+});
+
+test("failed verification preserves the unapproved polished candidate without changing the draft", async t => {
+  const { root, polisher, content, reportPath } = fixture(t);
+  const candidatePath = path.join(root, "collected", "2026-10.candidate.md");
+  const polished = `${content}\nPolished candidate.`;
+  await assert.rejects(saveVerifiedPolish(polisher, polished, async () => {
+    throw new Error("Evidence timed out");
+  }), /timed out/);
+  assert.equal(fs.readFileSync(candidatePath, "utf8"), polished);
+  assert.equal(fs.readFileSync(polisher.draftPath, "utf8"), content);
+  assert.equal(JSON.parse(fs.readFileSync(reportPath, "utf8")).status, "pending");
+  assert.throws(() => assertVerified(polished, "2026-10", root), /Publication blocked/);
+});
+
+test("successful verification saves the polished draft and removes its candidate", async t => {
+  const { root, polisher, content } = fixture(t);
+  const candidatePath = path.join(root, "collected", "2026-10.candidate.md");
+  const polished = `${content}\nPolished candidate.`;
+  await saveVerifiedPolish(polisher, polished, async () => ({ status: "passed" }));
+  assert.equal(fs.readFileSync(polisher.draftPath, "utf8"), polished);
+  assert.equal(fs.existsSync(candidatePath), false);
 });

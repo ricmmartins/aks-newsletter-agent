@@ -38,22 +38,55 @@ function sourceUrl(value) {
   return url.href;
 }
 
-async function fetchEvidence(value) {
+const TRANSIENT_NETWORK_CODES = new Set([
+  "ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "EAI_AGAIN", "ENOTFOUND",
+  "ENETUNREACH", "EHOSTUNREACH", "EPIPE", "ERR_STREAM_PREMATURE_CLOSE",
+]);
+
+async function fetchEvidence(value, options = {}) {
+  const request = options.fetch || fetch;
+  const sleep = options.sleep || (ms => new Promise(resolve => setTimeout(resolve, ms)));
+  const timeoutMs = options.timeoutMs ?? 20000;
   let url = sourceUrl(value);
   for (let redirects = 0; redirects <= 4; redirects++) {
-    const response = await fetch(url, {
-      redirect: "manual", size: 2 * 1024 * 1024,
-      signal: AbortSignal.timeout(20000),
-      headers: { "User-Agent": "AKSNewsletter-FactCheck/1.0", Accept: "text/html,application/json,text/plain" },
-    });
+    let response;
+    let body;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const signal = AbortSignal.timeout(timeoutMs);
+      try {
+        response = await request(url, {
+          redirect: "manual", size: 2 * 1024 * 1024, signal,
+          headers: { "User-Agent": "AKSNewsletter-FactCheck/1.0", Accept: "text/html,application/json,text/plain" },
+        });
+        if (response.status === 429 || response.status >= 500) {
+          response.body?.destroy();
+          const error = new Error(`HTTP ${response.status}`);
+          error.transient = true;
+          throw error;
+        }
+        if (!response.ok && !(response.status >= 300 && response.status < 400)) {
+          throw new Error(`Evidence unavailable (HTTP ${response.status})`);
+        }
+        if (response.ok) body = await response.text();
+        break;
+      } catch (error) {
+        const timedOut = signal.aborted;
+        const transient = timedOut || error.transient || TRANSIENT_NETWORK_CODES.has(error.code);
+        const detail = timedOut ? `request timed out after ${timeoutMs} ms` : error.message;
+        if (!transient || attempt === 3) {
+          throw new Error(`Evidence unavailable for ${url} (attempt ${attempt}): ${detail}`, { cause: error });
+        }
+        console.warn(`Evidence fetch failed for ${url} (attempt ${attempt}/3): ${detail}; retrying.`);
+        await sleep(attempt * 1000);
+      }
+    }
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location");
+      response.body?.destroy();
       if (!location) throw new Error(`Evidence redirect has no destination: ${url}`);
       url = sourceUrl(new URL(location, url).href);
       continue;
     }
-    if (!response.ok) throw new Error(`Evidence unavailable (${response.status}): ${url}`);
-    const body = await response.text();
     const type = response.headers.get("content-type") || "";
     let text = body;
     if (type.includes("html")) {
@@ -137,6 +170,7 @@ async function verifyNewsletter(content, collected, options = {}) {
   for (const release of collected.aks_releases || []) if (release.url) urls.add(sourceUrl(release.url));
   const sources = [];
   for (const url of urls) {
+    console.log(`Fetching factual evidence: ${url}`);
     const evidence = await loadSource(url);
     sources.push({ ...evidence, id: `s${sources.length + 1}`, requestedUrl: url });
   }

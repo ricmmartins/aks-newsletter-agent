@@ -3,7 +3,9 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const { verifyNewsletter, assertVerified, validateReview, unitsFromMarkdown } = require("./fact-check");
+const http = require("node:http");
+const fetch = require("node-fetch");
+const { verifyNewsletter, assertVerified, validateReview, unitsFromMarkdown, fetchEvidence: fetchSource } = require("./fact-check");
 
 const url = "https://learn.microsoft.com/azure/aks/node-auto-provisioning";
 const quote = "Node auto-provisioning support in AKS was announced as generally available in July 2025.";
@@ -128,4 +130,89 @@ test("only structural headings can be editorial and source/report metadata is ch
 
 test("unsupported evidence hosts block verification before making a network request", async () => {
   await assert.rejects(verifyNewsletter("* **[Unsafe](https://127.0.0.1/test)**: Text.", collected), /Unsupported evidence URL/);
+});
+
+test("evidence fetch retries a timed-out response body and transient HTTP errors", async () => {
+  let calls = 0;
+  const waits = [];
+  const result = await fetchSource(url, {
+    timeoutMs: 15,
+    sleep: async ms => waits.push(ms),
+    fetch: async (_url, { signal }) => {
+      calls++;
+      if (calls === 1) return {
+        ok: true, status: 200, headers: { get: () => "text/plain" },
+        text: () => new Promise((resolve, reject) => {
+          signal.addEventListener("abort", () => reject(new Error("The user aborted a request.")), { once: true });
+          setTimeout(resolve, 50);
+        }),
+      };
+      if (calls === 2) return { ok: false, status: 503 };
+      return { ok: true, status: 200, headers: { get: () => "text/plain" }, text: async () => quote.repeat(2) };
+    },
+  });
+  assert.equal(calls, 3);
+  assert.deepEqual(waits, [1000, 2000]);
+  assert.equal(result.text, quote.repeat(2));
+});
+
+test("evidence fetch reports the URL and fails closed on persistent or non-transient errors", async () => {
+  let calls = 0;
+  await assert.rejects(fetchSource(url, {
+    sleep: async () => {},
+    fetch: async () => { calls++; const error = new Error("connection reset"); error.code = "ECONNRESET"; throw error; },
+  }), error => error.message.includes(url) && /attempt 3.*connection reset/.test(error.message));
+  assert.equal(calls, 3);
+  calls = 0;
+  await assert.rejects(fetchSource(url, {
+    sleep: async () => assert.fail("HTTP 403 is not transient"),
+    fetch: async () => { calls++; return { ok: false, status: 403 }; },
+  }), error => error.message.includes(url) && /HTTP 403/.test(error.message));
+  assert.equal(calls, 1);
+});
+
+test("a real node-fetch timeout during body streaming is retried", async t => {
+  let calls = 0;
+  let originalError;
+  const server = http.createServer((request, response) => {
+    calls++;
+    response.writeHead(200, { "Content-Type": "text/plain" });
+    response.write("Evidence starts here. ");
+    if (calls === 1) {
+      const timer = setTimeout(() => response.end(quote.repeat(2)), 500);
+      response.on("close", () => clearTimeout(timer));
+    } else {
+      response.end(quote.repeat(2));
+    }
+  });
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => server.close());
+  const localUrl = `http://127.0.0.1:${server.address().port}/`;
+  const result = await fetchSource(url, {
+    timeoutMs: 200,
+    sleep: async () => {},
+    fetch: async (_url, options) => {
+      const response = await fetch(localUrl, options);
+      const readText = response.text.bind(response);
+      response.text = async () => {
+        try { return await readText(); }
+        catch (error) { originalError = error; throw error; }
+      };
+      return response;
+    },
+  });
+  assert.equal(calls, 2);
+  assert.equal(originalError.message, "The user aborted a request.");
+  assert.ok(result.text.includes(quote));
+});
+
+test("evidence redirects enforce the allowlist on each hop", async () => {
+  let calls = 0;
+  await assert.rejects(fetchSource(url, {
+    fetch: async () => {
+      calls++;
+      return { ok: false, status: 302, headers: { get: () => "http://127.0.0.1/private" } };
+    },
+  }), /Unsupported evidence URL/);
+  assert.equal(calls, 1);
 });
