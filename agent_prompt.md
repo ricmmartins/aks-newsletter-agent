@@ -33,7 +33,6 @@ The agent MUST collect and filter content from these sources for the target mont
 🔵 AKS Engineering Blog (MANDATORY): https://blog.aks.azure.com/
 🔵 Azure Updates (filter AKS): https://azure.microsoft.com/en-us/updates/?query=AKS
 🔵 AKS GitHub Releases: https://github.com/Azure/AKS/releases/
-🔵 AKS docs, last commit date: https://github.com/MicrosoftDocs/azure-aks-docs/tree/main/articles/aks
 🔵 AKS Public Roadmap: https://github.com/orgs/Azure/projects/685/views/1
 🔵 TechCommunity – AKS related posts: https://techcommunity.microsoft.com/search?q=AKS&contentType=BLOG&sortBy=newest
 🔵 Azure Architecture Blog: https://techcommunity.microsoft.com/t5/azure-architecture-blog/bg-p/AzureArchitectureBlog
@@ -81,6 +80,7 @@ If the AKS Engineering Blog has no posts for that month, explicitly state:
 - Format: **[Title](URL)**: 1–3 sentences explaining what was refreshed and why it matters when the source establishes those details.
 - Practical, platform-focused explanation. Never copy/paste the Learn page's meta description.
 - Explain architectural or operational context only when supported by the documentation change or supplied source evidence.
+- The former public AKS documentation source is no longer accessible, and Microsoft Learn does not provide a public documentation-change catalog. When `documentationUpdatesStatus` is `unavailable`, preserve the generated note that tracking is unavailable; never claim that no updates occurred.
 
 7️⃣ **📚 Community Blogs**
 - Include AKS blog + TechCommunity posts.

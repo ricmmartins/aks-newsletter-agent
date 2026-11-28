@@ -8,7 +8,12 @@ const cheerio = require("cheerio");
 const fs = require("fs");
 const path = require("path");
 const { marked } = require("marked");
-const { SOURCES, AKS_KEYWORDS, AKS_STRICT_KEYWORDS } = require("./config");
+const {
+  SOURCES,
+  AKS_KEYWORDS,
+  AKS_STRICT_KEYWORDS,
+  AKS_COMMUNITY_PATTERNS,
+} = require("./config");
 
 class ContentCollector {
   constructor(year, month, outputDir = "collected") {
@@ -32,6 +37,7 @@ class ContentCollector {
         collectedAt: new Date().toISOString(),
         windowStart: this.windowStart.toISOString(),
         windowEnd: this.windowEnd.toISOString(),
+        documentationUpdatesStatus: "unavailable",
       },
       aks_blog: [],
       azure_updates: [],
@@ -98,72 +104,22 @@ class ContentCollector {
     return AKS_STRICT_KEYWORDS.some((kw) => lower.includes(kw));
   }
 
-  // Fetch the actual page title from a doc's markdown frontmatter
-  async _fetchDocPageTitle(articleFile) {
-    try {
-      const rawUrl = `https://raw.githubusercontent.com/MicrosoftDocs/azure-aks-docs/main/${articleFile}`;
-      const resp = await this._safeFetch(rawUrl);
-      if (!resp) return null;
-      const text = await resp.text();
-      // Parse YAML frontmatter between --- delimiters
-      const fmMatch = text.match(/^---\s*\n([\s\S]*?)\n---/);
-      if (!fmMatch) return null;
-      const titleMatch = fmMatch[1].match(/^title:\s*['"]?(.*?)['"]?\s*$/m);
-      const descMatch = fmMatch[1].match(/^description:\s*['"]?(.*?)['"]?\s*$/m);
-      return {
-        title: titleMatch ? titleMatch[1].trim() : null,
-        description: descMatch ? descMatch[1].trim() : null,
-      };
-    } catch {
-      return null;
-    }
-  }
-
-  // Fetch description from a learn.microsoft.com doc page (or azure-monitor) via GitHub raw frontmatter
+  // Fetch descriptions from the published Learn page, not its unavailable source repository.
   async _fetchDocDescription(url) {
     if (!url) return "";
     try {
-      // Map learn.microsoft.com URL to raw GitHub markdown
-      const docMatch = url.match(/learn\.microsoft\.com\/(?:en-us\/)?azure\/(aks|azure-monitor)\/(.*?)(?:#.*)?$/);
-      if (!docMatch) return "";
-      const repo = docMatch[1] === "aks" ? "azure-aks-docs" : "azure-monitor-docs";
-      const path = docMatch[1] === "aks" ? `articles/aks/${docMatch[2]}` : `articles/azure-monitor/${docMatch[2]}`;
-      const articleFile = path.endsWith(".md") ? path : `${path}.md`;
-      const rawUrl = `https://raw.githubusercontent.com/MicrosoftDocs/${repo}/main/${articleFile}`;
-      const resp = await this._safeFetch(rawUrl);
+      const docUrl = new URL(url);
+      if (
+        docUrl.hostname !== "learn.microsoft.com" ||
+        !/^\/(?:en-us\/)?azure\/(?:aks|azure-monitor)\//i.test(docUrl.pathname)
+      ) return "";
+      const resp = await this._safeFetch(docUrl.href);
       if (!resp) return "";
-      const text = await resp.text();
-      const fmMatch = text.match(/^---\s*\n([\s\S]*?)\n---/);
-      if (!fmMatch) return "";
-      const descMatch = fmMatch[1].match(/^description:\s*['"]?(.*?)['"]?\s*$/m);
-      return descMatch ? descMatch[1].trim() : "";
+      const $ = cheerio.load(await resp.text());
+      return $('meta[name="description"]').attr("content")?.trim() || "";
     } catch {
       return "";
     }
-  }
-
-  // Clean up a commit message into a reader-friendly summary
-  _cleanCommitMessage(msg) {
-    if (!msg) return "";
-    let s = msg.trim();
-    // Remove common prefixes
-    s = s.replace(/^(doc|docs|fix|update|add|chore|feat|refactor|style):\s*/i, "");
-    // Remove file name references (.md, article paths)
-    s = s.replace(/\s+(for\s+)?\S+\.md\b/g, "");
-    s = s.replace(/\barticles\/aks\/\S*/g, "");
-    // Remove internal developer references ("from Sam", "per John")
-    s = s.replace(/\s+(from|by|per|via)\s+[A-Z][a-z]+(\s+[A-Z][a-z]+)?\s*$/g, "").trim();
-    // Remove "to reflect author changes and" patterns
-    s = s.replace(/\bto reflect author changes and\s*/i, "");
-    // Fix trailing prepositions left after cleanup ("for", "in", "to", "with")
-    s = s.replace(/\s+(for|in|to|with|and|or)\s*$/i, "").trim();
-    // Capitalize first letter
-    if (s) s = s.charAt(0).toUpperCase() + s.slice(1);
-    // Remove trailing period then re-add for consistency
-    s = s.replace(/\.+$/, "");
-    // If result is too short or vague, return empty (title alone is enough)
-    if (s.length < 15) return "";
-    return s;
   }
 
   async collectAKSBlog() {
@@ -248,145 +204,9 @@ class ContentCollector {
     console.log(`  ✓ Found ${this.collected.aks_releases.length} releases`);
   }
 
-  async collectAKSDocCommits() {
-    console.log("📡 Collecting AKS Documentation commits...");
-
-    const startDate = this.windowStart.toISOString();
-    const endDate = this.windowEnd.toISOString();
-    const url = `${SOURCES.aks_docs.apiUrl}&since=${startDate}&until=${endDate}`;
-
-    const resp = await this._safeFetch(url, {
-      headers: this._githubHeaders(),
-    });
-    if (!resp) return;
-    const commits = await resp.json();
-
-    // Noise patterns: merge commits, trivial messages, metadata-only changes
-    const noisePatterns = [
-      /^merge /i,
-      /^merge pull request/i,
-      /^merge branch/i,
-      /^fixed? typo/i,
-      /^fixed? issues/i,
-      /^fix(ed|es|ing)?\s+(formatting|markdown|yaml|indentation|link|typo|style)/i,
-      /^updated? content\.?$/i,
-      /^reshuffled/i,
-      /^resolved merge conflict/i,
-      /^small adjustment/i,
-      /^update articles\/aks\//i,
-      /^apply suggestion/i,
-      /^fix ms\.author/i,
-      /^renamed files/i,
-      /^delete volume/i,
-      /^change title/i,
-      /^update link$/i,
-      /^update date /i,
-      /^fixed? broken link/i,
-      /^added? links/i,
-      /^portal ui updates/i,
-      /^fix redirection/i,
-      /^removed?\s+(the\s+)?line\s*break/i,
-      /^content\s+(dev\s+)?review/i,
-      /^address\s+acrolinx/i,
-      /^update\s+terminology/i,
-      /^adding\s+(absolute\s+)?links/i,
-      /^doc:\s*(replace|fix|update)\s/i,
-      /^content\s+edits?\s+and\s+style/i,
-      /^fixes?\s+markdown/i,
-      /^update\s+\S+\.md$/i,
-      /^minor\s+edit/i,
-      /^.+\s*\(#\d+\)$/,          // Raw PR-style commits like "topic: change (#1234)"
-      /^include\s+.+\s+images?/i,  // "Include flame graph images" type noise
-      /^updating to resolve/i,     // "updating to resolve errors"
-      /^minor changes/i,
-      /^toc\s+(added|update|change)/i,
-    ];
-
-    // Group commits by article file to deduplicate
-    const articleMap = new Map(); // filePath -> { title, url, date, learnUrl }
-
-    for (const commit of Array.isArray(commits) ? commits : []) {
-      const msg = commit.commit?.message || "";
-      const date = commit.commit?.committer?.date || "";
-      const commitUrl = commit.html_url || "";
-      const sha = commit.sha || "";
-      const firstLine = msg.split("\n")[0].trim();
-
-      // Skip noise commits (patterns + short/cryptic messages)
-      if (!firstLine || firstLine.length < 20) continue;
-      if (!firstLine || noisePatterns.some((p) => p.test(firstLine))) continue;
-
-      // Fetch commit details to get changed files
-      let files = [];
-      if (sha) {
-        const detailResp = await this._safeFetch(
-          `https://api.github.com/repos/MicrosoftDocs/azure-aks-docs/commits/${sha}`,
-          { headers: this._githubHeaders() }
-        );
-        if (detailResp) {
-          const detail = await detailResp.json();
-          files = (detail.files || [])
-            .map((f) => f.filename)
-            .filter((f) => f.startsWith("articles/aks/") && f.endsWith(".md") && !f.includes("includes/"));
-        }
-      }
-
-      // Pick the primary article file (skip TOC.yml-only commits)
-      const articleFile = files.find((f) => !f.endsWith("TOC.yml")) || null;
-      if (!articleFile) continue;
-
-      // Build Learn URL: articles/aks/some-article.md -> https://learn.microsoft.com/azure/aks/some-article
-      const slug = articleFile.replace("articles/aks/", "").replace(/\.md$/, "");
-      const learnUrl = `https://learn.microsoft.com/azure/aks/${slug}`;
-
-      // Deduplicate by article – keep the most recent commit per file
-      if (!articleMap.has(articleFile)) {
-        articleMap.set(articleFile, {
-          commitMessage: firstLine,
-          articleFile,
-          url: learnUrl,
-          date,
-          source: "AKS Docs",
-        });
-      }
-    }
-
-    // Enrich each doc entry with the actual page title and description from frontmatter
-    const entries = Array.from(articleMap.values());
-    for (const entry of entries) {
-      const pageMeta = await this._fetchDocPageTitle(entry.articleFile);
-      if (pageMeta?.title) {
-        entry.title = pageMeta.title;
-        // Store the frontmatter description as context for the polisher,
-        // but flag it as metadata so the polisher knows to rewrite it
-        if (pageMeta.description) {
-          entry.summary = pageMeta.description;
-          entry.summaryIsMetadata = true;
-        } else {
-          entry.summary = this._cleanCommitMessage(entry.commitMessage);
-        }
-      } else {
-        // No frontmatter title found — use commit message as fallback
-        // but discard entries with low-quality commit message titles
-        const msg = entry.commitMessage || "";
-        if (msg.length < 30 || /^(updat|fix|add|chang|delet|renam|minor|small|includ)/i.test(msg)) {
-          // Skip: commit message is too short or looks like noise
-          entry._discard = true;
-        } else {
-          entry.title = msg;
-        }
-      }
-      // Preserve commit message as context for the polisher to understand what changed
-      entry.commitContext = this._cleanCommitMessage(entry.commitMessage);
-      delete entry.commitMessage;
-      delete entry.articleFile;
-    }
-
-    this.collected.aks_docs_commits = entries.filter((e) => !e._discard);
-
-    console.log(
-      `  ✓ Found ${this.collected.aks_docs_commits.length} doc commits`
-    );
+  reportAKSDocChangesUnavailable() {
+    this.collected.metadata.documentationUpdatesStatus = "unavailable";
+    console.log("⚠ AKS documentation change tracking is unavailable; skipping the retired GitHub source.");
   }
 
   async collectAzureUpdates() {
@@ -620,6 +440,51 @@ class ContentCollector {
     console.log(
       `  ✓ Found ${this.collected.techcommunity.length} TechCommunity posts`
     );
+  }
+
+  _hasUsableTechCommunitySummary(summary) {
+    const text = typeof summary === "string" ? summary.trim() : "";
+    return text.length >= 80 &&
+      !/<[^>]+>/.test(text) &&
+      !/^(?:\.{3}|…)/.test(text);
+  }
+
+  async _fetchTechCommunityArticleSummary(url) {
+    let articleUrl;
+    try {
+      articleUrl = new URL(url);
+    } catch {
+      return "";
+    }
+
+    if (
+      articleUrl.protocol !== "https:" ||
+      articleUrl.hostname !== "techcommunity.microsoft.com"
+    ) return "";
+
+    const resp = await this._safeFetch(articleUrl.href);
+    if (!resp) return "";
+
+    const $ = cheerio.load(await resp.text());
+    const body = $('[class*="lia-g-message-body-blog"]').first();
+    return body.find("p, li")
+      .map((_, element) => $(element).text().replace(/\s+/g, " ").trim())
+      .get()
+      .filter((text) => text.length >= 40)
+      .slice(0, 10)
+      .join(" ")
+      .slice(0, 1200);
+  }
+
+  async enrichTechCommunitySummaries() {
+    const posts = [...this.collected.techcommunity, ...this.collected.techcommunity_search];
+    for (const post of posts) {
+      const postIdentity = `${post.title || ""} ${post.url || ""}`;
+      if (!AKS_COMMUNITY_PATTERNS.some((pattern) => pattern.test(postIdentity))) continue;
+      if (this._hasUsableTechCommunitySummary(post.summary)) continue;
+      const summary = await this._fetchTechCommunityArticleSummary(post.url);
+      if (summary) post.summary = summary;
+    }
   }
 
   async collectYouTube() {
@@ -1080,12 +945,13 @@ class ContentCollector {
 
     await this.collectAKSBlog();
     await this.collectGitHubReleases();
-    await this.collectAKSDocCommits();
+    this.reportAKSDocChangesUnavailable();
     await this.collectAzureUpdates();
     await this.collectTavilySearch();
     await this.collectTechCommunity();
     await this.collectTechCommunitySearch();
     await this.collectYouTube();
+    await this.enrichTechCommunitySummaries();
 
     // Save collected data
     fs.mkdirSync(this.outputDir, { recursive: true });
@@ -1115,7 +981,7 @@ class ContentCollector {
       `    GitHub Releases:      ${this.collected.aks_releases.length}`
     );
     console.log(
-      `    Doc Commits:          ${this.collected.aks_docs_commits.length}`
+      `    Docs change tracking: ${this.collected.metadata.documentationUpdatesStatus}`
     );
     console.log(
       `    TechCommunity posts:  ${this.collected.techcommunity.length}`

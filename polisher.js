@@ -162,6 +162,9 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     const sectionContextMap = {
       "Documentation Updates": () => {
         const docs = collectedData?.aks_docs_commits || [];
+        if (!docs.length && collectedData?.metadata?.documentationUpdatesStatus === "unavailable") {
+          return "AKS documentation change tracking is unavailable for this edition. Preserve this status; do not claim that no documentation changes occurred.";
+        }
         return docs.map((d) => {
           const meta = d.summaryIsMetadata ? " [META]" : "";
           const ctx = d.commitContext ? ` | Change: ${d.commitContext}` : "";
@@ -194,7 +197,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
           (blog.url && section.content.includes(blog.url)) ||
           (blog.title && section.content.includes(blog.title))
         );
-        return relevantBlogs.map((b) => `- ${b.title}: ${(b.summary || "").slice(0, 400)}`).join("\n");
+        return relevantBlogs.map((b) => `- ${b.title}: ${(b.summary || "").slice(0, 1000)}`).join("\n");
       },
       "Watch & Learn": () => {
         const vids = collectedData?.youtube || [];
@@ -265,7 +268,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     if (blogs.length) {
       sections.push("\n### Community Blogs");
       for (const item of blogs.slice(0, 20)) {
-        sections.push(`- ${item.title}: ${(item.summary || "").slice(0, 400)} | URL: ${item.url || ""}`);
+        sections.push(`- ${item.title}: ${(item.summary || "").slice(0, 1000)} | URL: ${item.url || ""}`);
       }
     }
 

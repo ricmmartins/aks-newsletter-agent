@@ -5,7 +5,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { SECTION_HEADERS, SOURCES } = require("./config");
+const { SECTION_HEADERS, SOURCES, AKS_COMMUNITY_PATTERNS } = require("./config");
 
 class NewsletterGenerator {
   constructor(year, month, collectedDir = "collected", outputDir = "newsletters") {
@@ -164,7 +164,11 @@ class NewsletterGenerator {
     const docs = this.data.aks_docs_commits || [];
 
     if (!docs.length) {
-      lines.push("No documentation updates were identified this month.\n");
+      if (this.data.metadata?.documentationUpdatesStatus === "unavailable") {
+        lines.push("AKS documentation change tracking is unavailable for this edition.\n");
+      } else {
+        lines.push("No documentation updates were identified this month.\n");
+      }
     } else {
       docs.forEach((item) => {
         lines.push(this._formatEntry(item));
@@ -247,14 +251,6 @@ class NewsletterGenerator {
 
     // AKS blog posts are always relevant; for TechCommunity posts,
     // re-check the title for AKS relevance to filter out tangential matches
-    const aksPatterns = [
-      /\baks\b/i, /azure kubernetes/i, /\bk8s\b/i,
-      /\bkubernetes\b/i, /\bkubectl\b/i, /\bnode\s*pool/i,
-      /\bcilium\b/i, /\bistio\b/i, /\bhelm\b/i, /\bkarpenter\b/i,
-      /\bkaito\b/i, /\bkubecon\b/i, /\bcontainer.*(runtime|network|storage)/i,
-      /\bingress\b/i, /\bapp\s*routing\b/i, /\bvirtual\s*node/i,
-    ];
-
     if (!blogs.length) {
       lines.push("No community blog posts identified this month.\n");
     } else {
@@ -270,7 +266,9 @@ class NewsletterGenerator {
           const url = (item.url || "").toLowerCase();
           // AKS blog posts pass through; TechCommunity posts need title/URL match
           const isAKSBlog = (item.source || "").includes("AKS");
-          const matchesTitle = aksPatterns.some((p) => p.test(title) || p.test(url));
+          const matchesTitle = AKS_COMMUNITY_PATTERNS.some((pattern) =>
+            pattern.test(title) || pattern.test(url)
+          );
           if (isAKSBlog || matchesTitle) {
             lines.push(this._formatEntry(item));
             lines.push(""); // blank line between entries
