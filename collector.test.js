@@ -4,6 +4,92 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { ContentCollector } = require("./collector");
 const { NewsletterGenerator } = require("./generator");
+const { NewsletterPolisher } = require("./polisher");
+
+test("AKS documentation collection skips the unavailable source and records its status", () => {
+  const collector = new ContentCollector(2026, 11);
+  collector._safeFetch = async () => {
+    assert.fail("Unavailable documentation source must not be requested");
+  };
+
+  collector.reportAKSDocChangesUnavailable();
+
+  assert.equal(collector.collected.metadata.documentationUpdatesStatus, "unavailable");
+  assert.deepEqual(collector.collected.aks_docs_commits, []);
+});
+
+test("documentation section reports unavailable tracking instead of claiming no updates", () => {
+  const generator = new NewsletterGenerator(2026, 11);
+  generator.data = {
+    metadata: { documentationUpdatesStatus: "unavailable" },
+    aks_docs_commits: [],
+  };
+
+  const section = generator.generateDocumentationUpdates();
+  assert.match(section, /change tracking is unavailable/);
+  assert.doesNotMatch(section, /No documentation updates were identified/);
+});
+
+test("AKS release descriptions come from the public Learn page", async () => {
+  const collector = new ContentCollector(2026, 11);
+  const requests = [];
+  collector._safeFetch = async (url) => {
+    requests.push(url);
+    return {
+      text: async () => '<html><head><meta name="description" content="Official Learn description"></head></html>',
+    };
+  };
+
+  const description = await collector._fetchDocDescription(
+    "https://learn.microsoft.com/azure/aks/overview"
+  );
+
+  assert.equal(description, "Official Learn description");
+  assert.deepEqual(requests, ["https://learn.microsoft.com/azure/aks/overview"]);
+});
+
+test("TechCommunity search snippets with markup are replaced by article-body evidence", async () => {
+  const collector = new ContentCollector(2026, 11);
+  const articleUrl = "https://techcommunity.microsoft.com/blog/azurearcblog/ct-p/4569134";
+  collector.collected.techcommunity_search = [
+    {
+      title: "Simplify Kubernetes operations with Upgrade Insights and GitOps",
+      url: articleUrl,
+      summary: '...<SPAN class="lia-search-match-lithium">AKS</SPAN> Ignite session results...',
+    },
+    {
+      title: "Untrusted host",
+      url: "https://example.com/article",
+      summary: "<span>bad snippet</span>",
+    },
+  ];
+  const requests = [];
+  collector._safeFetch = async (url) => {
+    requests.push(url);
+    return {
+      text: async () => `
+        <div class="styles_lia-g-message-body-blog__TUnqH">
+          <p>Upgrade Insights helps teams assess Kubernetes upgrade readiness before beginning an upgrade.</p>
+          <li>Flux GitOps integration with Azure Kubernetes Fleet Manager brings GitOps together with workload placement.</li>
+        </div>`,
+    };
+  };
+
+  await collector.enrichTechCommunitySummaries();
+
+  assert.deepEqual(requests, [articleUrl]);
+  assert.match(collector.collected.techcommunity_search[0].summary, /Upgrade Insights helps teams assess Kubernetes upgrade readiness/);
+  assert.match(collector.collected.techcommunity_search[0].summary, /Flux GitOps integration/);
+  assert.doesNotMatch(collector.collected.techcommunity_search[0].summary, /lia-search-match|Ignite session results/);
+  assert.equal(collector.collected.techcommunity_search[1].summary, "<span>bad snippet</span>");
+
+  const polisher = new NewsletterPolisher(2026, 11);
+  const section = polisher._splitIntoSections(
+    `## 📚 Community Blogs\n\n* **[${collector.collected.techcommunity_search[0].title}](${articleUrl})**: [NEEDS DESCRIPTION]`,
+    { techcommunity_search: collector.collected.techcommunity_search }
+  )[0];
+  assert.match(section.context, /Flux GitOps integration/);
+});
 
 test("October NAP enhancements are not GA announcements or standalone references", async () => {
   const snapshot = JSON.parse(fs.readFileSync(path.join(__dirname, "collected", "2026-10.json"), "utf8"));

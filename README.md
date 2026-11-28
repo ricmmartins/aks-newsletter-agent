@@ -165,7 +165,7 @@ Fetches and filters content from all sources for the **full calendar month** (1s
 | AKS Engineering Blog | RSS/HTML scraping |
 | Azure Updates (AKS) | Microsoft Release Communications API |
 | AKS GitHub Releases | GitHub API |
-| AKS Docs Changes | GitHub API → mapped to [learn.microsoft.com](https://learn.microsoft.com) URLs |
+| AKS Docs Changes | Unavailable: former public source is no longer accessible; no public Learn documentation-change catalog exists |
 | AKS Public Roadmap | GitHub Projects API |
 | TechCommunity Blogs | Direct blog pages (6 blogs) + GraphQL search API |
 | TechCommunity Search | GraphQL API with Bearer token capture (Puppeteer) |
@@ -175,7 +175,8 @@ Fetches and filters content from all sources for the **full calendar month** (1s
 - Release-note `Features` entries require explicit GA wording before entering the GA section. Other enhancements are covered under Behavioral Changes; nested capabilities and reference links stay attached to their parent feature.
 - Azure Update links are checked against the official Microsoft Release Communications RSS record, which supplies the announcement title, lifecycle status, publication date, and description.
 - Blog discovery uses Tavily Search with exact publication-date filtering when `TAVILY_API_KEY` is configured. Without the key or if Tavily is unavailable, the collector falls back to Bing HTML search. Search results are candidates; factual verification still checks their original sources.
-- Docs collector maps GitHub commits to `learn.microsoft.com` article URLs, filters noise (TOC-only changes, merge commits)
+- AKS documentation-change tracking is explicitly marked unavailable rather than calling the retired public GitHub source or claiming no changes occurred
+- TechCommunity search results with missing, truncated, or HTML-contaminated snippets are enriched from the matching article body before polishing
 - TechCommunity search uses the internal GraphQL API (`MessageSearch` operation) to capture all results (not just the first 10)
 - YouTube scraper parses the `ytInitialData` JSON embedded in page HTML, pairing video IDs with titles reliably
 - All sources are filtered to the target calendar month window

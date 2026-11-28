@@ -23,13 +23,6 @@ const SOURCES = {
     mandatory: true,
     type: "github_releases",
   },
-  aks_docs: {
-    name: "AKS Documentation (Recent Commits)",
-    url: "https://github.com/MicrosoftDocs/azure-aks-docs/tree/main/articles/aks",
-    apiUrl: "https://api.github.com/repos/MicrosoftDocs/azure-aks-docs/commits?path=articles/aks&per_page=100",
-    mandatory: true,
-    type: "github_commits",
-  },
   aks_roadmap: {
     name: "AKS Public Roadmap",
     url: "https://github.com/orgs/Azure/projects/685/views/1",
@@ -129,4 +122,18 @@ const AKS_STRICT_KEYWORDS = [
   "kaito",
 ];
 
-module.exports = { SOURCES, SECTION_HEADERS, AKS_KEYWORDS, AKS_STRICT_KEYWORDS };
+const AKS_COMMUNITY_PATTERNS = [
+  /\baks\b/i, /azure kubernetes/i, /\bk8s\b/i,
+  /\bkubernetes\b/i, /\bkubectl\b/i, /\bnode\s*pool/i,
+  /\bcilium\b/i, /\bistio\b/i, /\bhelm\b/i, /\bkarpenter\b/i,
+  /\bkaito\b/i, /\bkubecon\b/i, /\bcontainer.*(runtime|network|storage)/i,
+  /\bingress\b/i, /\bapp\s*routing\b/i, /\bvirtual\s*node/i,
+];
+
+module.exports = {
+  SOURCES,
+  SECTION_HEADERS,
+  AKS_KEYWORDS,
+  AKS_STRICT_KEYWORDS,
+  AKS_COMMUNITY_PATTERNS,
+};
