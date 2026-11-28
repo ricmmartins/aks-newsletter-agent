@@ -39,6 +39,30 @@ test("corrected October data and edition distinguish NAP enhancements from GA", 
   assert.match(edition, /Capacity Buffers CRD/);
 });
 
+test("community blog generation deduplicates alternate TechCommunity URLs by post ID", () => {
+  const generator = new NewsletterGenerator(2026, 11);
+  generator.data = {
+    techcommunity: [{
+      title: "AKS networking announcement",
+      url: "https://techcommunity.microsoft.com/blog/azurenetworkingblog/aks-networking-announcement/4571806",
+      summary: "The full source summary.",
+      source: "TechCommunity",
+    }],
+    techcommunity_search: [{
+      title: "AKS networking announcement",
+      url: "https://techcommunity.microsoft.com/blog/azurenetworkingblog/ct-p/4571806",
+      summary: "A shorter search snippet.",
+      source: "TechCommunity Search",
+    }],
+  };
+
+  const section = generator.generateCommunityBlogs();
+  assert.equal((section.match(/\*\*\[/g) || []).length, 1);
+  assert.match(section, /\/aks-networking-announcement\/4571806/);
+  assert.match(section, /The full source summary\./);
+  assert.doesNotMatch(section, /\/ct-p\/4571806/);
+});
+
 test("release headings support both depths and retain nested evidence without promoting it", async () => {
   for (const heading of ["###", "####"]) {
     const collector = new ContentCollector(2026, 10);

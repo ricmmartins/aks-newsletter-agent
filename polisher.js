@@ -11,6 +11,7 @@ const path = require("path");
 const { callCopilot } = require("./copilot-client");
 
 const MAX_SECTION_RETRIES = 2;
+const STATIC_REFERENCE_LINKS = ["github.com/Azure/AKS/releases", "github.com/orgs/Azure/projects"];
 
 class NewsletterPolisher {
   constructor(year, month, options = {}) {
@@ -129,6 +130,7 @@ RULES:
 - Remove [NEEDS DESCRIPTION] markers from output
 - **NEVER change, merge, remove, or substitute URLs.** Each item's URL is its source — preserve it EXACTLY.
 - **NEVER merge two items into one.** Each entry with a unique URL stays separate.
+- The fixed AKS Releases and Public Roadmap reference links are valid without descriptions; preserve them unchanged.
 - You may shorten the title but the URL in parentheses must remain unchanged.
 - Be technical, not marketing
 - A release-note "Features" heading is NOT proof of general availability. Never infer a new GA transition from existing availability, documentation changes, or a new subfeature.
@@ -182,9 +184,17 @@ Return ONLY the polished section content in Markdown. No commentary.`;
         const items = [...(collectedData?.behavioral_changes || []), ...(collectedData?.announcements || [])];
         return items.map((i) => `- ${i.title}: ${(i.summary || "").slice(0, 300)}`).join("\n");
       },
-      "Community Blogs": () => {
-        const blogs = [...(collectedData?.aks_blog || []), ...(collectedData?.techcommunity_search || [])];
-        return blogs.slice(0, 15).map((b) => `- ${b.title}: ${(b.summary || "").slice(0, 200)}`).join("\n");
+      "Community Blogs": (section) => {
+        const blogs = [
+          ...(collectedData?.aks_blog || []),
+          ...(collectedData?.techcommunity || []),
+          ...(collectedData?.techcommunity_search || []),
+        ];
+        const relevantBlogs = blogs.filter((blog) =>
+          (blog.url && section.content.includes(blog.url)) ||
+          (blog.title && section.content.includes(blog.title))
+        );
+        return relevantBlogs.map((b) => `- ${b.title}: ${(b.summary || "").slice(0, 400)}`).join("\n");
       },
       "Watch & Learn": () => {
         const vids = collectedData?.youtube || [];
@@ -200,7 +210,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     for (const section of sections) {
       for (const [key, fn] of Object.entries(sectionContextMap)) {
         if (section.name.includes(key)) {
-          section.context = fn();
+          section.context = fn(section);
           break;
         }
       }
@@ -298,6 +308,20 @@ Return ONLY the polished section content in Markdown. No commentary.`;
       .map((item) => this._normalizeTrackedUrl(item.url)));
   }
 
+  _missingDescriptionEntries(content, titleOnlyUrls) {
+    return content.split("\n").filter((line) => {
+      const match = line.match(/^\*\s+\*\*\[([^\]]+)\]\(([^)]+)\)\*\*/);
+      if (!match) return false;
+
+      const url = match[2];
+      if (STATIC_REFERENCE_LINKS.some((staticUrl) => url.includes(staticUrl))) return false;
+      if (titleOnlyUrls.has(this._normalizeTrackedUrl(url))) return false;
+
+      const afterLink = line.replace(/^\*\s+\*\*\[[^\]]+\]\([^)]+\)\*\*/, "").trim();
+      return !afterLink || afterLink === ":" || afterLink === ": ";
+    });
+  }
+
   async _callModel(messages, model) {
     console.log(`🤖 Polishing via Copilot CLI${model ? ` (${model})` : ""}...`);
     return callCopilot(messages, model);
@@ -356,7 +380,8 @@ Return ONLY the polished section content in Markdown. No commentary.`;
       const needsPolish = section.content.includes("[NEEDS DESCRIPTION]") ||
         bareEntries.some((line) => {
           const url = line.match(/\]\((https?:\/\/[^)]+)\)/)?.[1];
-          return url && !titleOnlyUrls.has(this._normalizeTrackedUrl(url));
+          const isStaticReference = url && STATIC_REFERENCE_LINKS.some((staticUrl) => url.includes(staticUrl));
+          return url && !isStaticReference && !titleOnlyUrls.has(this._normalizeTrackedUrl(url));
         });
 
       if (!needsPolish) {
@@ -404,6 +429,20 @@ Return ONLY the polished section content in Markdown. No commentary.`;
           conversationMessages.push({ role: "assistant", content: result });
         }
 
+        let missingDescriptionEntries = this._missingDescriptionEntries(cleaned, titleOnlyUrls);
+        while (missingDescriptionEntries.length && retryCount < MAX_SECTION_RETRIES) {
+          retryCount++;
+          console.warn(`  ⚠️  Section still has ${missingDescriptionEntries.length} entries without descriptions, retry ${retryCount}/${MAX_SECTION_RETRIES}...`);
+          conversationMessages.push({
+            role: "user",
+            content: `These linked entries still have no description:\n${missingDescriptionEntries.join("\n")}\n\nAdd a concise description to each using only facts supported by the source context. Do not change their titles or URLs, do not add unsupported claims, and preserve any title/status-only items exactly. Return the COMPLETE corrected section.`,
+          });
+          result = await this._callModel(conversationMessages, this.model);
+          cleaned = this._cleanOutput(result);
+          conversationMessages.push({ role: "assistant", content: result });
+          missingDescriptionEntries = this._missingDescriptionEntries(cleaned, titleOnlyUrls);
+        }
+
         // Also catch generic one-liner descriptions that the polisher missed
         const genericPattern = /:\s*(Is now (available|supported|enabled)|Is now in (public )?preview)[^.]*\.?\s*$/gm;
         if (genericPattern.test(cleaned) && retryCount < MAX_SECTION_RETRIES) {
@@ -430,13 +469,10 @@ Return ONLY the polished section content in Markdown. No commentary.`;
     const lines = content.split("\n");
     const titleOnlyUrls = this._titleOnlyAnnouncementUrls(collectedData);
 
-    let itemsWithoutDescription = 0;
     let titleOnlyItemsWithDescription = 0;
     let itemsWithMetadata = 0;
     let totalItems = 0;
 
-    // Static links that intentionally have no descriptions
-    const staticLinks = ["github.com/Azure/AKS/releases", "github.com/orgs/Azure/projects"];
     let hasNeedsDescMarker = false;
 
     for (const line of lines) {
@@ -445,7 +481,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
       if (entryMatch) {
         const url = entryMatch[2] || "";
         // Skip static reference links
-        if (staticLinks.some((s) => url.includes(s))) continue;
+        if (STATIC_REFERENCE_LINKS.some((s) => url.includes(s))) continue;
 
         totalItems++;
         const titleOnly = titleOnlyUrls.has(this._normalizeTrackedUrl(url));
@@ -456,7 +492,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
           continue;
         }
         if (!afterLink || afterLink === ":" || afterLink === ": ") {
-          itemsWithoutDescription++;
+          continue;
         } else if (/^:\s*(Learn (how to|about|the)|In this (article|tutorial))/i.test(afterLink)) {
           itemsWithMetadata++;
         } else if (/^:\s*Is now (available|supported|enabled|in (public )?preview)/i.test(afterLink) && afterLink.length < 100) {
@@ -474,8 +510,13 @@ Return ONLY the polished section content in Markdown. No commentary.`;
       issues.push("Leftover [NEEDS DESCRIPTION] markers found — model didn't rewrite all items");
     }
 
-    if (itemsWithoutDescription > 0) {
-      issues.push(`${itemsWithoutDescription}/${totalItems} items have no description`);
+    const missingDescriptionEntries = this._missingDescriptionEntries(content, titleOnlyUrls);
+    if (missingDescriptionEntries.length > 0) {
+      const labels = missingDescriptionEntries
+        .map((line) => line.match(/^\*\s+\*\*\[([^\]]+)\]/)?.[1])
+        .filter(Boolean);
+      const examples = labels.slice(0, 5).join("; ");
+      issues.push(`${missingDescriptionEntries.length}/${totalItems} items have no description${examples ? `: ${examples}${labels.length > 5 ? "..." : ""}` : ""}`);
     }
     if (titleOnlyItemsWithDescription > 0) {
       issues.push(`${titleOnlyItemsWithDescription} title/status-only announcements have unsupported descriptions`);
@@ -495,7 +536,7 @@ Return ONLY the polished section content in Markdown. No commentary.`;
       while ((match = urlRegex.exec(originalDraft)) !== null) {
         // Strip UTM params for comparison (they're added post-generation)
         const url = this._normalizeTrackedUrl(match[1]);
-        if (!staticLinks.some((s) => url.includes(s))) {
+        if (!STATIC_REFERENCE_LINKS.some((s) => url.includes(s))) {
           originalUrls.add(url);
         }
       }

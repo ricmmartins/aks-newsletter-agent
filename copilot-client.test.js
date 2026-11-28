@@ -147,6 +147,19 @@ test("keeps source-limited lifecycle announcements title-only", async (t) => {
     .some((issue) => issue.includes("title/status-only announcements have unsupported descriptions")));
 });
 
+test("does not polish the fixed releases and roadmap reference links", async (t) => {
+  const draft = [
+    "## Releases and Roadmap",
+    "",
+    "* **[AKS GitHub Releases](https://github.com/Azure/AKS/releases/)**",
+    "* **[AKS Public Roadmap](https://github.com/orgs/Azure/projects/685/views/1)**",
+  ].join("\n");
+  const polisher = new NewsletterPolisher(2026, 11);
+  t.mock.method(polisher, "_callModel", async () => assert.fail("static links do not need descriptions"));
+
+  assert.equal(await polisher._polishBySection(draft, { aks_releases: [] }), draft);
+});
+
 test("protects title/status-only items while polishing other entries in the section", async (t) => {
   const url = "https://azure.microsoft.com/en-us/updates/581130/";
   const draft = [
@@ -177,6 +190,50 @@ test("protects title/status-only items while polishing other entries in the sect
   const issues = polisher._validateOutput(polished, draft, collectedData);
   assert(!issues.some((issue) => issue.includes("unsupported descriptions")));
   assert(!issues.some((issue) => issue.includes("items have no description")));
+});
+
+test("retries entries left without descriptions and keeps the final completeness gate strict", async (t) => {
+  const url = "https://techcommunity.microsoft.com/blog/aksblog/aks-announcement/12345";
+  const target = `* **[AKS announcement](${url})**`;
+  const others = Array.from({ length: 4 }, (_, index) =>
+    `* **[Other item ${index + 1}](https://example.com/${index + 1})**: Source-backed description.`
+  );
+  const draft = `## Community Blogs\n\n${[`${target}: [NEEDS DESCRIPTION]`, ...others].join("\n\n")}`;
+  const firstOutput = `## Community Blogs\n\n${[target, ...others].join("\n\n")}`;
+  const correctedOutput = firstOutput.replace(
+    target,
+    `${target}: The source describes the AKS networking announcement.`
+  );
+  const collectedData = {
+    techcommunity: [
+      ...Array.from({ length: 20 }, (_, index) => ({
+        title: `Unrelated AKS post ${index}`,
+        url: `https://example.com/${index}`,
+        summary: "Unrelated context.",
+      })),
+      {
+        title: "AKS announcement",
+        url,
+        summary: "Source context: the announcement covers AKS networking.",
+      },
+    ],
+  };
+  const polisher = new NewsletterPolisher(2026, 11);
+  let calls = 0;
+  t.mock.method(polisher, "_callModel", async (messages) => {
+    calls++;
+    if (calls === 1) return firstOutput;
+    assert.match(messages.at(-1).content, /still have no description/);
+    assert.match(messages.at(-1).content, /AKS announcement/);
+    assert.match(messages[1].content, /Source context: the announcement covers AKS networking/);
+    return correctedOutput;
+  });
+
+  const polished = await polisher._polishBySection(draft, collectedData);
+  assert.equal(calls, 2);
+  assert.deepEqual(polisher._validateOutput(polished, draft, collectedData), []);
+  assert(polisher._validateOutput(firstOutput, draft, collectedData)
+    .some((issue) => issue.includes("1/5 items have no description")));
 });
 
 test("tracking preserves query parameters and anchors across generation and polish", () => {
