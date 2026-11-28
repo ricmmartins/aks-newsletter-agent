@@ -90,8 +90,11 @@ class NewsletterGenerator {
       }
     }
 
+    const isTruncated = /(?:\.{3}|…)\s*$/.test(summary) ||
+      (summary.length >= 180 && !/[.!?]["')\]]?\s*$/.test(summary));
+
     // Mark items that need the polisher to write/rewrite descriptions
-    if (isMetadata) {
+    if (isMetadata || isTruncated) {
       summary = summary ? `[NEEDS DESCRIPTION] ${summary}` : "[NEEDS DESCRIPTION]";
     } else if (!summary && url && !item.suppressGeneratedDescription) {
       // No summary at all — flag it explicitly for the polisher
@@ -124,32 +127,17 @@ class NewsletterGenerator {
     lines.push("");
 
     // Summarize the key highlights
-    const highlights = [];
-    if (gaItems.length) {
-      highlights.push(`**${gaItems.length} feature${gaItems.length > 1 ? "s" : ""} reaching General Availability**`);
-    }
-    if (previewItems.length) {
-      highlights.push(`**${previewItems.length} new Preview announcement${previewItems.length > 1 ? "s" : ""}**`);
-    }
-
-    if (highlights.length) {
-      lines.push(`This month brings ${highlights.join(" and ")}. Here are some of the highlights:`);
+    if (gaItems.length || previewItems.length) {
+      lines.push("Highlights from the Azure Updates announcements in this edition include:");
       lines.push("");
 
-      // List top GA items
+      // List top GA and preview items without implying a complete monthly count.
       for (const item of gaItems.slice(0, 3)) {
-        const title = (item.title || "")
-          .replace(/^Generally Available:\s*/i, "")
-          .replace(/\s*[–-]\s*now generally available$/i, "");
-        lines.push(`- **${title}** is now generally available`);
+        lines.push(`- **${item.title}**`);
       }
 
-      // List top Preview items
       for (const item of previewItems.slice(0, 3)) {
-        const title = (item.title || "")
-          .replace(/^Public Preview:\s*/i, "")
-          .replace(/\s*\(preview\)$/i, "");
-        lines.push(`- **${title}** enters public preview`);
+        lines.push(`- **${item.title}**`);
       }
       lines.push("");
     }
@@ -165,9 +153,9 @@ class NewsletterGenerator {
 
     if (!docs.length) {
       if (this.data.metadata?.documentationUpdatesStatus === "unavailable") {
-        lines.push("AKS documentation change tracking is unavailable for this edition.\n");
+        lines.push("The collector reports that AKS documentation change tracking is unavailable for this edition.\n");
       } else {
-        lines.push("No documentation updates were identified this month.\n");
+        lines.push("No documentation updates are listed in this section.\n");
       }
     } else {
       docs.forEach((item) => {
@@ -185,7 +173,7 @@ class NewsletterGenerator {
     );
 
     if (!updates.length) {
-      lines.push("None this month.\n");
+      lines.push("No announcements are listed in this section.\n");
     } else {
       updates.forEach((item) => {
         lines.push(this._formatEntry(item));
@@ -203,7 +191,7 @@ class NewsletterGenerator {
     });
 
     if (!updates.length) {
-      lines.push("None this month.\n");
+      lines.push("No announcements are listed in this section.\n");
     } else {
       updates.forEach((item) => {
         lines.push(this._formatEntry(item));
@@ -239,7 +227,7 @@ class NewsletterGenerator {
         }
       }
       if (!found) {
-        lines.push("No behavioral changes identified this month.\n");
+        lines.push("No behavioral changes are listed in this section.\n");
       }
     }
     return lines.join("\n");
@@ -252,7 +240,7 @@ class NewsletterGenerator {
     // AKS blog posts are always relevant; for TechCommunity posts,
     // re-check the title for AKS relevance to filter out tangential matches
     if (!blogs.length) {
-      lines.push("No community blog posts identified this month.\n");
+      lines.push("No community blog posts are listed in this section.\n");
     } else {
       const seen = new Set();
       blogs.forEach((item) => {
@@ -324,7 +312,7 @@ class NewsletterGenerator {
     const videos = this.data.youtube || [];
 
     if (!videos.length) {
-      lines.push("No AKS-related videos identified this month.\n");
+      lines.push("No videos are listed in this section.\n");
     } else {
       videos.forEach((item) => {
         lines.push(this._formatEntry(item));
@@ -370,7 +358,7 @@ class NewsletterGenerator {
 
     if (themes.length) {
       lines.push(
-        `${this.monthName} ${this.year} brought ${updates.length} platform announcements alongside updates to operations, documentation, and the AKS community.`
+        `This edition brings together AKS announcements and community resources.`
       );
       lines.push("");
       lines.push(`The strongest threads in this edition were ${this._joinList(themes)}.`);

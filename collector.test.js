@@ -30,6 +30,49 @@ test("documentation section reports unavailable tracking instead of claiming no 
   assert.doesNotMatch(section, /No documentation updates were identified/);
 });
 
+test("intro highlights selected Azure Updates without claiming monthly totals or inferring status transitions", () => {
+  const generator = new NewsletterGenerator(2026, 11);
+  generator.data = {
+    azure_updates: [
+      { title: "Generally Available: Feature A" },
+      { title: "Public Preview: Feature B" },
+      { title: "Preview feature C updated" },
+    ],
+    techcommunity_search: [{ title: "Another GA announcement" }],
+  };
+
+  const intro = generator.generateIntro();
+  assert.match(intro, /Azure Updates announcements in this edition/);
+  assert.match(intro, /\*\*Generally Available: Feature A\*\*/);
+  assert.match(intro, /\*\*Public Preview: Feature B\*\*/);
+  assert.match(intro, /\*\*Preview feature C updated\*\*/);
+  assert.doesNotMatch(intro, /This month brings|enters public preview|is now generally available/);
+
+  generator.data.azure_updates = [];
+  assert.doesNotMatch(generator.generateIntro(), /Azure Updates announcements/);
+});
+
+test("empty sections and closing do not claim comprehensive monthly coverage", () => {
+  const generator = new NewsletterGenerator(2026, 11);
+  generator.data = { azure_updates: [{ title: "Public Preview: AKS networking" }] };
+
+  assert.match(generator.generateBehavioralChanges(), /No behavioral changes are listed in this section/);
+  assert.match(generator.generateGAAnnouncements(), /No announcements are listed in this section/);
+  assert.match(generator.generateCommunityBlogs(), /No community blog posts are listed in this section/);
+  assert.match(generator.generateWatchLearn(), /No videos are listed in this section/);
+  assert.doesNotMatch(generator.generateClosing(), /brought \d+ platform announcements|updates to operations, documentation/);
+  assert.match(generator.generateClosing(), /Networking/);
+});
+
+test("clipped source summaries are marked for rewriting instead of publication", () => {
+  const generator = new NewsletterGenerator(2026, 11);
+  const url = "https://example.com/aks";
+  const clipped = "A".repeat(200) + " while Windows Server";
+  assert.match(generator._formatEntry({ title: "AKS article", url, summary: clipped }), /\[NEEDS DESCRIPTION\]/);
+  assert.match(generator._formatEntry({ title: "AKS video", url, summary: "A video explaining AKS networking..." }), /\[NEEDS DESCRIPTION\]/);
+  assert.doesNotMatch(generator._formatEntry({ title: "AKS article", url, summary: "A".repeat(200) + "." }), /\[NEEDS DESCRIPTION\]/);
+});
+
 test("AKS release descriptions come from the public Learn page", async () => {
   const collector = new ContentCollector(2026, 11);
   const requests = [];

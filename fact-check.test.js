@@ -103,6 +103,73 @@ test("headings, adjacent prose, introduction, and closing all receive both revie
   assert.ok(units.at(-1).text.includes("NAP is available"));
 });
 
+test("the reviewer treats standalone section headings as structural, not factual claims", async () => {
+  const text = `## Community Blogs\n\n${content}`;
+  let prompt;
+  await verifyNewsletter(text, collected, {
+    fetchEvidence,
+    callCopilot: async messages => {
+      prompt = messages[0].content;
+      return JSON.stringify(supported(JSON.parse(messages[1].content).units));
+    },
+  });
+  assert.match(prompt, /standalone structural section headings/);
+  assert.match(prompt, /Do not exempt a heading combined with factual prose/);
+  assert.doesNotThrow(() => validateReview(
+    [{ id: "u1", verdict: "editorial", reason: "Structural heading.", claims: [] }],
+    unitsFromMarkdown("## 📚 Community Blogs"),
+    []
+  ));
+});
+
+test("edition evidence counts empty sections and combines separate lists without implying classification", async () => {
+  const text = `## Behavioral Changes\n\nNo behavioral changes are listed in this section.\n\n## Community Blogs\n\n${content}\n\nSome editorial text.\n\n${content}`;
+  let summary;
+  await verifyNewsletter(text, collected, {
+    fetchEvidence,
+    callCopilot: async messages => {
+      const payload = JSON.parse(messages[1].content);
+      summary = payload.sources.find(source => source.id === "edition").text;
+      return JSON.stringify(supported(payload.units));
+    },
+  });
+  assert.match(summary, /Behavioral Changes: 0 linked items\./);
+  assert.match(summary, /Community Blogs: 2 linked items\./);
+  assert.match(summary, /not proof of feature status/);
+});
+
+test("previous verification reports retain their original edition summary", async t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "newsletter-legacy-report-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(root, "collected"));
+  const text = `## Documentation Updates\n\nNo entries.\n\n## Behavioral Changes\n\n${content}`;
+  const report = await verifyNewsletter(text, collected, {
+    fetchEvidence, callCopilot: async messages => JSON.stringify(supported(JSON.parse(messages[1].content).units)),
+  });
+  report.sources.find(source => source.id === "edition").text =
+    "Target edition: October 2026. Newsletter section item counts (not proof of feature status): Behavioral Changes: 1 linked items.";
+  fs.writeFileSync(path.join(root, "collected", "2026-10.verification.json"), JSON.stringify(report));
+  assert.doesNotThrow(() => assertVerified(text, "2026-10", root));
+});
+
+test("collector status evidence is limited to the recorded edition and checked at publication", async t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "newsletter-collector-status-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(root, "collected"));
+  const data = { ...collected, metadata: { ...collected.metadata, documentationUpdatesStatus: "unavailable" } };
+  const report = await verifyNewsletter(content, data, {
+    fetchEvidence, callCopilot: async messages => JSON.stringify(supported(JSON.parse(messages[1].content).units)),
+  });
+  assert.match(report.sources.find(source => source.id === "edition").text, /Collector reports AKS documentation change tracking is unavailable/);
+  fs.writeFileSync(path.join(root, "collected", "2026-10.verification.json"), JSON.stringify(report));
+  assert.throws(() => assertVerified(content, "2026-10", root), /missing collector status/);
+  const collectedPath = path.join(root, "collected", "2026-10.json");
+  fs.writeFileSync(collectedPath, JSON.stringify(data));
+  assert.doesNotThrow(() => assertVerified(content, "2026-10", root));
+  fs.writeFileSync(collectedPath, JSON.stringify(collected));
+  assert.throws(() => assertVerified(content, "2026-10", root), /invalid collector status/);
+});
+
 test("only structural headings can be editorial and source/report metadata is checked", async t => {
   const heading = "## Preview Feature Announcements";
   const review = [{ id: "u1", verdict: "editorial", reason: "Structural heading.", claims: [] }];
@@ -130,6 +197,22 @@ test("only structural headings can be editorial and source/report metadata is ch
 
 test("unsupported evidence hosts block verification before making a network request", async () => {
   await assert.rejects(verifyNewsletter("* **[Unsafe](https://127.0.0.1/test)**: Text.", collected), /Unsupported evidence URL/);
+});
+
+test("HTML evidence retains source publication metadata removed with page headers", async () => {
+  const articleUrl = "https://blog.aks.azure.com/2026/11/24/example";
+  const result = await fetchSource(articleUrl, {
+    fetch: async () => ({
+      ok: true, status: 200, headers: { get: () => "text/html" },
+      text: async () => `<html><head><title>AKS article title</title>
+        <meta property="article:published_time" content="2026-11-24T00:00:00.000Z"></head>
+        <body><header>Not article text</header><main>${"Article evidence. ".repeat(10)}</main></body></html>`,
+    }),
+  });
+  assert.match(result.text, /Page title: AKS article title/);
+  assert.match(result.text, /Article published time metadata: 2026-11-24T00:00:00\.000Z/);
+  assert.match(result.text, /Article evidence/);
+  assert.doesNotMatch(result.text, /Not article text/);
 });
 
 test("evidence fetch retries a timed-out response body and transient HTTP errors", async () => {

@@ -122,8 +122,16 @@ async function fetchEvidence(value, options = {}) {
       ].join("\n");
     } else if (type.includes("html")) {
       const $ = cheerio.load(body);
+      const pageTitle = $("head title").first().text().trim();
+      const published = $('meta[property="article:published_time"]').first().attr("content")?.trim();
       $("script,style,nav,header,footer,noscript").remove();
-      text = ($("main").length ? $("main") : $("body")).text();
+      const pageText = normalize(($("main").length ? $("main") : $("body")).text());
+      if (pageText.length < 100) throw new Error(`Insufficient readable source evidence: ${url}`);
+      text = [
+        pageTitle && `Page title: ${pageTitle}`,
+        published && `Article published time metadata: ${published}`,
+        pageText,
+      ].filter(Boolean).join("\n");
     }
     text = normalize(text);
     if (text.length < 100) throw new Error(`Insufficient readable source evidence: ${url}`);
@@ -139,24 +147,35 @@ function unitsFromMarkdown(content) {
     .map((text, index) => ({ id: `u${index + 1}`, text }));
 }
 
-function editionSummary(content, metadata) {
+function editionSummary(content, metadata, legacy = false) {
   const { year, month } = metadata || {};
   if (!Number.isInteger(year) || year < 2000 || year > 9999 || !Number.isInteger(month) || month < 1 || month > 12) {
     throw new Error("Valid target edition year and month are required for factual verification.");
   }
   const monthName = new Date(Date.UTC(year, month - 1)).toLocaleString("en-US", { month: "long", timeZone: "UTC" });
-  const counts = [];
+  const counts = new Map();
+  const legacyCounts = [];
   let section = "Introduction";
   for (const token of marked.lexer(content)) {
-    if (token.type === "heading" && token.depth === 2) section = token.text;
+    if (token.type === "heading" && token.depth === 2) {
+      section = token.text;
+      if (!counts.has(section)) counts.set(section, 0);
+    }
     if (token.type === "list") {
       const count = token.items.filter(item => /\[[^\]]+\]\(https?:\/\/[^)]+\)/.test(item.text)).length;
-      if (count) counts.push(`${section}: ${count} linked items.`);
+      if (count) {
+        counts.set(section, (counts.get(section) || 0) + count);
+        legacyCounts.push(`${section}: ${count} linked items.`);
+      }
     }
   }
+  const sectionCounts = legacy ? legacyCounts : [...counts].map(([name, count]) => `${name}: ${count} linked items.`);
+  const collectorStatus = !legacy && metadata.documentationUpdatesStatus === "unavailable"
+    ? " Collector reports AKS documentation change tracking is unavailable for this edition."
+    : "";
   return {
     id: "edition", kind: "derived",
-    text: `Target edition: ${monthName} ${year}. Newsletter section item counts (not proof of feature status): ${counts.join(" ")}`,
+    text: `Target edition: ${monthName} ${year}. Newsletter section item counts (not proof of feature status): ${sectionCounts.join(" ")}${collectorStatus}`,
   };
 }
 
@@ -233,8 +252,8 @@ Return ONLY a JSON array with exactly one result per content unit:
 {"id":"u1","verdict":"supported|editorial|unsupported|uncertain","reason":"explanation","claims":[{"claim":"one atomic factual assertion","sourceId":"s1","quote":"verbatim source excerpt"}]}.
 Extract and check ALL factual assertions in each unit, including titles and introductory bullets.
 Every supported assertion requires an exact quotation from a fetched source. A valid URL alone is not evidence.
-The derived "edition" source may ONLY support the target edition label and arithmetic counts of newsletter items, NEVER technical facts, lifecycle status, dates of announcements, or the accuracy of classification. Counts alone do not prove that the listed features are GA or preview.
-Use editorial ONLY for nonfactual greetings, opinions, or calls to action. Do not exempt technical descriptions, dates, counts, or availability claims.
+The derived "edition" source may ONLY support the target edition label, arithmetic counts of linked items in the newsletter, and an explicitly reported collector status. A collector status is not independent proof of the underlying service's state or whether changes occurred. This source NEVER establishes technical facts, lifecycle status, dates of announcements, or the accuracy of classification. Counts alone do not prove that the listed features are GA or preview.
+Use editorial ONLY for nonfactual greetings, opinions, calls to action, or standalone structural section headings such as "Community Blogs". A section heading alone does not assert authorship or classification of every item below it. Do not exempt a heading combined with factual prose, technical descriptions, dates, counts, or availability claims.
 An existing GA status does not establish a new GA transition this month. A Features heading does not establish GA.
 Check dates against the target edition, distinguish publication dates from event dates, and verify counts against the entire newsletter.
 If evidence is missing, truncated, ambiguous, contradictory, or requires another source not provided, verdict MUST be uncertain or unsupported.
@@ -280,7 +299,18 @@ function assertVerified(content, slug, root = __dirname) {
   )) throw new Error(`Publication blocked: incomplete source evidence for ${slug}.`);
   const summary = report.sources.find(source => source.id === "edition");
   const [year, month] = slug.split("-").map(Number);
-  if (!summary || summary.text !== editionSummary(content, { year, month }).text) {
+  const metadata = { year, month };
+  if (summary?.text.includes("Collector reports AKS documentation change tracking is unavailable for this edition.")) {
+    const dataPath = path.join(root, "collected", `${slug}.json`);
+    if (!fs.existsSync(dataPath)) throw new Error(`Publication blocked: missing collector status for ${slug}.`);
+    const collected = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+    if (collected.metadata?.year !== year || collected.metadata?.month !== month ||
+        collected.metadata?.documentationUpdatesStatus !== "unavailable") {
+      throw new Error(`Publication blocked: invalid collector status for ${slug}.`);
+    }
+    metadata.documentationUpdatesStatus = "unavailable";
+  }
+  if (!summary || ![editionSummary(content, metadata).text, editionSummary(content, { year, month }, true).text].includes(summary.text)) {
     throw new Error(`Publication blocked: invalid edition summary for ${slug}.`);
   }
   for (const review of report.reviews) validateReview(review, unitsFromMarkdown(content), report.sources);
