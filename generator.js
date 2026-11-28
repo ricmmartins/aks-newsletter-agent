@@ -260,8 +260,12 @@ class NewsletterGenerator {
     } else {
       const seen = new Set();
       blogs.forEach((item) => {
-        if (item.url && !seen.has(item.url)) {
-          seen.add(item.url);
+        const techCommunityId = item.url && /techcommunity\.microsoft\.com/i.test(item.url)
+          ? new URL(item.url).pathname.match(/\/(\d+)\/?$/)?.[1]
+          : null;
+        const dedupeKey = techCommunityId ? `techcommunity:${techCommunityId}` : item.url;
+        if (item.url && !seen.has(dedupeKey)) {
+          seen.add(dedupeKey);
           const title = (item.title || "").toLowerCase();
           const url = (item.url || "").toLowerCase();
           // AKS blog posts pass through; TechCommunity posts need title/URL match
